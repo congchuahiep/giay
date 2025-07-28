@@ -17,6 +17,7 @@ import { Cursors } from "./Cursor";
 import Toolbar from "./Toolbar";
 
 import type { ShortcutConfig } from "@/features/editor/shortcut";
+import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 /**
  * Khởi động Editor với tính năng cộng tác
  */
@@ -118,6 +119,7 @@ const SlateEditor = ({
       <Cursors>
         <div className="relative">
           <Toolbar />
+          <HoveringToolbar />
           <Editable
             className="focus:outline-none selection:bg-blue-500/15"
             style={{ outline: "0px" }}

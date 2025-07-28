@@ -127,3 +127,9 @@
     @apply bg-background text-foreground;
   }
 }
+
+.hover-toolbar {
+  top: -10000px;
+  left: -10000px;
+  transition: opacity 0.25s;
+}
