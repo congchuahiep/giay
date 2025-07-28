@@ -1,0 +1,20 @@
+import type { RenderElementProps } from "slate-react";
+import { LeafPlaceholder } from "../Leaf";
+import { Node } from "slate";
+
+const QuoteBlock = (props: RenderElementProps) => {
+  const isEmpty = Node.string(props.element) === "";
+
+  return (
+    <blockquote
+      className="m-1 py-1 pl-2 border-l-3 border-black"
+      {...props.attributes}
+      spellCheck={false}
+    >
+      <LeafPlaceholder isEmpty={isEmpty} placeholder="Empty quote" />
+      {props.children}
+    </blockquote>
+  );
+};
+
+export default QuoteBlock;
