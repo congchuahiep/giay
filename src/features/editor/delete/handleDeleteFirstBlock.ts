@@ -28,6 +28,9 @@ export function handleDeleteFirstBlock(editor: Editor, event: KeyboardEvent) {
         },
         { at: [0] }
       );
+
+      // Sau khi xoá, cho con trỏ về vị trí đầu
+      editor.select([0]);
     });
     return;
   }
