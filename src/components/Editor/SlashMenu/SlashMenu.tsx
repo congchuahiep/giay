@@ -33,7 +33,7 @@ export default function SlashCommandMenu({
     SLASH_MENU_ITEMS,
     menuState.searchQuery,
     {
-      threshold: 0.4, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
+      threshold: 0.3, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
       minMatchCharLength: 1, // Độ dài tối thiểu của chuỗi tìm kiếm
       shouldSort: false, // TODO Tìm hiểu kỹ hơn thuật toán sort
       keys: [
@@ -220,9 +220,7 @@ export default function SlashCommandMenu({
   if (!menuState.isOpen) return null;
 
   const newLocal = () => {
-    editor.handleSlashCommandSelection(
-      filteredItems[menuState.selectedIndex]
-    );
+    editor.handleSlashCommandSelection(filteredItems[menuState.selectedIndex]);
     // Focus vào Slate editor sau khi chọn
     ReactEditor.focus(editor);
   };

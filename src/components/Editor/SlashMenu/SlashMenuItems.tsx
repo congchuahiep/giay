@@ -6,6 +6,7 @@ import { TextHFourIcon } from "@phosphor-icons/react/dist/icons/TextHFour";
 import { ListBulletsIcon } from "@phosphor-icons/react/dist/icons/ListBullets";
 // import { ListNumbersIcon } from "@phosphor-icons/react/dist/icons/ListNumbers";
 import { CodeIcon } from "@phosphor-icons/react/dist/icons/Code";
+import { QuotesIcon } from "@phosphor-icons/react/dist/icons/Quotes";
 import { MinusIcon } from "@phosphor-icons/react/dist/icons/Minus";
 import type { JSX } from "react";
 import type { BlockType } from "@/features/editor/types";
@@ -77,6 +78,13 @@ export const SLASH_MENU_ITEMS: SlashMenuItem[] = [
     description: "Capture a code snippet.",
     icon: <CodeIcon />,
     blockType: "code",
+  },
+  {
+    id: "quote-block",
+    title: "Quote",
+    description: "A blockquote for highlighting important text.",
+    icon: <QuotesIcon />,
+    blockType: "quote",
   },
   {
     id: "divider",
