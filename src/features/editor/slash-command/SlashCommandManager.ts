@@ -2,9 +2,13 @@ type SlashMenuState = {
   // Slash Menu có đang mở hay không
   isOpen: boolean;
   // Vị trí hiển thị menu (tọa độ x, y) hoặc null nếu không xác định
-  position: { x: number; y: number } | null;
+  cursorCoordinates: { x: number; y: number } | null;
   // Chỉ số mục đang được chọn trong menu
   selectedIndex: number;
+  // Vị trí anchor (sau ký tự "/") để theo dõi giá trị `searchQuery`
+  anchorOffset: number;
+  // Đoạn chuỗi thông tin dùng để lọc slash command item
+  searchQuery: string;
 };
 
 type SlashCommandListener = (state: SlashMenuState) => void;
@@ -24,8 +28,10 @@ type SlashCommandListener = (state: SlashMenuState) => void;
 class SlashCommandManager {
   private state: SlashMenuState = {
     isOpen: false,
-    position: null,
+    cursorCoordinates: null,
     selectedIndex: 0,
+    anchorOffset: 0,
+    searchQuery: "",
   };
 
   // Component đã đăng ký theo dõi sự kiện
@@ -64,11 +70,13 @@ class SlashCommandManager {
   /**
    * Mở slash command
    */
-  open(position?: { x: number; y: number }): void {
+  open(position?: { x: number; y: number }, anchorOffset?: number): void {
     this.updateState({
       isOpen: true,
-      position: position || null,
+      cursorCoordinates: position || null,
       selectedIndex: 0,
+      anchorOffset: anchorOffset || 0,
+      searchQuery: "",
     });
   }
 
@@ -78,8 +86,10 @@ class SlashCommandManager {
   close(): void {
     this.updateState({
       isOpen: false,
-      position: null,
+      cursorCoordinates: null,
       selectedIndex: 0,
+      anchorOffset: 0,
+      searchQuery: "",
     });
   }
 
@@ -88,6 +98,31 @@ class SlashCommandManager {
    */
   isMenuOpen(): boolean {
     return this.state.isOpen;
+  }
+
+  /**
+   * Cập nhật search query và reset selected index
+   */
+  updateSearchQuery(query: string): void {
+    if (this.state.isOpen) {
+      this.updateState({
+        ...this.state,
+        searchQuery: query,
+        selectedIndex: 0, // Reset về item đầu tiên
+      });
+    }
+  }
+
+  /**
+   * Cập nhật selected index
+   */
+  setSelectedIndex(index: number): void {
+    if (this.state.isOpen) {
+      this.updateState({
+        ...this.state,
+        selectedIndex: index,
+      });
+    }
   }
 
   /**
@@ -120,8 +155,10 @@ class SlashCommandManager {
   reset(): void {
     this.state = {
       isOpen: false,
-      position: null,
+      cursorCoordinates: null,
       selectedIndex: 0,
+      anchorOffset: 0,
+      searchQuery: "",
     };
     this.listener = () => {};
   }

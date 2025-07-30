@@ -4,7 +4,8 @@ import { TextHTwoIcon } from "@phosphor-icons/react/dist/icons/TextHTwo";
 import { TextHThreeIcon } from "@phosphor-icons/react/dist/icons/TextHThree";
 import { TextHFourIcon } from "@phosphor-icons/react/dist/icons/TextHFour";
 import { ListBulletsIcon } from "@phosphor-icons/react/dist/icons/ListBullets";
-import { ListNumbersIcon } from "@phosphor-icons/react/dist/icons/ListNumbers";
+// import { ListNumbersIcon } from "@phosphor-icons/react/dist/icons/ListNumbers";
+import { CodeIcon } from "@phosphor-icons/react/dist/icons/Code";
 import { MinusIcon } from "@phosphor-icons/react/dist/icons/Minus";
 import type { JSX } from "react";
 
@@ -49,24 +50,31 @@ export const SLASH_MENU_ITEMS: SlashMenuItem[] = [
     blockType: "h3",
   },
   {
+    id: "heading-4",
+    title: "Heading 4",
+    description: "Tiny section heading.",
+    icon: <TextHFourIcon />,
+    blockType: "h4",
+  },
+  {
     id: "bulleted-list",
     title: "Bulleted List",
     description: "Create a simple bulleted list.",
-    icon: <TextHFourIcon />,
+    icon: <ListBulletsIcon />,
     blockType: "bulletList",
   },
-  {
-    id: "numbered-list",
-    title: "Numbered List",
-    description: "Create a list with numbering.",
-    icon: <ListBulletsIcon />,
-    blockType: "numberedList",
-  },
+  // {
+  //   id: "numbered-list",
+  //   title: "Numbered List",
+  //   description: "Create a list with numbering.",
+  //   icon: <ListNumbersIcon />,
+  //   blockType: "numberedList",
+  // },
   {
     id: "code-block",
     title: "Code",
     description: "Capture a code snippet.",
-    icon: <ListNumbersIcon />,
+    icon: <CodeIcon />,
     blockType: "code",
   },
   {
