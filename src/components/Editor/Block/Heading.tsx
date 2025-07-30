@@ -7,7 +7,7 @@ export const Heading1Block = (props: RenderElementProps) => {
 
 	return (
 		<h1
-			className="mt-10 mb-2 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance"
+			className="mt-10  p-1 scroll-m-20 text-4xl font-extrabold tracking-tight text-balance"
 			{...props.attributes}
 		>
 			<LeafPlaceholder isEmpty={isEmpty} placeholder="Heading 1" />
@@ -19,7 +19,7 @@ export const Heading1Block = (props: RenderElementProps) => {
 export const Heading2Block = (props: RenderElementProps) => {
 	return (
 		<h2
-			className="mt-8 scroll-m-20 text-3xl font-bold tracking-tight text-balance"
+			className="mt-6 p-1 scroll-m-20 text-3xl font-bold tracking-tight text-balance"
 			{...props.attributes}
 		>
 			{props.children}
@@ -30,7 +30,7 @@ export const Heading2Block = (props: RenderElementProps) => {
 export const Heading3Block = (props: RenderElementProps) => {
 	return (
 		<h3
-			className="mt-4 scroll-m-20 text-2xl font-bold tracking-tight text-balance"
+			className="mt-3 p-1 scroll-m-20 text-xl font-bold tracking-tight text-balance"
 			{...props.attributes}
 		>
 			{props.children}
@@ -41,7 +41,7 @@ export const Heading3Block = (props: RenderElementProps) => {
 export const Heading4Block = (props: RenderElementProps) => {
 	return (
 		<h4
-			className="mt-1 scroll-m-20 text-xl font-semibold tracking-tight text-balance"
+			className="mt-1 p-1 scroll-m-20 text-lg font-medium tracking-tight text-balance"
 			{...props.attributes}
 		>
 			{props.children}

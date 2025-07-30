@@ -14,7 +14,7 @@ export default function renderLeaf(props: RenderLeafProps) {
         props.leaf.underline && "underline",
         props.leaf.strikeThrough && "line-through",
         props.leaf.code &&
-          "font-mono text-blue-500 bg-stone-100 p-1 rounded text-[0.9rem] text-base/tight"
+          "font-mono text-accent-foreground/80 bg-stone-200/60 p-1 rounded text-[80%] z-1"
       )}
       spellCheck={!props.leaf.code}
     >

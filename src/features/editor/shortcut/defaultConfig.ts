@@ -18,6 +18,12 @@ export const defaultShortcutConfig: ShortcutConfig = {
   "shift+enter": "shift-enter-handler",
   "backspace": "backspace-handler",
   "shift+tab": "shift-tab-handler",
+
+  " ": "markdown-shortcut",
+  "-": "divider-markdown-shortcut",
+
+  "/": "slash-command",
+  "esc": "close-slash-command"
 };
 
 // Cho phép user override config

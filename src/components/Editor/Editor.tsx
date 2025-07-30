@@ -18,6 +18,7 @@ import Toolbar from "./Toolbar";
 
 import type { ShortcutConfig } from "@/features/editor/shortcut";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
+import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
 /**
  * Khởi động Editor với tính năng cộng tác
  */
@@ -104,6 +105,11 @@ const SlateEditor = ({
     []
   );
 
+  const handleSlashMenuSelect = (item: any) => {
+    console.log("Selected item:", item);
+    // TODO: Implement block insertion logic
+  };
+
   // Kết nối với Yjs
   useEffect(() => {
     YjsEditor.connect(editor);
@@ -120,6 +126,7 @@ const SlateEditor = ({
         <div className="relative">
           <Toolbar />
           <HoveringToolbar />
+
           <Editable
             className="focus:outline-none selection:bg-blue-500/15"
             style={{ outline: "0px" }}
@@ -129,6 +136,8 @@ const SlateEditor = ({
             autoFocus
             // placeholder="Type something"
           />
+          <SlashCommandMenu onSelectItem={handleSlashMenuSelect} />
+
           {/*<BlockSelectionComponent />*/}
         </div>
       </Cursors>

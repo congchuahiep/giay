@@ -45,11 +45,11 @@ export type BulletListType = {
   children: LeafText[];
 };
 
-export type NumberedListType = {
-  type: "numberedList";
-  startIndex?: number;
-  children: LeafText[];
-};
+// export type NumberedListType = {
+//   type: "numberedList";
+//   startIndex?: number;
+//   children: LeafText[];
+// };
 
 export type CheckListType = {
   type: "checkList";

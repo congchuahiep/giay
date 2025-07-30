@@ -5,10 +5,12 @@ import { withHistory } from "slate-history";
 import type { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 import { withUtilsEditor } from "@/features/editor/utils";
-import { withSelectHandler } from "@/features/editor/select";
-import { withDeleteHandler } from "@/features/editor/delete";
-import { withInsertHandler } from "@/features/editor/insert";
-import { withFormatHandler } from "@/features/editor/format";
+import { withSelectEditor } from "@/features/editor/select";
+import { withDeleteEditor } from "@/features/editor/delete";
+import { withInsertEditor } from "@/features/editor/insert";
+import { withFormatEditor } from "@/features/editor/format";
+import { withMarkdownEditor } from "@/features/editor/markdown";
+import { withSlashEditor } from "@/features/editor/slash-command";
 
 export default function initialEditor(
   sharedType: Y.XmlText,
@@ -43,10 +45,14 @@ export default function initialEditor(
     withReact(
       withCursors(
         withYjs(
-          withFormatHandler(
-            withSelectHandler(
+          withFormatEditor(
+            withSelectEditor(
               withUtilsEditor(
-                withDeleteHandler(withInsertHandler(createEditor()))
+                withDeleteEditor(
+                  withInsertEditor(
+                    withMarkdownEditor(withSlashEditor(createEditor()))
+                  )
+                )
               )
             )
           ),

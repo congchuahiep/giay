@@ -6,7 +6,7 @@ import type { Editor } from "slate";
 
 export type { SelectEditor };
 
-export function withSelectHandler(editor: Editor): Editor & SelectEditor {
+export function withSelectEditor(editor: Editor): Editor & SelectEditor {
   editor.expandSelectionToFullBlocks = (event) =>
     expandSelectionToFullBlocks(editor, event);
 

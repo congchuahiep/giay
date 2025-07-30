@@ -12,7 +12,7 @@ export type { DeleteEditor };
  * - Xoá một  ký tự bằng `backspace` hoặc `delete`
  * - Xoá nhiều ký tự (bằng bất kỳ phím)
  */
-export function withDeleteHandler(editor: Editor): Editor & DeleteEditor {
+export function withDeleteEditor(editor: Editor): Editor & DeleteEditor {
   const { deleteBackward, deleteFragment, deleteForward } = editor;
 
   editor.deleteBackward = (...args) => {

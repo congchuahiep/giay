@@ -1,4 +1,4 @@
-import insertNumberedList from "@/features/editor/insert/insertNumberedList";
+// import insertNumberedList from "@/features/editor/insert/insertNumberedList";
 import insertParagraph from "@/features/editor/insert/insertParagraph";
 import type { BlockType } from "@/features/editor/types";
 import { type KeyboardEvent } from "react";
@@ -69,7 +69,7 @@ const BlockEnterHandlerOverrides: Partial<
 > = {
   paragraph: { handleEnter: NO_ACTION },
   bulletList: { handleEnter: NO_ACTION },
-  numberedList: { handleEnter: insertNumberedList },
+  // numberedList: { handleEnter: insertNumberedList },
   checkList: { handleEnter: NO_ACTION },
   code: { handleEnter: softBreakline, handleShiftEnter: insertParagraph },
   divider: { handleShiftEnter: insertParagraph },

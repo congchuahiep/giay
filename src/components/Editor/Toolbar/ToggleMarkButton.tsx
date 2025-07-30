@@ -25,7 +25,7 @@ const ToggleMarkButton = ({
       size="icon"
       className={cn(
         "size-8 cursor-pointer",
-        isActive && "text-blue-600 hover:text-blue-600"
+        isActive && "text-accent-foreground hover:text-shadow-accent-foreground"
       )}
       onMouseDown={handleMouseDown}
     >

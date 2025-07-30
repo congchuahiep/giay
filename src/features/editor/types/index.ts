@@ -1,7 +1,9 @@
 import type { DeleteEditor } from "@/features/editor/delete";
 import type { FormatEditor } from "@/features/editor/format";
 import type { InsertEditor } from "@/features/editor/insert";
+import type { MarkdownEditor } from "@/features/editor/markdown";
 import type { SelectEditor } from "@/features/editor/select";
+import type { SlashEditor } from "@/features/editor/slash-command";
 import type { BlockType, ElementBlock } from "@/features/editor/types/block";
 import type { LeafText, MarkType } from "@/features/editor/types/leaf";
 import type { UtilsEditor } from "@/features/editor/utils";
@@ -18,7 +20,9 @@ declare module "slate" {
       InsertEditor &
       DeleteEditor &
       SelectEditor &
-      FormatEditor;
+      FormatEditor &
+      MarkdownEditor &
+      SlashEditor;
     Element: ElementBlock;
     Text: LeafText;
   }

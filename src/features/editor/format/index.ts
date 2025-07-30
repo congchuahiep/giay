@@ -7,7 +7,7 @@ import isMarkActive from "@/features/editor/format/isMarkActive";
 
 export type { FormatEditor };
 
-export function withFormatHandler(editor: Editor): Editor & FormatEditor {
+export function withFormatEditor(editor: Editor): Editor & FormatEditor {
   editor.toggleBlock = (type) => toggleBlock(editor, type);
   editor.toggleMark = (format) => toggleMark(editor, format);
   editor.isBlockType = (type) => isBlockType(editor, type);
