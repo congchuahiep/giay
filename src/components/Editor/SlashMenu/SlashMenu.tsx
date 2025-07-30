@@ -35,7 +35,7 @@ export default function SlashCommandMenu({
     {
       threshold: 0.3, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
       minMatchCharLength: 1, // Độ dài tối thiểu của chuỗi tìm kiếm
-      shouldSort: false, // TODO Tìm hiểu kỹ hơn thuật toán sort
+      shouldSort: true, // TODO Tìm hiểu kỹ hơn thuật toán sort
       keys: [
         // Các trường để tìm kiếm
         {
@@ -111,6 +111,7 @@ export default function SlashCommandMenu({
               filteredItems[menuState.selectedIndex]
             );
           }
+          // Note: SlashCommandPlugin sẽ xử lý preventDefault này
           break;
         case "Backspace":
           // Kiểm tra xem có xoá ký tự "/" không

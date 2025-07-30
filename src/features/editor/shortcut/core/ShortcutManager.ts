@@ -60,22 +60,24 @@ export class ShortcutManager {
   }
 
   /**
-   * Tìm action đã đăng ký
-   * @param actionName 
-   * @returns 
+   * Tìm danh sách action handler kèm theo độ priority của plugin chứa nó.
+   * @param actionName Tên action cần tìm
+   * @returns Mảng các đối tượng chứa handler (các action được sắp xếp theo độ piority),
+   * hoặc mảng rỗng nếu không tìm thấy
    */
-  private findActionHandler(actionName: string): ShortcutAction | null {
-    for (const plugin of this.plugins) {
-      if (plugin.actions[actionName]) {
-        return plugin.actions[actionName];
-      }
-    }
-    return null;
+  private findActionHandlers(actionName: string): ShortcutAction[] {
+    return this.plugins
+      .filter((plugin) => !!plugin.actions[actionName])
+      .sort((a, b) => b.priority - a.priority)
+      .map((plugin) => plugin.actions[actionName]);
   }
 
   /**
    * Xử lý sự kiện nhấn phím (keydown) trong editor.
    * Ưu tiên gọi handler onKeyDown của từng plugin, sau đó kiểm tra các phím tắt đã cấu hình.
+   *
+   * Các phím tắt đã cấu hình sẽ được gọi dựa trên piority
+   *
    * @param event Sự kiện bàn phím
    * @param editor Đối tượng editor
    * @returns true nếu sự kiện đã được xử lý, ngược lại trả về false
@@ -93,12 +95,11 @@ export class ShortcutManager {
     // Kiểm tra config shortcuts
     for (const [hotkey, actionName] of Object.entries(this.config)) {
       if (isHotkey(hotkey, event)) {
-        const handler = this.findActionHandler(actionName);
-        if (handler) {
+        const handlers = this.findActionHandlers(actionName);
+
+        for (const handler of handlers) {
           const handled = handler(event, editor);
-          if (handled !== false) {
-            return true;
-          }
+          if (handled) return true;
         }
       }
     }
