@@ -53,7 +53,7 @@ export type BulletListType = {
 
 export type CheckListType = {
   type: "checkList";
-  checked: boolean;
+  checked: false;
   children: LeafText[];
 };
 

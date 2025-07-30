@@ -2,6 +2,9 @@ import type UtilsEditor from "@/features/editor/utils/interface";
 import type { Editor } from "slate";
 import getCurrentBlockType from "./getCurrentBlockType";
 import isCurrentBlockEmpty from "./isCurrentBlockEmpty";
+import getCurrentBlockEntry from "@/features/editor/utils/getCurrentBlockEntry";
+import getCurrentBlock from "@/features/editor/utils/getCurrentBlock";
+import getCurrentBlockPath from "@/features/editor/utils/getCurrentBlockPath";
 
 export type { UtilsEditor };
 
@@ -13,6 +16,9 @@ export type { UtilsEditor };
  * Sử dụng: `editor.<tên tiện ích>`
  */
 export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
+  editor.getCurrentBlock = () => getCurrentBlock(editor);
+  editor.getCurrentBlockEntry = () => getCurrentBlockEntry(editor);
+  editor.getCurrentBlockPath = () => getCurrentBlockPath(editor);
   editor.getCurrentBlockType = () => getCurrentBlockType(editor);
   editor.isCurrentBlockEmpty = () => isCurrentBlockEmpty(editor);
 

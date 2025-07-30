@@ -1,5 +1,5 @@
 // import insertNumberedList from "@/features/editor/insert/insertNumberedList";
-import insertParagraph from "@/features/editor/insert/insertParagraph";
+import handleAppendParagraph from "@/features/editor/insert/handleAppendParagraph";
 import type { BlockType } from "@/features/editor/types";
 import { type KeyboardEvent } from "react";
 import { Editor } from "slate";
@@ -59,7 +59,7 @@ const NO_ACTION = null;
 
 // Hành vi mặc định
 const defaultHandler: BlockEnterHandler = {
-  handleEnter: insertParagraph,
+  handleEnter: handleAppendParagraph,
   handleShiftEnter: softBreakline,
 };
 
@@ -71,8 +71,8 @@ const BlockEnterHandlerOverrides: Partial<
   bulletList: { handleEnter: NO_ACTION },
   // numberedList: { handleEnter: insertNumberedList },
   checkList: { handleEnter: NO_ACTION },
-  code: { handleEnter: softBreakline, handleShiftEnter: insertParagraph },
-  divider: { handleShiftEnter: insertParagraph },
+  code: { handleEnter: softBreakline, handleShiftEnter: handleAppendParagraph },
+  divider: { handleShiftEnter: handleAppendParagraph },
 };
 
 /**

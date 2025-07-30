@@ -8,7 +8,7 @@ import {
   type SlashMenuState,
 } from "@/features/editor/slash-command";
 import { cn } from "@/lib/utils";
-import { useSlateSelection, useSlateStatic } from "slate-react";
+import { ReactEditor, useSlateSelection, useSlateStatic } from "slate-react";
 import { useFuseSearch } from "@/features/search/useFuseSearch";
 import { Editor } from "slate";
 
@@ -33,25 +33,22 @@ export default function SlashCommandMenu({
     SLASH_MENU_ITEMS,
     menuState.searchQuery,
     {
-      // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
-      threshold: 0.4,
-
-      // Độ dài tối thiểu của chuỗi tìm kiếm
-      minMatchCharLength: 1,
-
-      // Các trường để tìm kiếm
+      threshold: 0.4, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
+      minMatchCharLength: 1, // Độ dài tối thiểu của chuỗi tìm kiếm
+      shouldSort: false, // TODO Tìm hiểu kỹ hơn thuật toán sort
       keys: [
+        // Các trường để tìm kiếm
         {
           name: "title",
-          weight: 0.7, // Trọng số cao hơn cho title
+          weight: 0.5, // Trọng số cao hơn cho title
         },
         {
           name: "description",
-          weight: 0.2,
+          weight: 0.1,
         },
         {
           name: "blockType",
-          weight: 0.1,
+          weight: 0.4,
         },
       ],
     }
@@ -110,8 +107,9 @@ export default function SlashCommandMenu({
         case "Enter":
           event.preventDefault();
           if (filteredItems[menuState.selectedIndex]) {
-            onSelectItem?.(filteredItems[menuState.selectedIndex]);
-            slashMenuManager.close();
+            editor.handleSlashCommandSelection(
+              filteredItems[menuState.selectedIndex]
+            );
           }
           break;
         case "Backspace":
@@ -221,6 +219,13 @@ export default function SlashCommandMenu({
   // Slash Command Menu không mở -> trả về null
   if (!menuState.isOpen) return null;
 
+  const newLocal = () => {
+    editor.handleSlashCommandSelection(
+      filteredItems[menuState.selectedIndex]
+    );
+    // Focus vào Slate editor sau khi chọn
+    ReactEditor.focus(editor);
+  };
   // Slash Command Menu mở -> thực hiện render menu
   return (
     <div
@@ -247,7 +252,7 @@ export default function SlashCommandMenu({
               <div
                 key={item.id}
                 data-index={index}
-                onClick={() => onSelectItem?.(item)}
+                onClick={newLocal}
                 onMouseEnter={() => slashMenuManager.setSelectedIndex(index)}
                 className={cn("p-1")}
               >

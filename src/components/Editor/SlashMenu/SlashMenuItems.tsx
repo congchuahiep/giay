@@ -8,13 +8,14 @@ import { ListBulletsIcon } from "@phosphor-icons/react/dist/icons/ListBullets";
 import { CodeIcon } from "@phosphor-icons/react/dist/icons/Code";
 import { MinusIcon } from "@phosphor-icons/react/dist/icons/Minus";
 import type { JSX } from "react";
+import type { BlockType } from "@/features/editor/types";
 
 export interface SlashMenuItem {
   id: string;
   title: string;
   description: string;
   icon: JSX.Element;
-  blockType: string;
+  blockType: BlockType;
 }
 
 /**

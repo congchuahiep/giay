@@ -1,3 +1,4 @@
+import type { BlockType } from "@/features/editor/types";
 import type { KeyboardEvent } from "react";
 
 export default interface InsertEditor {
@@ -14,9 +15,19 @@ export default interface InsertEditor {
   handleEnter: (event: KeyboardEvent, shift: boolean) => void;
 
   /**
-   * Tạo một paragraph mới, (hành vi mặc định của nhiều block khi nhấn phím enter)
+   * Thực thi việc chèn một block mới xuống dòng kế tiếp selection
+   *
+   * @param blockType Kiểu cuả block muốn chèn
+   * @returns {boolean} `true` nếu thực thi thành công, `false` nếu ngược lại
    */
-  insertParagraph: () => void;
+  insertBlock: (blockType: BlockType) => boolean;
+
+  /**
+   * Nới một paragraph mới, (hành vi mặc định của nhiều block khi nhấn phím enter).
+   * Logic nó khác với các logic insert thuần là nó còn xử lý việc chia block, cho
+   * cho phép "tách" block chứ không chỉ lại tạo một block paragraph mới
+   */
+  handleAppendParagraph: () => void;
 
   /**
    * Chèn một danh sách đánh số vào vị trí hiện tại của con trỏ trong editor.

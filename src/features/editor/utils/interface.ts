@@ -1,6 +1,44 @@
 import type { BlockType } from "@/features/editor/types";
+import type { ElementBlock } from "@/features/editor/types/block";
+import type { NodeEntry, Path } from "slate";
 
 export default interface UtilsEditor {
+  /**
+   * Lấy block hiện tại ở vị trí con trỏ đang ở trong editor.
+   *
+   * @returns {ElementBlock | null} Block hiện tại dưới dạng Element,
+   * hoặc null nếu không xác định được.
+   *
+   * @example
+   * const currentBlock = editor.getCurrentBlock();
+   * if (currentBlock) {
+   *   // Xử lý với block hiện tại
+   * }
+   */
+  getCurrentBlock: () => ElementBlock | null;
+
+  /**
+   * Lấy block entry hiện tại ở vị trí con trỏ đang ở trong editor.
+   *
+   * @returns {NodeEntry<ElementBlock> | null} Là một mảng chứa hai giá trị:
+   * - Block hiện tại dưới dạng Element, hoặc null nếu không xác định được.
+   * - Vị trí Path hiện tại của Block.
+   *
+   * @example
+   * const currentBlockEntry = editor.getCurrentBlockEntry();
+   * if (currentBlockEntry) {
+   *   // Xử lý với block hiện tại
+   * }
+   */
+  getCurrentBlockEntry: () => NodeEntry<ElementBlock> | null;
+
+  /**
+   * Lấy vị trí Path tại ví trị con trỏ đang ở trong editor.
+   *
+   * @returns {Path | null} Vị trí Path hoặc null
+   */
+  getCurrentBlockPath: () => Path | null;
+
   /**
    * Lấy loại block hiện tại mà cursor đang ở
    * @returns {string | null} Loại block hiện tại hoặc null nếu không xác định được

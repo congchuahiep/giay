@@ -34,7 +34,6 @@ const HoveringToolbar = () => {
     }
 
     const domSelection = window.getSelection();
-    console.log(domSelection?.rangeCount);
     if (domSelection && domSelection.rangeCount > 0) {
       const domRange = domSelection.getRangeAt(0);
       const rect = domRange.getBoundingClientRect();
