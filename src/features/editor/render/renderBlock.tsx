@@ -11,7 +11,22 @@ import {
   QuoteBlock,
   DividerBlock,
 } from "@/components/Editor/Block";
-// import NumberedListBlock from "@/components/Editor/Block/NumberedList";
+import { withBlockInteraction } from "@/components/Editor/DragHandle";
+
+
+// Map các block types với components
+const blockComponents = {
+  h1: withBlockInteraction(Heading1Block),
+  h2: withBlockInteraction(Heading2Block),
+  h3: withBlockInteraction(Heading3Block),
+  h4: withBlockInteraction(Heading4Block),
+  code: withBlockInteraction(CodeBlock),
+  bulletList: withBlockInteraction(BulletListBlock),
+  checkList: withBlockInteraction(CheckList),
+  divider: withBlockInteraction(DividerBlock),
+  quote: withBlockInteraction(QuoteBlock),
+  paragraph: withBlockInteraction(ParagraphBlock), // default case
+} as const;
 
 /**
  * Sử dụng để render các block khác nhau
@@ -19,28 +34,9 @@ import {
  * @returns
  */
 export default function renderBlock(props: RenderElementProps) {
-  switch (props.element.type) {
-    case "h1":
-      return <Heading1Block {...props} />;
-    case "h2":
-      return <Heading2Block {...props} />;
-    case "h3":
-      return <Heading3Block {...props} />;
-    case "h4":
-      return <Heading4Block {...props} />;
-    case "code":
-      return <CodeBlock {...props} />;
-    case "bulletList":
-      return <BulletListBlock {...props} />;
-    // case "numberedList":
-    //   return <NumberedListBlock {...props} />;
-    case "checkList":
-      return <CheckList {...props} />;
-    case "divider":
-      return <DividerBlock {...props} />;
-    case "quote":
-      return <QuoteBlock {...props} />;
-    default:
-      return <ParagraphBlock {...props} />;
-  }
+  const blockType = props.element.type as keyof typeof blockComponents;
+  const BlockComponent =
+    blockComponents[blockType] || blockComponents.paragraph;
+
+  return <BlockComponent {...props} />;
 }

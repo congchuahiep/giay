@@ -19,6 +19,9 @@ import Toolbar from "./Toolbar";
 import type { ShortcutConfig } from "@/features/editor/shortcut";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
+import { v4 as uuidv4 } from "uuid";
+import { DragProvider } from "@/components/Editor/DragProvider";
+
 /**
  * Khởi động Editor với tính năng cộng tác
  */
@@ -73,9 +76,10 @@ const SlateEditor = ({
   const initialValue: Descendant[] = useMemo(() => {
     const storedContent = loadContentFromLocal();
     return storedContent
-      ? storedContent
+      ? storedContent.map(editor.ensureBlockId)
       : [
           {
+            id: uuidv4(),
             type: "paragraph",
             children: [{ text: "" }],
           },
@@ -117,31 +121,33 @@ const SlateEditor = ({
   }, [editor]);
 
   return (
-    <Slate
-      editor={editor}
-      initialValue={initialValue}
-      // onChange={saveEditorContent(editor)}
-    >
-      <Cursors>
-        <div className="relative">
-          <Toolbar />
-          <HoveringToolbar />
+    <DragProvider>
+      <Slate
+        editor={editor}
+        initialValue={initialValue}
+        // onChange={saveEditorContent(editor)}
+      >
+        <Cursors>
+          <div className="relative">
+            <Toolbar />
+            <HoveringToolbar />
 
-          <Editable
-            className="focus:outline-none selection:bg-blue-500/15"
-            style={{ outline: "0px" }}
-            renderLeaf={memoizedRenderLeaf} // Định nghĩa render inline
-            renderElement={memoizedRenderBlock} // Định nghĩa render block
-            onKeyDown={shortcutHandle} // Đăng ký các shortcut
-            autoFocus
-            // placeholder="Type something"
-          />
-          <SlashCommandMenu onSelectItem={handleSlashMenuSelect} />
+            <Editable
+              className="focus:outline-none selection:bg-blue-500/15"
+              style={{ outline: "0px" }}
+              renderLeaf={memoizedRenderLeaf} // Định nghĩa render inline
+              renderElement={memoizedRenderBlock} // Định nghĩa render block
+              onKeyDown={shortcutHandle} // Đăng ký các shortcut
+              autoFocus
+              // placeholder="Type something"
+            />
+            <SlashCommandMenu onSelectItem={handleSlashMenuSelect} />
 
-          {/*<BlockSelectionComponent />*/}
-        </div>
-      </Cursors>
-    </Slate>
+            {/*<BlockSelectionComponent />*/}
+          </div>
+        </Cursors>
+      </Slate>
+    </DragProvider>
   );
 };
 

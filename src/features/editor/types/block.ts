@@ -1,73 +1,47 @@
-import type { LeafText } from "./leaf";
+import type { Descendant } from "slate";
 
-export type BlockType = ElementBlock["type"];
+// Cập nhật base interface để có id
+export interface BaseBlock {
+  type: string;
+  children: Descendant[];
+}
 
-export type ElementBlock =
-  | ParagraphType
-  | CodeType
-  | Heading1Type
-  | Heading2Type
-  | Heading3Type
-  | Heading4Type
-  | BulletListType
-  // | NumberedListType
-  | CheckListType
-  | DividerType
-  | QuoteType;
-
-export type ParagraphType = {
+// Cập nhật các block types
+export interface ParagraphBlock extends BaseBlock {
   type: "paragraph";
-  children: LeafText[];
-};
+}
 
-export type Heading1Type = {
-  type: "h1";
-  children: LeafText[];
-};
+export interface HeadingBlock extends BaseBlock {
+  type: "h1" | "h2" | "h3" | "h4";
+}
 
-export type Heading2Type = {
-  type: "h2";
-  children: LeafText[];
-};
-
-export type Heading3Type = {
-  type: "h3";
-  children: LeafText[];
-};
-
-export type Heading4Type = {
-  type: "h4";
-  children: LeafText[];
-};
-
-export type BulletListType = {
+export interface BulletListBlock extends BaseBlock {
   type: "bulletList";
-  children: LeafText[];
-};
+}
 
-// export type NumberedListType = {
-//   type: "numberedList";
-//   startIndex?: number;
-//   children: LeafText[];
-// };
-
-export type CheckListType = {
+export interface CheckListBlock extends BaseBlock {
   type: "checkList";
-  checked: false;
-  children: LeafText[];
-};
+  checked: boolean;
+}
 
-export type CodeType = {
+export interface CodeBlock extends BaseBlock {
   type: "code";
-  children: LeafText[];
-};
+}
 
-export type DividerType = {
-  type: "divider";
-  children: [{ text: "" }];
-};
-
-export type QuoteType = {
+export interface QuoteBlock extends BaseBlock {
   type: "quote";
-  children: LeafText[];
-};
+}
+
+export interface DividerBlock extends BaseBlock {
+  type: "divider";
+}
+
+// Union type cho tất cả blocks
+export type ElementBlock =
+  | ParagraphBlock
+  | HeadingBlock
+  | BulletListBlock
+  | CheckListBlock
+  | CodeBlock
+  | QuoteBlock
+  | DividerBlock;

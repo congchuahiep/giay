@@ -5,6 +5,8 @@ import isCurrentBlockEmpty from "./isCurrentBlockEmpty";
 import getCurrentBlockEntry from "@/features/editor/utils/getCurrentBlockEntry";
 import getCurrentBlock from "@/features/editor/utils/getCurrentBlock";
 import getCurrentBlockPath from "@/features/editor/utils/getCurrentBlockPath";
+import buildBlock from "@/features/editor/utils/buildBlock";
+import ensureBlockId from "@/features/editor/utils/ensureBlockId";
 
 export type { UtilsEditor };
 
@@ -16,6 +18,9 @@ export type { UtilsEditor };
  * Sử dụng: `editor.<tên tiện ích>`
  */
 export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
+  editor.buildBlock = (blockType, additionalProps) =>
+    buildBlock(blockType, additionalProps);
+  editor.ensureBlockId = (block) => ensureBlockId(block);
   editor.getCurrentBlock = () => getCurrentBlock(editor);
   editor.getCurrentBlockEntry = () => getCurrentBlockEntry(editor);
   editor.getCurrentBlockPath = () => getCurrentBlockPath(editor);

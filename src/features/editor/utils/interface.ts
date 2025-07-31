@@ -1,8 +1,22 @@
 import type { BlockType } from "@/features/editor/types";
 import type { ElementBlock } from "@/features/editor/types/block";
-import type { NodeEntry, Path } from "slate";
+import type { Element, NodeEntry, Path } from "slate";
 
 export default interface UtilsEditor {
+  /**
+   * Tạo block mới dựa trên type, lưu ý này chỉ là khởi tạo block
+   * chưa có gắn block lên editor
+   */
+  buildBlock: (
+    blockType: BlockType,
+    additionalProps: Record<string, any>
+  ) => Element;
+
+  /**
+   * Đảm bảo block có UUID (thêm nếu chưa có)
+   */
+  ensureBlockId: (block: any) => Element;
+
   /**
    * Lấy block hiện tại ở vị trí con trỏ đang ở trong editor.
    *

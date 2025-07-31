@@ -1,5 +1,6 @@
 import type { Descendant, Editor } from "slate";
 import { saveContentToLocal } from "./localStorage";
+import useDragStore from "@/features/editor/stores/dragStore";
 
 const saveEditorContent = (editor: Editor) => {
   return (value: Descendant[]) => {
@@ -15,3 +16,5 @@ const saveEditorContent = (editor: Editor) => {
 };
 
 export default saveEditorContent;
+
+export { useDragStore };

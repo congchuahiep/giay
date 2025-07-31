@@ -1,6 +1,12 @@
 import { withCursors, withYjs } from "@slate-yjs/core";
-import { createEditor, Editor, Transforms, type Descendant } from "slate";
-import { withReact } from "slate-react";
+import {
+  createEditor,
+  Editor,
+  Element,
+  Transforms,
+  type Descendant,
+} from "slate";
+import { ReactEditor, withReact } from "slate-react";
 import { withHistory } from "slate-history";
 import type { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
@@ -72,6 +78,7 @@ export default function initialEditor(
   const { normalizeNode } = editor;
   editor.normalizeNode = (entry, options) => {
     const [node] = entry;
+
     if (!Editor.isEditor(node) || node.children.length > 0) {
       return normalizeNode(entry, options);
     }

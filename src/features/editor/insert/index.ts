@@ -1,4 +1,4 @@
-import handleEnter from "@/features/editor/insert/handlerEnter";
+import handleEnter from "@/features/editor/insert/handleEnter";
 // import insertNumberedList from "@/features/editor/insert/insertNumberedList";
 import handleAppendParagraph from "@/features/editor/insert/handleAppendParagraph";
 import type InsertEditor from "@/features/editor/insert/inteface";
