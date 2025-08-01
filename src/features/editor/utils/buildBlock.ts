@@ -1,5 +1,6 @@
 import type { BlockType } from "@/features/editor/types";
 import type { Element } from "slate";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Tạo block mới dựa trên type, lưu ý này chỉ là khởi tạo block
@@ -10,6 +11,7 @@ export default function buildBlock(
   additionalProps: Record<string, any> = {}
 ): Element {
   const baseBlock = {
+    id: uuidv4(),
     children: [{ text: "" }],
     ...additionalProps,
   };

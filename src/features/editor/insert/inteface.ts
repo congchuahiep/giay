@@ -15,12 +15,20 @@ export default interface InsertEditor {
   handleEnter: (event: KeyboardEvent, shift: boolean) => void;
 
   /**
-   * Thực thi việc chèn một block mới xuống dòng kế tiếp selection
+   * Chèn một block mới vào editor tại vị trí xác định. Hàm này chỉ thực
+   * thi công việc chèn block, chứ không thực hiện việc tách block
    *
-   * @param blockType Kiểu cuả block muốn chèn
-   * @returns {boolean} `true` nếu thực thi thành công, `false` nếu ngược lại
+   * @param editor - Đối tượng editor hiện tại.
+   * @param blockType - Loại block cần chèn.
+   * @param configs - Cấu hình cho việc chèn block
+   * @param additionalProps - Các thuộc tính bổ sung cho block mới.
+   * @returns {boolean} Trả về `true` nếu chèn thành công, ngược lại trả về `false`.
    */
-  insertBlock: (blockType: BlockType) => boolean;
+  insertBlock: (
+    blockType: BlockType,
+    configs?: InsertBlockConfigProps,
+    additionalProps?: Record<string, any>
+  ) => boolean;
 
   /**
    * Nới một paragraph mới, (hành vi mặc định của nhiều block khi nhấn phím enter).
@@ -36,4 +44,11 @@ export default interface InsertEditor {
    * @param editor Editor Slate để thao tác.
    */
   insertNumberedList: () => void;
+}
+
+export interface InsertBlockConfigProps {
+  /**
+   * Chèn block phía bên trên
+   */
+  reverse?: boolean;
 }

@@ -1,12 +1,11 @@
 import type { Descendant } from "slate";
 
-// Cập nhật base interface để có id
 export interface BaseBlock {
+  id: string;
   type: string;
   children: Descendant[];
 }
 
-// Cập nhật các block types
 export interface ParagraphBlock extends BaseBlock {
   type: "paragraph";
 }
@@ -45,3 +44,5 @@ export type ElementBlock =
   | CodeBlock
   | QuoteBlock
   | DividerBlock;
+
+export type BlockType = ElementBlock["type"];

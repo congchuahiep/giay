@@ -7,11 +7,12 @@ import getCurrentBlock from "@/features/editor/utils/getCurrentBlock";
 import getCurrentBlockPath from "@/features/editor/utils/getCurrentBlockPath";
 import buildBlock from "@/features/editor/utils/buildBlock";
 import ensureBlockId from "@/features/editor/utils/ensureBlockId";
+import { v4 as uuidv4 } from "uuid";
 
 export type { UtilsEditor };
 
 /**
- * Plugin này chung cấp các phương thức tiện ích cho editor, mục đích của
+ * Plugin này chung cấp các phương thức ưtiện ích cho editor, mục đích của
  * các phương thức này là cho phép các phương thức của các plugin khác được
  * sử dụng chung
  *
@@ -20,6 +21,7 @@ export type { UtilsEditor };
 export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
   editor.buildBlock = (blockType, additionalProps) =>
     buildBlock(blockType, additionalProps);
+  editor.generateId = () => uuidv4();
   editor.ensureBlockId = (block) => ensureBlockId(block);
   editor.getCurrentBlock = () => getCurrentBlock(editor);
   editor.getCurrentBlockEntry = () => getCurrentBlockEntry(editor);

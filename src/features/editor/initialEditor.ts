@@ -1,3 +1,10 @@
+import { withDeleteEditor } from "@/features/editor/delete";
+import { withFormatEditor } from "@/features/editor/format";
+import { withInsertEditor } from "@/features/editor/insert";
+import { withMarkdownEditor } from "@/features/editor/markdown";
+import { withSelectEditor } from "@/features/editor/select";
+import { withSlashEditor } from "@/features/editor/slash-command";
+import { withUtilsEditor } from "@/features/editor/utils";
 import { withCursors, withYjs } from "@slate-yjs/core";
 import {
   createEditor,
@@ -6,17 +13,10 @@ import {
   Transforms,
   type Descendant,
 } from "slate";
-import { ReactEditor, withReact } from "slate-react";
 import { withHistory } from "slate-history";
+import { withReact } from "slate-react";
 import type { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
-import { withUtilsEditor } from "@/features/editor/utils";
-import { withSelectEditor } from "@/features/editor/select";
-import { withDeleteEditor } from "@/features/editor/delete";
-import { withInsertEditor } from "@/features/editor/insert";
-import { withFormatEditor } from "@/features/editor/format";
-import { withMarkdownEditor } from "@/features/editor/markdown";
-import { withSlashEditor } from "@/features/editor/slash-command";
 
 export default function initialEditor(
   sharedType: Y.XmlText,
@@ -76,16 +76,25 @@ export default function initialEditor(
   );
 
   const { normalizeNode } = editor;
-  editor.normalizeNode = (entry, options) => {
-    const [node] = entry;
 
-    if (!Editor.isEditor(node) || node.children.length > 0) {
-      return normalizeNode(entry, options);
+  editor.normalizeNode = (entry, options) => {
+    const [node, path] = entry;
+
+    // Nếu là Element (block) và không có ID, thêm ID
+    if (Element.isElement(node) && !node.id && path.length === 1) {
+      Transforms.setNodes(editor, { id: editor.generateId() }, { at: path });
+      return;
     }
-    // Chỉ chèn initialValue nếu sharedType (dữ liệu cộng tác) rỗng
-    // if (sharedType.length !== 0) {
-    // }
-    Transforms.insertNodes(editor, initialValue, { at: [0] });
+
+    // Nếu editor rỗng, thêm initial value với ID
+    if (Editor.isEditor(node) && node.children.length === 0) {
+      const initialValueWithIds = initialValue.map((block) =>
+        editor.ensureBlockId(block)
+      );
+      Transforms.insertNodes(editor, initialValueWithIds, { at: [0] });
+      return;
+    }
+    return normalizeNode(entry, options);
   };
 
   editor.isVoid = (element) => {

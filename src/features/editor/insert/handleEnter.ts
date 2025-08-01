@@ -1,5 +1,5 @@
 // import insertNumberedList from "@/features/editor/insert/insertNumberedList";
-import handleAppendParagraph from "@/features/editor/insert/handleAppendParagraph";
+import handleAppendParagraph from "@/features/editor/insert/insertBreak";
 import type { BlockType } from "@/features/editor/types";
 import { type KeyboardEvent } from "react";
 import { Editor } from "slate";

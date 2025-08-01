@@ -8,9 +8,14 @@ export default interface UtilsEditor {
    * chưa có gắn block lên editor
    */
   buildBlock: (
-    blockType: BlockType,
-    additionalProps: Record<string, any>
+    blockType?: BlockType,
+    additionalProps?: Record<string, any>
   ) => Element;
+
+  /**
+   * Tạo `id` theo chuẩn uuidv4
+   */
+  generateId: () => string;
 
   /**
    * Đảm bảo block có UUID (thêm nếu chưa có)
@@ -20,7 +25,7 @@ export default interface UtilsEditor {
   /**
    * Lấy block hiện tại ở vị trí con trỏ đang ở trong editor.
    *
-   * @returns {ElementBlock | null} Block hiện tại dưới dạng Element,
+   * @returns {ElementBlock | undefined} Block hiện tại dưới dạng Element,
    * hoặc null nếu không xác định được.
    *
    * @example
@@ -29,12 +34,12 @@ export default interface UtilsEditor {
    *   // Xử lý với block hiện tại
    * }
    */
-  getCurrentBlock: () => ElementBlock | null;
+  getCurrentBlock: () => ElementBlock | undefined;
 
   /**
    * Lấy block entry hiện tại ở vị trí con trỏ đang ở trong editor.
    *
-   * @returns {NodeEntry<ElementBlock> | null} Là một mảng chứa hai giá trị:
+   * @returns {NodeEntry<ElementBlock> | undefined} Là một mảng chứa hai giá trị:
    * - Block hiện tại dưới dạng Element, hoặc null nếu không xác định được.
    * - Vị trí Path hiện tại của Block.
    *
@@ -44,23 +49,23 @@ export default interface UtilsEditor {
    *   // Xử lý với block hiện tại
    * }
    */
-  getCurrentBlockEntry: () => NodeEntry<ElementBlock> | null;
+  getCurrentBlockEntry: () => NodeEntry<ElementBlock> | undefined;
 
   /**
    * Lấy vị trí Path tại ví trị con trỏ đang ở trong editor.
    *
-   * @returns {Path | null} Vị trí Path hoặc null
+   * @returns {Path | undefined} Vị trí Path hoặc null
    */
-  getCurrentBlockPath: () => Path | null;
+  getCurrentBlockPath: () => Path | undefined;
 
   /**
    * Lấy loại block hiện tại mà cursor đang ở
-   * @returns {string | null} Loại block hiện tại hoặc null nếu không xác định được
+   * @returns {string | undefined} Loại block hiện tại hoặc null nếu không xác định được
    * @example
    * const blockType = editor.getCurrentBlockType();
    * console.log(blockType); // "paragraph", "heading-one", etc.
    */
-  getCurrentBlockType: () => BlockType | null;
+  getCurrentBlockType: () => BlockType | undefined;
 
   /**
    * Kiểm tra xem block hiện tại có rỗng (không có text) không
