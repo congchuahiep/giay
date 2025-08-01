@@ -4,14 +4,6 @@ const DefaultBehaviourPlugin: ShortcutPlugin = {
   name: "navigation",
   priority: 70,
   actions: {
-    "enter-handler": (event, editor) => {
-      editor.handleEnter(event, false);
-    },
-
-    "shift-enter-handler": (event, editor) => {
-      editor.handleEnter(event, true);
-    },
-
     "backspace-handler": (event, editor) => {
       editor.handleDeleteFirstBlock(event);
     },

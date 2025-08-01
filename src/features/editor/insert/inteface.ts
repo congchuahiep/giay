@@ -18,6 +18,8 @@ export default interface InsertEditor {
    * Chèn một block mới vào editor tại vị trí xác định. Hàm này chỉ thực
    * thi công việc chèn block, chứ không thực hiện việc tách block
    *
+   * Nếu cần tách block, hãy sử dụng `insertBlockAndBreak()`
+   *
    * @param editor - Đối tượng editor hiện tại.
    * @param blockType - Loại block cần chèn.
    * @param configs - Cấu hình cho việc chèn block
@@ -27,6 +29,27 @@ export default interface InsertEditor {
   insertBlock: (
     blockType: BlockType,
     configs?: InsertBlockConfigProps,
+    additionalProps?: Record<string, any>
+  ) => boolean;
+
+  /**
+   * Ngắt dòng và chèn một khối mới vào vị trí hiện tại của con trỏ trong editor.
+   * Hàm này dùng để ghi đè lại hành vi khi người dùng nhấn phím "Enter" trong slate,
+   * cho phép ngắt và tạo dòng mới.
+   *
+   * Hàm này kiểm tra vị trí của con trỏ trong khối hiện tại:
+   * - Nếu con trỏ ở cuối khối, sẽ chèn một khối mới sau khối hiện tại.
+   * - Nếu con trỏ ở đầu khối, sẽ chèn một khối mới trước khối hiện tại.
+   * - Nếu con trỏ ở giữa khối, sẽ tách khối tại vị trí con trỏ và chuyển đổi phần sau
+   * thành loại khối mới.
+   *
+   * @param editor Editor hiện tại.
+   * @param blockType Loại khối cần chèn (mặc định là "paragraph").
+   * @param additionalProps - Các thuộc tính bổ sung cho block mới.
+   * @returns {boolean} Trả về false nếu không thể chèn, ngược lại không trả về gì.
+   */
+  insertBlockAndBreak: (
+    blockType?: BlockType,
     additionalProps?: Record<string, any>
   ) => boolean;
 

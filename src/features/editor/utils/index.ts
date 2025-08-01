@@ -20,7 +20,7 @@ export type { UtilsEditor };
  */
 export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
   editor.buildBlock = (blockType, additionalProps) =>
-    buildBlock(blockType, additionalProps);
+    buildBlock(editor, blockType, additionalProps);
   editor.generateId = () => uuidv4();
   editor.ensureBlockId = (block) => ensureBlockId(block);
   editor.getCurrentBlock = () => getCurrentBlock(editor);

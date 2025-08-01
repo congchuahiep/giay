@@ -1,17 +1,17 @@
 import type { BlockType } from "@/features/editor/types";
-import type { Element } from "slate";
-import { v4 as uuidv4 } from "uuid";
+import type { Editor, Element } from "slate";
 
 /**
  * Tạo block mới dựa trên type, lưu ý này chỉ là khởi tạo block
  * chưa có gắn block lên editor
  */
 export default function buildBlock(
+  editor: Editor,
   blockType: BlockType = "paragraph",
   additionalProps: Record<string, any> = {}
 ): Element {
   const baseBlock = {
-    id: uuidv4(),
+    id: editor.generateId(),
     children: [{ text: "" }],
     ...additionalProps,
   };
