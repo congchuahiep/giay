@@ -1,10 +1,4 @@
-import { withDeleteEditor } from "@/features/editor/delete";
-import { withFormatEditor } from "@/features/editor/format";
-import { withInsertEditor } from "@/features/editor/insert";
-import { withMarkdownEditor } from "@/features/editor/markdown";
-import { withSelectEditor } from "@/features/editor/select";
-import { withSlashEditor } from "@/features/editor/slash-command";
-import { withUtilsEditor } from "@/features/editor/utils";
+import { composePlugins, type Plugin } from "@/features/editor/composePlugins";
 import { withCursors, withYjs } from "@slate-yjs/core";
 import {
   createEditor,
@@ -13,17 +7,23 @@ import {
   Transforms,
   type Descendant,
 } from "slate";
-import { withHistory } from "slate-history";
-import { withReact } from "slate-react";
 import type { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 
+/**
+ * Khởi tạo editor, có chế độ cộng tác
+ *
+ * @param sharedType
+ * @param provider
+ * @param initialValue
+ * @returns
+ */
 export default function initialEditor(
+  plugins: Plugin<Editor>[],
   sharedType: Y.XmlText,
   provider: WebsocketProvider,
   initialValue: Descendant[]
 ) {
-  // Generate a random name and color for the cursor
   const randomNames = [
     "Alex",
     "Sam",
@@ -47,32 +47,11 @@ export default function initialEditor(
   const name = randomNames[Math.floor(Math.random() * randomNames.length)];
   const color = randomColors[Math.floor(Math.random() * randomColors.length)];
 
-  const editor = withHistory(
-    withReact(
-      withCursors(
-        withYjs(
-          withFormatEditor(
-            withSelectEditor(
-              withUtilsEditor(
-                withDeleteEditor(
-                  withInsertEditor(
-                    withMarkdownEditor(withSlashEditor(createEditor()))
-                  )
-                )
-              )
-            )
-          ),
-          sharedType
-        ),
-        provider.awareness,
-        {
-          data: {
-            name,
-            color,
-          },
-        }
-      )
-    )
+  // Khởi tạo editor với danh sách các plugin
+  const editor = withCursors(
+    withYjs(composePlugins(createEditor(), plugins), sharedType),
+    provider.awareness,
+    { data: { name, color } }
   );
 
   const { normalizeNode } = editor;

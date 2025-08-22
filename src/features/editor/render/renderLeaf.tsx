@@ -16,7 +16,7 @@ export default function renderLeaf(props: RenderLeafProps) {
         props.leaf.code &&
           "font-mono text-accent-foreground/80 bg-stone-200/60 p-1 rounded text-[80%] z-1"
       )}
-      spellCheck={!props.leaf.code}
+      spellCheck={props.leaf.code && "false"}
     >
       {props.children}
     </span>

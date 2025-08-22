@@ -28,6 +28,7 @@
         "react-dom": "^19.1.0",
         "slate": "^0.117.2",
         "slate-history": "^0.113.1",
+        "slate-hyperscript": "^0.100.0",
         "slate-react": "^0.117.3",
         "slate-yjs": "^3.2.0",
         "tailwind-merge": "^3.3.1",

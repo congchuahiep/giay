@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 // Import the Slate editor factory.
 import { type Descendant } from "slate";
 import type { RenderElementProps, RenderLeafProps } from "slate-react";
-import { Editable, Slate } from "slate-react";
+import { Editable, Slate, withReact } from "slate-react";
 import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 
@@ -16,11 +16,35 @@ import { YjsEditor } from "@slate-yjs/core";
 import { Cursors } from "./Cursor";
 import Toolbar from "./Toolbar";
 
-import type { ShortcutConfig } from "@/features/editor/shortcut";
+import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
+import useClipboard from "@/features/editor/clipboard";
+import type { ShortcutConfig } from "@/features/editor/shortcut";
 import { v4 as uuidv4 } from "uuid";
-import { DragProvider } from "@/components/Editor/DragProvider";
+import { withMarkdownEditor } from "@/features/editor/markdown";
+import { withSlashEditor } from "@/features/editor/slash-command";
+import { withInsertEditor } from "@/features/editor/insert";
+import { withDeleteEditor } from "@/features/editor/delete";
+import { withUtilsEditor } from "@/features/editor/utils";
+import { withSelectEditor } from "@/features/editor/select";
+import { withFormatEditor } from "@/features/editor/format";
+import { withHistory } from "slate-history";
+
+/**
+ * Danh sách các plugin
+ */
+const plugins = [
+  withMarkdownEditor,
+  withSlashEditor,
+  withInsertEditor,
+  withDeleteEditor,
+  withUtilsEditor,
+  withSelectEditor,
+  withFormatEditor,
+  withReact,
+  withHistory,
+];
 
 /**
  * Khởi động Editor với tính năng cộng tác
@@ -88,17 +112,9 @@ const SlateEditor = ({
 
   // Khởi tạo editor
   const editor = useMemo(
-    () => initialEditor(sharedType, provider, initialValue),
+    () => initialEditor(plugins, sharedType, provider, initialValue),
     [provider, sharedType, initialValue]
   );
-
-  const customConfig: ShortcutConfig = {
-    "mod+shift+b": "mark-bold",
-    "mod+shift+i": "mark-italic",
-    "ctrl+k": "toggle-code-block",
-  };
-
-  const shortcutHandle = useShortcut(editor, customConfig);
 
   const memoizedRenderLeaf = useCallback(
     (props: RenderLeafProps) => renderLeaf(props),
@@ -120,6 +136,16 @@ const SlateEditor = ({
     return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
   }, [editor]);
 
+  const customConfig: ShortcutConfig = {
+    "mod+shift+b": "mark-bold",
+    "mod+shift+i": "mark-italic",
+    "ctrl+k": "toggle-code-block",
+  };
+
+  // Khúc này đăng ký các sự kiện
+  const handleShortcut = useShortcut(editor, customConfig);
+  const [handlePaste, handleCopy] = useClipboard(editor);
+
   return (
     <DragProvider>
       <Slate
@@ -135,11 +161,12 @@ const SlateEditor = ({
             <Editable
               className="focus:outline-none selection:bg-blue-500/15"
               style={{ outline: "0px" }}
-              renderLeaf={memoizedRenderLeaf} // Định nghĩa render inline
-              renderElement={memoizedRenderBlock} // Định nghĩa render block
-              onKeyDown={shortcutHandle} // Đăng ký các shortcut
+              renderLeaf={memoizedRenderLeaf}
+              renderElement={memoizedRenderBlock}
+              onKeyDown={handleShortcut}
+              onPaste={handlePaste}
+              onCopy={handleCopy}
               autoFocus
-              // placeholder="Type something"
             />
             <SlashCommandMenu onSelectItem={handleSlashMenuSelect} />
 
@@ -152,6 +179,3 @@ const SlateEditor = ({
 };
 
 export default CollaborativeEditor;
-
-// TODO Editor hiện tại rất chậmmmm, chả hiểu tại sao, nhưng trên firefox lại nhanh
-// hơn rất nhiều, có thể nó liên quan đến việc chưa tối ưu DOM painting

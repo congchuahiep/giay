@@ -1,5 +1,5 @@
 import type UtilsEditor from "@/features/editor/utils/interface";
-import type { Editor } from "slate";
+import { Editor, Element, type Path } from "slate";
 import getCurrentBlockType from "./getCurrentBlockType";
 import isCurrentBlockEmpty from "./isCurrentBlockEmpty";
 import getCurrentBlockEntry from "@/features/editor/utils/getCurrentBlockEntry";
@@ -8,6 +8,7 @@ import getCurrentBlockPath from "@/features/editor/utils/getCurrentBlockPath";
 import buildBlock from "@/features/editor/utils/buildBlock";
 import ensureBlockId from "@/features/editor/utils/ensureBlockId";
 import { v4 as uuidv4 } from "uuid";
+import getCurrentBlockContent from "@/features/editor/utils/getCurrentBlockContent";
 
 export type { UtilsEditor };
 
@@ -28,6 +29,17 @@ export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
   editor.getCurrentBlockPath = () => getCurrentBlockPath(editor);
   editor.getCurrentBlockType = () => getCurrentBlockType(editor);
   editor.isCurrentBlockEmpty = () => isCurrentBlockEmpty(editor);
+  editor.getCurrentBlockContent = () => getCurrentBlockContent(editor);
+
+  editor.getBlockEntryById = (id: string) => {
+    for (const [node, path] of Editor.nodes(editor, {
+      at: [],
+      match: (n) => Element.isElement(n) && n.id === id,
+    })) {
+      return [node, path] as [Element, Path];
+    }
+    return null;
+  };
 
   return editor;
 }

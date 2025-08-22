@@ -6,6 +6,10 @@ export default interface UtilsEditor {
   /**
    * Tạo block mới dựa trên type, lưu ý này chỉ là khởi tạo block
    * chưa có gắn block lên editor
+   *
+   * Mọi hành vi khi tạo một block mới sẽ luôn phải thông qua phương
+   * thức này để tạo block mới! Vì khi sinh block với phương thức
+   * này, nó cũng đảm bảo block mới tạo là duy nhất bằng id uuidv4
    */
   buildBlock: (
     blockType?: BlockType,
@@ -21,6 +25,16 @@ export default interface UtilsEditor {
    * Đảm bảo block có UUID (thêm nếu chưa có)
    */
   ensureBlockId: (block: any) => Element;
+
+  /**
+   * Tìm block entry dựa trên ID
+   *
+   * @param id - Id uuidv4 của block
+   * @returns {NodeEntry<ElementBlock> | undefined} Là một mảng chứa hai giá trị:
+   * - Block hiện tại dưới dạng Element, hoặc null nếu không xác định được.
+   * - Vị trí Path hiện tại của Block.
+   */
+  getBlockEntryById: (id: string) => NodeEntry<ElementBlock> | null;
 
   /**
    * Lấy block hiện tại ở vị trí con trỏ đang ở trong editor.
@@ -60,12 +74,19 @@ export default interface UtilsEditor {
 
   /**
    * Lấy loại block hiện tại mà cursor đang ở
-   * @returns {string | undefined} Loại block hiện tại hoặc null nếu không xác định được
+   * @returns {BlockType | undefined} Loại block hiện tại hoặc null nếu không xác định được
    * @example
    * const blockType = editor.getCurrentBlockType();
    * console.log(blockType); // "paragraph", "heading-one", etc.
    */
   getCurrentBlockType: () => BlockType | undefined;
+
+  /**
+   * Lấy nội dung của block hiện tại mà con trỏ đang ở
+   * @returns {string | undefined} Nội dung của block hiện tại hoặc null nếu như vị trí
+   * con trỏ không nằm trong editor
+   */
+  getCurrentBlockContent: () => string | undefined;
 
   /**
    * Kiểm tra xem block hiện tại có rỗng (không có text) không

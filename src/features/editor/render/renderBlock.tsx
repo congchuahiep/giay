@@ -11,8 +11,7 @@ import {
   QuoteBlock,
   DividerBlock,
 } from "@/components/Editor/Block";
-import { withBlockInteraction } from "@/components/Editor/DragHandle";
-
+import { withBlockInteraction } from "@/components/Editor/BlockInteraction";
 
 // Map các block types với components
 const blockComponents = {
@@ -23,7 +22,7 @@ const blockComponents = {
   code: withBlockInteraction(CodeBlock),
   bulletList: withBlockInteraction(BulletListBlock),
   checkList: withBlockInteraction(CheckList),
-  divider: withBlockInteraction(DividerBlock),
+  divider: withBlockInteraction(DividerBlock, { alignCenter: true }),
   quote: withBlockInteraction(QuoteBlock),
   paragraph: withBlockInteraction(ParagraphBlock), // default case
 } as const;
