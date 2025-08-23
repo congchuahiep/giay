@@ -19,17 +19,30 @@ import Toolbar from "./Toolbar";
 import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
-import useClipboard from "@/features/editor/clipboard";
-import type { ShortcutConfig } from "@/features/editor/shortcut";
-import { v4 as uuidv4 } from "uuid";
-import { withMarkdownEditor } from "@/features/editor/markdown";
-import { withSlashEditor } from "@/features/editor/slash-command";
-import { withInsertEditor } from "@/features/editor/insert";
-import { withDeleteEditor } from "@/features/editor/delete";
-import { withUtilsEditor } from "@/features/editor/utils";
-import { withSelectEditor } from "@/features/editor/select";
-import { withFormatEditor } from "@/features/editor/format";
+import useClipboard from "@/features/editor/plugins/clipboard";
+import { withDeleteEditor } from "@/features/editor/plugins/delete";
+import {
+  FormatShortcutExtension,
+  MarkShortcutExtension,
+  withFormatEditor,
+} from "@/features/editor/plugins/format";
+import { withInsertEditor } from "@/features/editor/plugins/insert";
+import {
+  MarkdownShortcutExtension,
+  withMarkdownEditor,
+} from "@/features/editor/plugins/markdown";
+import { withSelectEditor } from "@/features/editor/plugins/select";
+import type { ShortcutConfig } from "@/core/shortcut";
+import {
+  SlashCommandShortcutExtension,
+  withSlashEditor,
+} from "@/features/editor/plugins/slash-command";
+import {
+  DefaultBehaviourShortCutExtension,
+  withUtilsEditor,
+} from "@/features/editor/plugins/utils";
 import { withHistory } from "slate-history";
+import { v4 as uuidv4 } from "uuid";
 
 /**
  * Danh sách các plugin
@@ -47,7 +60,24 @@ const plugins = [
 ];
 
 /**
- * Khởi động Editor với tính năng cộng tác
+ * Danh sách các phím tắt tuỳ chỉnh
+ */
+const customConfig: ShortcutConfig = {
+  "mod+shift+b": "mark-bold",
+  "mod+shift+i": "mark-italic",
+  "ctrl+k": "toggle-code-block",
+};
+
+const customExtensions = [
+  FormatShortcutExtension,
+  MarkShortcutExtension,
+  MarkdownShortcutExtension,
+  SlashCommandShortcutExtension,
+  DefaultBehaviourShortCutExtension,
+];
+
+/**
+ * Khởi động Editor bao gồm các tính năng cộng tác
  */
 const CollaborativeEditor = () => {
   const [connected, setConnected] = useState(false);
@@ -125,25 +155,14 @@ const SlateEditor = ({
     []
   );
 
-  const handleSlashMenuSelect = (item: any) => {
-    console.log("Selected item:", item);
-    // TODO: Implement block insertion logic
-  };
-
   // Kết nối với Yjs
   useEffect(() => {
     YjsEditor.connect(editor);
     return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
   }, [editor]);
 
-  const customConfig: ShortcutConfig = {
-    "mod+shift+b": "mark-bold",
-    "mod+shift+i": "mark-italic",
-    "ctrl+k": "toggle-code-block",
-  };
-
   // Khúc này đăng ký các sự kiện
-  const handleShortcut = useShortcut(editor, customConfig);
+  const handleShortcut = useShortcut(editor, customConfig, customExtensions);
   const [handlePaste, handleCopy] = useClipboard(editor);
 
   return (
@@ -168,7 +187,7 @@ const SlateEditor = ({
               onCopy={handleCopy}
               autoFocus
             />
-            <SlashCommandMenu onSelectItem={handleSlashMenuSelect} />
+            <SlashCommandMenu />
 
             {/*<BlockSelectionComponent />*/}
           </div>

@@ -1,24 +1,17 @@
 import { useEffect, useRef, useState } from "react";
-import {
-  SLASH_MENU_ITEMS,
-  type SlashMenuItem,
-} from "@/components/Editor/SlashMenu/SlashMenuItems";
+import { SLASH_MENU_ITEMS } from "@/components/Editor/SlashMenu/SlashMenuItems";
 import {
   slashMenuManager,
   type SlashMenuState,
-} from "@/features/editor/slash-command";
+} from "@/features/editor/plugins/slash-command";
 import { cn } from "@/lib/utils";
 import { ReactEditor, useSlateSelection, useSlateStatic } from "slate-react";
 import { useFuseSearch } from "@/features/search/useFuseSearch";
 import { Editor } from "slate";
 
-interface SlashCommandMenuProps {
-  onSelectItem?: (item: SlashMenuItem) => void;
-}
+interface SlashCommandMenuProps {}
 
-export default function SlashCommandMenu({
-  onSelectItem,
-}: SlashCommandMenuProps) {
+export default function SlashCommandMenu({}: SlashCommandMenuProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement | null>(null);
   const editor = useSlateStatic();
@@ -131,7 +124,7 @@ export default function SlashCommandMenu({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [menuState.isOpen, menuState.selectedIndex, filteredItems, onSelectItem]);
+  }, [menuState.isOpen, menuState.selectedIndex, filteredItems]);
 
   // Helper function để scroll đến index
   const scrollToIndex = (index: number) => {
