@@ -47,10 +47,7 @@ export function withBlockInteraction<P extends RenderElementProps>(
     // Thiết lập Droppable
     const { setNodeRef: setDroppableRef } = useDroppable({
       id: props.element.id,
-      data: {
-        blockId: props.element.id,
-        blockData: props.element,
-      },
+      data: { blockData: props.element },
     });
 
     // Xác định xem có nên hiển thị drop indicator hay không
@@ -71,7 +68,6 @@ export function withBlockInteraction<P extends RenderElementProps>(
           isDragging && !isCurrentBlockDragged && "cursor-grab"
         )}
         onMouseEnter={() => setIsHovered(true)}
-        // onMouseMove={handleMouseMove}
         onMouseLeave={() => setIsHovered(false)}
         data-block-id={props.element.id}
       >

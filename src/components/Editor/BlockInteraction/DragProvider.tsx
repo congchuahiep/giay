@@ -7,14 +7,15 @@ import {
   useSensors,
   type DragEndEvent,
   type DragMoveEvent,
-  type DragStartEvent
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import { useCallback, useState } from "react";
 import { createPortal } from "react-dom";
-import { Node } from "slate";
+import { Editor, Element, Node, Path } from "slate";
 
 interface DragProviderProps {
   children: React.ReactNode;
+  editor: Editor;
 }
 
 interface ElementSize {
@@ -45,9 +46,9 @@ interface ElementSize {
  * </DragProvider>
  * ```
  */
-export function DragProvider({ children }: DragProviderProps) {
+export function DragProvider({ children, editor }: DragProviderProps) {
   const [elementSize, setElementSize] = useState<ElementSize | null>(null);
-  const { startDrag, endDrag, setDropTarget, draggedBlockData } =
+  const { startDrag, endDrag, dropPosition, setDropTarget, draggedBlockData } =
     useDragStore();
 
   // Thiết lập sensor để lấy được tọa độ con trỏ chính xác
@@ -87,8 +88,9 @@ export function DragProvider({ children }: DragProviderProps) {
    * Xử lý việc bắt đầu kéo block
    */
   const handleDragStart = (event: DragStartEvent) => {
+    document.body.classList.add("cursor-grabbing");
+    
     const { active } = event;
-
     captureElementSize(active.id as string);
 
     // Lấy data của block được kéo từ active.data.current
@@ -103,7 +105,7 @@ export function DragProvider({ children }: DragProviderProps) {
     const activeId = active.id as string;
 
     if (!overId || overId === activeId) {
-      setDropTarget(null, null, null);
+      setDropTarget(null, null);
       return;
     }
 
@@ -118,21 +120,41 @@ export function DragProvider({ children }: DragProviderProps) {
     const isTopHalf = pointerY < overNodeRect.top;
     const position = isTopHalf ? "top" : "bottom";
 
-    setDropTarget(overId, null, position);
+    setDropTarget(overId, position);
   };
 
   /**
    * Xử lý việc thả block
    */
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+    document.body.classList.remove("cursor-grabbing");
 
-    // TODO: Xử lý việc thả block
-    console.log("Drag ended:", {
-      activeId: active.id,
-      overId: over?.id,
-      activeData: active.data.current,
-      overData: over?.data.current,
+    const { active, over } = event;
+    if (!active || !over || !active.data.current) return;
+
+    const draggedPath = editor.getBlockPathById(active.id as string);
+    let droppedPath = editor.getBlockPathById(over.id as string);
+
+    if (!draggedPath || !droppedPath) return;
+
+    // Mặc định ta sẽ luôn đảm bảo việc thả lên phía lên trên vị trí cần thả
+    // để làm được điều đó ta phải đảm bảo rằng: nếu vị trí kéo bé hơn vị trí
+    // thả, thì ta lùi vị trí thả lại 1
+    if (Path.isBefore(draggedPath, droppedPath)) {
+      droppedPath = Path.previous(droppedPath);
+    }
+
+    // Nếu vị trí cần thả là nằm ở bên dưới block
+    if (dropPosition === "bottom") {
+      droppedPath = Path.next(droppedPath);
+    }
+
+    console.log(droppedPath);
+
+    editor.moveNodes({
+      at: draggedPath,
+      to: droppedPath,
+      match: (node) => Element.isElement(node) && node.id === active.id,
     });
 
     endDrag();

@@ -43,6 +43,7 @@ import {
 } from "@/features/editor/plugins/utils";
 import { withHistory } from "slate-history";
 import { v4 as uuidv4 } from "uuid";
+import type { DragEndEvent } from "@dnd-kit/core";
 
 /**
  * Danh sách các plugin
@@ -166,7 +167,7 @@ const SlateEditor = ({
   const [handlePaste, handleCopy] = useClipboard(editor);
 
   return (
-    <DragProvider>
+    <DragProvider editor={editor}>
       <Slate
         editor={editor}
         initialValue={initialValue}

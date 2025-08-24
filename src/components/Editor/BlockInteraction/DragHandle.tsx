@@ -21,9 +21,7 @@ export default function DragHandle({
 
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: blockData.id,
-    data: {
-      blockData,
-    },
+    data: { blockData },
   });
 
   const style = {
