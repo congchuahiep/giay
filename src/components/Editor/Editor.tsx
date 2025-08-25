@@ -43,7 +43,7 @@ import {
 } from "@/features/editor/plugins/utils";
 import { withHistory } from "slate-history";
 import { v4 as uuidv4 } from "uuid";
-import type { DragEndEvent } from "@dnd-kit/core";
+import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
 
 /**
  * Danh sách các plugin
@@ -96,7 +96,7 @@ const CollaborativeEditor = () => {
 
     // Thiết lập Yjs provider,tự chọn provider (ở đây đang sử dụng y-websocket)
     const yProvider = new WebsocketProvider(
-      "ws://localhost:1234", // Địa chỉ websocket
+      "ws://localhost:1234", // Địa chỉ websocket, hiện tại dùng server ảo
       "slate-demo-room", // Tên phòng (room) dùng để sync
       yDoc
     );
@@ -128,18 +128,26 @@ const SlateEditor = ({
   sharedType: Y.XmlText;
   provider: WebsocketProvider;
 }) => {
-  const initialValue: Descendant[] = useMemo(() => {
-    const storedContent = loadContentFromLocal();
-    return storedContent
-      ? storedContent.map(editor.ensureBlockId)
-      : [
-          {
-            id: uuidv4(),
-            type: "paragraph",
-            children: [{ text: "" }],
-          },
-        ];
-  }, []);
+  const [initialValue, setInitialValue] = useState<Descendant[]>([]);
+
+  useEffect(() => {
+    // Chỉ fetch từ local nếu Yjs document rỗng
+    if (sharedType.length === 0) {
+      const storedContent = loadContentFromLocal();
+      setInitialValue(
+        storedContent
+          ? storedContent.map(editor.ensureBlockId)
+          : [
+              {
+                id: uuidv4(),
+                type: "paragraph",
+                children: [{ text: "Dữ liệu ban đầu" }],
+              },
+            ]
+      );
+    }
+    // Nếu đã có dữ liệu Yjs, không cần fetch local
+  }, [sharedType]);
 
   // Khởi tạo editor
   const editor = useMemo(
@@ -167,14 +175,14 @@ const SlateEditor = ({
   const [handlePaste, handleCopy] = useClipboard(editor);
 
   return (
-    <DragProvider editor={editor}>
-      <Slate
-        editor={editor}
-        initialValue={initialValue}
-        // onChange={saveEditorContent(editor)}
-      >
+    <Slate
+      editor={editor}
+      initialValue={initialValue}
+      // onChange={saveEditorContent(editor)}
+    >
+      <DragProvider editor={editor}>
         <Cursors>
-          <div className="relative">
+          <div className="relative h-screen flex flex-col">
             <Toolbar />
             <HoveringToolbar />
 
@@ -188,13 +196,14 @@ const SlateEditor = ({
               onCopy={handleCopy}
               autoFocus
             />
+            <TrailingEmptyParagraph />
             <SlashCommandMenu />
 
             {/*<BlockSelectionComponent />*/}
           </div>
         </Cursors>
-      </Slate>
-    </DragProvider>
+      </DragProvider>
+    </Slate>
   );
 };
 

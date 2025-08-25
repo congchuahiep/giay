@@ -1,96 +1,66 @@
-# Copilot Instructions for Slate.js Rich Text Editor
+# Instructions for Slate.js Rich Text Editor
 
-This project implements a Notion-like rich text editor using Slate.js, React, and TypeScript. Here are the key patterns and conventions to understand:
+This project is a Notion-like rich text editor built with Slate.js, React, and TypeScript. Follow these guidelines for effective AI agent development.
 
 ## Architecture Overview
 
-### Core Components
-- `Editor.tsx` - Main editor component integrating all plugins and features
-- `features/editor/` - Core editor functionality organized by feature
-  - `format/` - Text formatting and block type conversions
-  - `insert/` - Block insertion and break handling
-  - `markdown/` - Markdown shortcut processing
-  - `clipboard/` - Copy/paste handling with HTML/Markdown support
+- **Main Editor**: Editor.tsx is the entry point, integrating plugins, block rendering, and collaborative features.
+- **Block System**: All block types (paragraph, heading, list, code, etc.) are in Block. Blocks are rendered via renderBlock.tsx and always wrapped with the `withBlockInteraction` HOC for drag/drop and contextual UI.
+- **Block Interaction**: Drag-and-drop, drop indicators, and contextual controls are managed in `BlockInteraction/` (withBlockInteraction.tsx, `DragHandle.tsx`, `DropIndicator.tsx`, `DragProvider.tsx`). Zustand is used for drag state.
+- **Plugins**: Editor features (formatting, markdown shortcuts, clipboard, etc.) are modularized in `features/editor/` and composed in `composePlugins.ts`.
+- **Slash Menu & Shortcuts**: Slash commands and keyboard shortcuts are handled in `SlashMenu/` and `core/shortcut/`.
 
-### Key Data Flow Patterns
-1. Editor plugins are composed using `composePlugins.ts`
-2. Block interactions use HOC pattern via `withBlockInteraction.tsx`
-3. Shortcuts and commands are handled through plugin system
+## Developer Workflows
 
-## Development Workflows
+- **Install dependencies**: `bun install`
+- **Start dev server**: `bun dev`
+- **Build**: `bun run build` (if configured)
+- **Testing**: No standard test suite detected; manual browser testing is typical.
+- **Debugging**: Use browser dev tools to inspect Slate operations and plugin execution order. Console logs are used for plugin debugging.
 
-### Running the Project
-```bash
-# Install dependencies
-bun install
+## Key Patterns & Conventions
 
-# Start dev server
-bun dev
-```
-
-### Key Conventions
-
-1. **Plugin Architecture**
-- New features should be implemented as plugins in `features/editor/`
-- Plugins follow the pattern in `MarkdownPlugin.ts`:
-  ```typescript
-  const MyPlugin = {
-    name: "pluginName",
-    priority: number,
-    actions: {
-      "action-name": (event, editor) => void
-    }
+- **Block Rendering**: All blocks are wrapped with `withBlockInteraction` for drag/drop and contextual UI. Example:
+  ```tsx
+  const blockComponents = {
+    h1: withBlockInteraction(Heading1Block),
+    paragraph: withBlockInteraction(ParagraphBlock),
+    // ...
   };
   ```
-
-2. **Block Components**
-- Block components are in `components/Editor/Block/`
-- Must implement basic block interface
-- Use `withBlockInteraction` HOC for drag/drop support
-
-3. **Clipboard Handling**
-- HTML deserializer in `clipboard/deserializeHtml.ts`
-- Markdown deserializer in `clipboard/deserializeMarkdown.ts`
-- Format conversions maintain styling and structure
-
-## Common Patterns
-
-### Adding New Block Types
-1. Create component in `components/Editor/Block/`
-2. Add renderer in `features/editor/render/renderBlock.tsx`
-3. Add format toggle in `features/editor/format/toggleBlock.ts`
-4. Update slash menu in `components/Editor/SlashMenu/`
-
-### Markdown Shortcuts
-- Define shortcuts in `features/editor/markdown/markdownShortcutMap.ts`
-- Implement handlers in `features/editor/markdown/`
-- Follow pattern in `handleDividerShortcut.ts`
-
-### Text Formatting
-- Use `toggleMark` for inline formatting
-- Use `toggleBlock` for block-level changes
-- Check `isMarkActive` before applying formats
+- **Block Creation**: Always use `editor.buildBlock()` to create new blocks, ensuring unique IDs via `uuidv4`.
+- **Drag-and-Drop**: Uses `@dnd-kit/core` and Zustand. Drop indicators show above/below blocks during drag. See `DragProvider.tsx` and withBlockInteraction.tsx for logic.
+- **Plugins**: New features should be added as plugins in `features/editor/`, following the pattern in `MarkdownPlugin.ts`.
+- **Clipboard**: HTML/Markdown deserialization/serialization is handled in `features/editor/plugins/clipboard/`.
+- **Shortcuts**: Custom shortcuts are defined in `core/shortcut/defaultConfig.ts` and handled via extensions in `features/editor/`.
+- **Slash Menu**: Extendable via `components/Editor/SlashMenu/`.
 
 ## Integration Points
 
-1. **Slate.js Integration**
-- Custom plugins extend core Slate functionality
-- Editor configurations in `features/editor/initialEditor.ts`
-
-2. **External Dependencies**
-- @radix-ui/react-dialog - Modal dialogs
-- slate-react - Core editor framework
-- slate-history - Undo/redo support
-
-## Testing and Debug Workflows
-
-1. Use browser dev tools to inspect Slate operations
-2. Check clipboard data format in paste handlers
-3. Monitor plugin execution order via console logs
+- **External Libraries**: Uses `@dnd-kit/core` for drag-and-drop, Zustand for state, Slate.js for editor core, and Radix UI for dialogs.
+- **Block Path as ID**: Blocks are identified by their Slate path or unique `id` for drag/drop and manipulation.
+- **HOC Pattern**: `withBlockInteraction` is the standard for adding contextual UI and drag/drop to blocks.
 
 ## Common Gotchas
 
-1. Always normalize Slate operations to prevent invalid states
-2. Handle collapsed vs expanded selections differently
-3. Remember to update both the model and view when modifying blocks
-4. Check block type before applying transformations
+- **Slate Path/ID**: Always use Slate path or block `id` for block identification in drag/drop logic.
+- **DragOverlay**: Do not use Slate's Editable in DragOverlay; use a custom renderer for block preview.
+- **State Management**: Use Zustand for drag/drop state, not React Context.
+- **Plugin Order**: Plugin execution order can affect editor behavior; check `composePlugins.ts`.
+- **Block Normalization**: Ensure block operations are normalized to prevent invalid Slate states.
+
+## Example Files
+
+- withBlockInteraction.tsx — HOC for block UI/drag
+- DragProvider.tsx — Drag/drop logic and state
+- renderBlock.tsx — Block rendering logic
+- composePlugins.ts — Plugin composition
+- Editor.tsx — Main editor entry point
+
+---
+
+**Feedback requested:** If any section is unclear or missing important project-specific details, please specify so instructions can be improved.
+
+---
+
+Let me know if any section needs clarification or if you want more details on specific patterns or workflows!

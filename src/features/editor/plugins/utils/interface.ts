@@ -110,6 +110,24 @@ export default interface UtilsEditor {
   getCurrentBlockContent: () => string | undefined;
 
   /**
+   * Lấy block cuối cùng trong editor
+   * @returns {ElementBlock | undefined} Block cuối cùng hoặc undefined nếu không tìm thấy
+   */
+  getLastBlock: () => ElementBlock | undefined;
+
+  /**
+   * Lấy entry của block cuối cùng trong editor
+   * @returns {NodeEntry<ElementBlock> | undefined} Entry của block cuối cùng hoặc undefined nếu không tìm thấy
+   */
+  getLastBlockEntry: () => NodeEntry<ElementBlock> | undefined;
+
+  /**
+   * Lấy path của block cuối cùng trong editor
+   * @returns {Path | undefined} Path của block cuối cùng hoặc undefined nếu không tìm thấy
+   */
+  getLastBlockPath: () => Path | undefined;
+
+  /**
    * Kiểm tra xem block hiện tại có rỗng (không có text) không
    * @returns {boolean} True nếu block hiện tại rỗng
    * @example

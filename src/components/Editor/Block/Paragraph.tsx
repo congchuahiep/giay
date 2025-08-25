@@ -15,7 +15,7 @@ const ParagraphBlock = (props: RenderElementProps) => {
   return (
     <p className="p-1" {...props.attributes}>
       {isSelected && isSelectionCollapsed && (
-        <LeafPlaceholder isEmpty={isEmpty} placeholder="Typing..." />
+        <LeafPlaceholder isEmpty={isEmpty} placeholder='Write, or type "/" for commands...' />
       )}
       {props.children}
     </p>

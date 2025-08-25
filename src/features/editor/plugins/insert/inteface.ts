@@ -1,3 +1,4 @@
+import type { InsertBlockOptions } from "@/features/editor/plugins/insert/insertBlock";
 import type { BlockType } from "@/features/editor/types";
 import type { ElementBlock } from "@/features/editor/types/block.ts";
 import type { KeyboardEvent } from "react";
@@ -17,7 +18,8 @@ export default interface InsertEditor {
 
   /**
    * Chèn một block mới vào editor tại vị trí xác định. Hàm này chỉ thực
-   * thi công việc chèn block, chứ không thực hiện việc tách block
+   * thi công việc chèn block, chứ không thực hiện việc tách block hay
+   * thay đổi vị trí select
    *
    * Nếu cần tách block, hãy sử dụng `insertBlockAndBreak()`
    *
@@ -28,7 +30,7 @@ export default interface InsertEditor {
    */
   insertBlock: (
     additionalProps?: Partial<ElementBlock>,
-    configs?: InsertBlockConfigProps
+    configs?: InsertBlockOptions
   ) => boolean;
 
   /**
@@ -66,11 +68,4 @@ export default interface InsertEditor {
    * @param editor Editor Slate để thao tác.
    */
   insertNumberedList: () => void;
-}
-
-export interface InsertBlockConfigProps {
-  /**
-   * Chèn block phía bên trên
-   */
-  reverse?: boolean;
 }

@@ -1,28 +1,38 @@
-import type { InsertBlockConfigProps } from "@/features/editor/plugins/insert/inteface";
 import type { ElementBlock } from "@/features/editor/types/block.ts";
 
-import { Editor, Path, Transforms } from "slate";
+import { Editor, Node, Path, Transforms } from "slate";
+import type { NodeInsertNodesOptions } from "slate/dist/interfaces/transforms/node";
+
+export type InsertBlockOptions = NodeInsertNodesOptions<Node> & {
+  /**
+   * Chèn block phía bên trên, chỉ áp dụng cho trường hợp không đặt sẵn vị trí
+   */
+  reverse?: boolean;
+};
 
 /**
  * Chèn một block mới vào editor tại vị trí xác định. Hàm này chỉ thực
- * thi công việc chèn block, chứ không thực hiện việc tách block
+ * thi công việc chèn block, chứ không thực hiện việc tách block hay
+ * thay đổi vị trí select
  *
  * @param editor - Đối tượng editor hiện tại.
  * @param additionalProps - Các thuộc tính bổ sung cho block mới.
- * @param configs - Cấu hình cho việc chèn block
+ * @param options - Cấu hình cho việc chèn block
  * @returns Trả về `true` nếu chèn thành công, ngược lại trả về `false`.
  */
 export default function insertBlock(
   editor: Editor,
   additionalProps: Partial<ElementBlock> = {},
-  configs: InsertBlockConfigProps = { reverse: false }
+  options: InsertBlockOptions = { reverse: false }
 ): boolean {
   // Lấy path của block hiện tại
   const currentBlockPath = editor.getCurrentBlockPath();
   if (!currentBlockPath) return false;
 
   // Xác định vị trí cần đặt block mới
-  let targetBlockPath = configs?.reverse
+  let targetBlockPath = options.at
+    ? options.at
+    : options?.reverse
     ? currentBlockPath
     : Path.next(currentBlockPath);
 
@@ -31,9 +41,6 @@ export default function insertBlock(
 
   // Chèn block vào editor
   Transforms.insertNodes(editor, block, { at: targetBlockPath });
-
-  if (!configs?.reverse)
-    Transforms.select(editor, Editor.start(editor, targetBlockPath));
 
   return true;
 }

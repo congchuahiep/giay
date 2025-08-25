@@ -1,17 +1,17 @@
+import { renderBlock, renderLeaf } from "@/features/editor/render";
 import { useDragStore } from "@/features/editor/stores";
+import type { ElementBlock } from "@/features/editor/types/block";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
-  useSensor,
-  useSensors,
   type DragEndEvent,
   type DragMoveEvent,
-  type DragStartEvent,
+  type DragStartEvent
 } from "@dnd-kit/core";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { createPortal } from "react-dom";
-import { Editor, Element, Node, Path } from "slate";
+import { createEditor, Editor, Element, Path } from "slate";
+import { Editable, Slate, withReact } from "slate-react";
 
 interface DragProviderProps {
   children: React.ReactNode;
@@ -51,15 +51,6 @@ export function DragProvider({ children, editor }: DragProviderProps) {
   const { startDrag, endDrag, dropPosition, setDropTarget, draggedBlockData } =
     useDragStore();
 
-  // Thiết lập sensor để lấy được tọa độ con trỏ chính xác
-  const sensors = useSensors(
-    useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8, // Yêu cầu di chuyển 8px để bắt đầu drag
-      },
-    })
-  );
-
   /**
    * Lấy kích thước của block muốn kéo
    */
@@ -78,7 +69,7 @@ export function DragProvider({ children, editor }: DragProviderProps) {
   );
 
   /**
-   
+   * Reset lại
    */
   const resetSize = useCallback(() => {
     setElementSize(null);
@@ -89,7 +80,7 @@ export function DragProvider({ children, editor }: DragProviderProps) {
    */
   const handleDragStart = (event: DragStartEvent) => {
     document.body.classList.add("cursor-grabbing");
-    
+
     const { active } = event;
     captureElementSize(active.id as string);
 
@@ -128,6 +119,8 @@ export function DragProvider({ children, editor }: DragProviderProps) {
    */
   const handleDragEnd = (event: DragEndEvent) => {
     document.body.classList.remove("cursor-grabbing");
+    endDrag();
+    resetSize();
 
     const { active, over } = event;
     if (!active || !over || !active.data.current) return;
@@ -156,23 +149,18 @@ export function DragProvider({ children, editor }: DragProviderProps) {
       to: droppedPath,
       match: (node) => Element.isElement(node) && node.id === active.id,
     });
-
-    endDrag();
-    resetSize();
   };
 
   return (
     <DndContext
-      sensors={sensors}
       onDragStart={handleDragStart}
-      // onDragOver={handleDragOver}
       onDragMove={handleDragMove}
       onDragEnd={handleDragEnd}
       onDragCancel={endDrag}
     >
       {children}
       {createPortal(
-        <DragOverlay dropAnimation={null}>
+        <DragOverlay dropAnimation={null} adjustScale={false}>
           {draggedBlockData && (
             <div
               className="p-2 opacity-80"
@@ -181,14 +169,33 @@ export function DragProvider({ children, editor }: DragProviderProps) {
                 height: elementSize?.height,
               }}
             >
-              <div className="text-gray-600">
-                {Node.string(draggedBlockData)}
-              </div>
+              <DragOverlayContent blockData={draggedBlockData} />
             </div>
           )}
         </DragOverlay>,
         document.body
       )}
     </DndContext>
+  );
+}
+
+export function DragOverlayContent({ blockData }: { blockData: ElementBlock }) {
+  // Tạo editor tạm thời chỉ để render
+  const editor = useMemo(() => withReact(createEditor()), []);
+
+  // Tạo document tạm với block đang kéo
+  const document = useMemo(() => {
+    return [blockData];
+  }, [blockData]);
+
+  return (
+    <Slate editor={editor} initialValue={document}>
+      <Editable
+        readOnly
+        renderElement={renderBlock}
+        renderLeaf={renderLeaf}
+        className="pointer-events-none"
+      />
+    </Slate>
   );
 }

@@ -1,19 +1,22 @@
 import buildBlock from "@/features/editor/plugins/utils/buildBlock.ts";
+import DefaultBehaviourShortCutExtension from "@/features/editor/plugins/utils/DefaultBehaviourShortcutExtension.ts";
 import ensureBlockId from "@/features/editor/plugins/utils/ensureBlockId.ts";
+import getBlockByid from "@/features/editor/plugins/utils/getBlockById.ts";
+import getBlockContentById from "@/features/editor/plugins/utils/getBlockContentById.ts";
 import getBlockEntryById from "@/features/editor/plugins/utils/getBlockEntryById.ts";
+import getBlockPathById from "@/features/editor/plugins/utils/getBlockPathById.ts";
 import getCurrentBlock from "@/features/editor/plugins/utils/getCurrentBlock.ts";
 import getCurrentBlockContent from "@/features/editor/plugins/utils/getCurrentBlockContent.ts";
 import getCurrentBlockEntry from "@/features/editor/plugins/utils/getCurrentBlockEntry.ts";
 import getCurrentBlockPath from "@/features/editor/plugins/utils/getCurrentBlockPath.ts";
+import getLastBlock from "@/features/editor/plugins/utils/getLastBlock.ts";
+import getLastBlockEntry from "@/features/editor/plugins/utils/getLastBlockEntry.ts";
+import getLastBlockPath from "@/features/editor/plugins/utils/getLastBlockPath.ts";
 import type UtilsEditor from "@/features/editor/plugins/utils/interface.ts";
 import { Editor } from "slate";
 import { v4 as uuidv4 } from "uuid";
 import getCurrentBlockType from "./getCurrentBlockType.ts";
 import isCurrentBlockEmpty from "./isCurrentBlockEmpty.ts";
-import getBlockByid from "@/features/editor/plugins/utils/getBlockById.ts";
-import getBlockPathById from "@/features/editor/plugins/utils/getBlockPathById.ts";
-import getBlockContentById from "@/features/editor/plugins/utils/getBlockContentById.ts";
-import DefaultBehaviourShortCutExtension from "@/features/editor/plugins/utils/DefaultBehaviourShortcutExtension.ts";
 
 export { DefaultBehaviourShortCutExtension };
 export type { UtilsEditor };
@@ -40,6 +43,10 @@ export function withUtilsEditor(editor: Editor): Editor & UtilsEditor {
   editor.getCurrentBlockPath = () => getCurrentBlockPath(editor);
   editor.getCurrentBlockType = () => getCurrentBlockType(editor);
   editor.getCurrentBlockContent = () => getCurrentBlockContent(editor);
+
+  editor.getLastBlock = () => getLastBlock(editor);
+  editor.getLastBlockEntry = () => getLastBlockEntry(editor);
+  editor.getLastBlockPath = () => getLastBlockPath(editor);
 
   editor.isCurrentBlockEmpty = () => isCurrentBlockEmpty(editor);
 

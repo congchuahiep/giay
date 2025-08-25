@@ -79,12 +79,16 @@ export function withBlockInteraction<P extends RenderElementProps>(
         {/* Block interaction controls */}
         <div
           className={cn(
-            "absolute left-0 flex justify-center",
+            "absolute left-0 flex justify-center select-none",
             "w-6 -ml-9 opacity-0 transition-opacity duration-150",
             showBlockInteraction && "opacity-100",
             // Positioning based on alignment option
             alignCenter ? "top-0 bottom-0" : "top-1"
           )}
+          onMouseDown={(e: React.MouseEvent) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
         >
           <NewParagraphButton blockId={props.element.id} />
           <DragHandle

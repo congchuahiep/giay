@@ -1,5 +1,5 @@
 import type { BlockType } from "@/features/editor/types";
-import { Editor, Transforms } from "slate";
+import { Editor, Path, Transforms } from "slate";
 
 /**
  * Ngắt dòng và chèn một khối mới vào vị trí hiện tại của con trỏ trong editor.
@@ -30,18 +30,32 @@ export function insertBlockAndBreak(
   const isEnd = Editor.isEnd(editor, selection.anchor, path);
   const isStart = Editor.isStart(editor, selection.anchor, path);
 
+  // Nếu con trỏ ở cuối khối, chèn khối mới sau khối hiện tại
   if (isEnd) {
-    editor.insertBlock({ ...additionalProps, type: blockType });
-  } else if (isStart) {
-    editor.insertBlock({ ...additionalProps, type: blockType }, { reverse: true });
-  } else {
-    Transforms.splitNodes(editor);
-    Transforms.setNodes(editor, {
-      id: editor.generateId(),
+    const inserted = editor.insertBlock({
+      ...additionalProps,
       type: blockType,
-      ...additionalProps
     });
+    if (inserted) {
+      editor.select(Path.next(path));
+    }
+    return inserted;
   }
 
+  // Nếu con trỏ ở đầu khối, chèn khối mới trước khối hiện tại
+  if (isStart) {
+    return editor.insertBlock(
+      { ...additionalProps, type: blockType },
+      { reverse: true }
+    );
+  }
+
+  // Nếu con trỏ ở giữa khối, tách khối và chuyển đổi phần sau thành loại khối mới
+  Transforms.splitNodes(editor);
+  Transforms.setNodes(editor, {
+    id: editor.generateId(),
+    type: blockType,
+    ...additionalProps,
+  });
   return true;
 }
