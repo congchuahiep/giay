@@ -2,7 +2,7 @@ import SlateEditor from "./components/Editor/Editor";
 
 function App() {
 	return (
-		<div className="m-auto w-full md:w-3xl">
+		<div className="px-12 m-auto w-full md:w-3xl">
 			<SlateEditor />
 		</div>
 	);

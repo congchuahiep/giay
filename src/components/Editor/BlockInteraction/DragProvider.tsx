@@ -141,9 +141,8 @@ export function DragProvider({ children, editor }: DragProviderProps) {
     if (dropPosition === "bottom") {
       droppedPath = Path.next(droppedPath);
     }
-
-    console.log(droppedPath);
-
+    
+    // Thực hiện di chuyển node trong editor
     editor.moveNodes({
       at: draggedPath,
       to: droppedPath,
