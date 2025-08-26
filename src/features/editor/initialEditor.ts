@@ -1,12 +1,6 @@
 import { composePlugins, type Plugin } from "@/features/editor/composePlugins";
 import { withCursors, withYjs } from "@slate-yjs/core";
-import {
-  createEditor,
-  Editor,
-  Element,
-  Transforms,
-  type Descendant,
-} from "slate";
+import { createEditor, Editor, Element, Transforms } from "slate";
 import type { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 
@@ -21,8 +15,7 @@ import * as Y from "yjs";
 export default function initialEditor(
   plugins: Plugin<Editor>[],
   sharedType: Y.XmlText,
-  provider: WebsocketProvider,
-  initialValue: Descendant[]
+  provider: WebsocketProvider | undefined
 ) {
   const randomNames = [
     "Alex",
@@ -48,11 +41,12 @@ export default function initialEditor(
   const color = randomColors[Math.floor(Math.random() * randomColors.length)];
 
   // Khởi tạo editor với danh sách các plugin
-  const editor = withCursors(
-    withYjs(composePlugins(createEditor(), plugins), sharedType),
-    provider.awareness,
-    { data: { name, color } }
-  );
+  let editor = withYjs(composePlugins(createEditor(), plugins), sharedType);
+
+  // Nếu có provider, thêm plugin con trỏ chuột
+  if (provider) {
+    editor = withCursors(editor, provider.awareness, { data: { name, color } });
+  }
 
   const { normalizeNode } = editor;
 
@@ -67,12 +61,10 @@ export default function initialEditor(
 
     // Nếu editor rỗng, thêm initial value với ID
     if (Editor.isEditor(node) && node.children.length === 0) {
-      const initialValueWithIds = initialValue.map((block) =>
-        editor.ensureBlockId(block)
-      );
-      Transforms.insertNodes(editor, initialValueWithIds, { at: [0] });
+      Transforms.insertNodes(editor, editor.buildBlock(), { at: [0] });
       return;
     }
+
     return normalizeNode(entry, options);
   };
 

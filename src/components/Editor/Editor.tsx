@@ -8,9 +8,8 @@ import { WebsocketProvider } from "y-websocket";
 import * as Y from "yjs";
 
 // Import the Slate components and React plugin.
-import { initialEditor, useShortcut } from "@/features/editor";
+import { initialEditor } from "@/features/editor";
 import { renderBlock, renderLeaf } from "@/features/editor/render";
-import { loadContentFromLocal } from "@/features/editor/stores/localStorage";
 import { YjsEditor } from "@slate-yjs/core";
 
 import { Cursors } from "./Cursor";
@@ -19,6 +18,8 @@ import Toolbar from "./Toolbar";
 import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
+import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
+import { useShortcut, type ShortcutConfig } from "@/core/shortcut";
 import useClipboard from "@/features/editor/plugins/clipboard";
 import { withDeleteEditor } from "@/features/editor/plugins/delete";
 import {
@@ -32,7 +33,6 @@ import {
   withMarkdownEditor,
 } from "@/features/editor/plugins/markdown";
 import { withSelectEditor } from "@/features/editor/plugins/select";
-import type { ShortcutConfig } from "@/core/shortcut";
 import {
   SlashCommandShortcutExtension,
   withSlashEditor,
@@ -41,9 +41,6 @@ import {
   DefaultBehaviourShortCutExtension,
   withUtilsEditor,
 } from "@/features/editor/plugins/utils";
-import { withHistory } from "slate-history";
-import { v4 as uuidv4 } from "uuid";
-import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
 
 /**
  * Danh sách các plugin
@@ -57,7 +54,7 @@ const plugins = [
   withSelectEditor,
   withFormatEditor,
   withReact,
-  withHistory,
+  // withHistory,
 ];
 
 /**
@@ -77,88 +74,26 @@ const customExtensions = [
   DefaultBehaviourShortCutExtension,
 ];
 
-/**
- * Khởi động Editor bao gồm các tính năng cộng tác
- */
-const CollaborativeEditor = () => {
-  const [connected, setConnected] = useState(false);
-  const [sharedType, setSharedType] = useState<Y.XmlText | undefined>(
-    undefined
-  );
-  const [provider, setProvider] = useState<WebsocketProvider | undefined>(
-    undefined
-  );
-
-  // Khởi động Yjs provider và các tài liệu liên quan
-  useEffect(() => {
-    const yDoc = new Y.Doc();
-    const sharedDoc = yDoc.get("slate", Y.XmlText);
-
-    // Thiết lập Yjs provider,tự chọn provider (ở đây đang sử dụng y-websocket)
-    const yProvider = new WebsocketProvider(
-      "ws://localhost:1234", // Địa chỉ websocket, hiện tại dùng server ảo
-      "slate-demo-room", // Tên phòng (room) dùng để sync
-      yDoc
-    );
-
-    yProvider.on("status", (event) => {
-      setConnected(event.status === "connected");
-    });
-    setSharedType(sharedDoc);
-    setProvider(yProvider);
-
-    return () => {
-      yDoc?.destroy();
-      yProvider?.off("sync", setConnected);
-      yProvider?.destroy();
-    };
-  }, []);
-
-  if (!connected || !sharedType || !provider) {
-    return <div>Loading…</div>;
-  }
-
-  return <SlateEditor sharedType={sharedType} provider={provider} />;
-};
-
-const SlateEditor = ({
+const PageEditor = ({
   sharedType,
   provider,
 }: {
   sharedType: Y.XmlText;
-  provider: WebsocketProvider;
+  provider: WebsocketProvider | undefined;
 }) => {
-  const [initialValue, setInitialValue] = useState<Descendant[]>([]);
-
-  useEffect(() => {
-    // Chỉ fetch từ local nếu Yjs document rỗng
-    if (sharedType.length === 0) {
-      const storedContent = loadContentFromLocal();
-      setInitialValue(
-        storedContent
-          ? storedContent.map(editor.ensureBlockId)
-          : [
-              {
-                id: uuidv4(),
-                type: "paragraph",
-                children: [{ text: "Dữ liệu ban đầu" }],
-              },
-            ]
-      );
-    }
-    // Nếu đã có dữ liệu Yjs, không cần fetch local
-  }, [sharedType]);
+  const [initialValue] = useState<Descendant[]>([]);
 
   // Khởi tạo editor
   const editor = useMemo(
-    () => initialEditor(plugins, sharedType, provider, initialValue),
-    [provider, sharedType, initialValue]
+    () => initialEditor(plugins, sharedType, provider),
+    [provider, sharedType]
   );
 
   const memoizedRenderLeaf = useCallback(
     (props: RenderLeafProps) => renderLeaf(props),
     []
   );
+
   const memoizedRenderBlock = useCallback(
     (props: RenderElementProps) => renderBlock(props),
     []
@@ -171,15 +106,16 @@ const SlateEditor = ({
   }, [editor]);
 
   // Khúc này đăng ký các sự kiện
-  const handleShortcut = useShortcut(editor, customConfig, customExtensions);
+  const handleShortcut = useShortcut(
+    customExtensions,
+    editor,
+    customConfig,
+    "editor"
+  );
   const [handlePaste, handleCopy] = useClipboard(editor);
 
   return (
-    <Slate
-      editor={editor}
-      initialValue={initialValue}
-      // onChange={saveEditorContent(editor)}
-    >
+    <Slate editor={editor} initialValue={initialValue}>
       <DragProvider editor={editor}>
         <Cursors>
           <div className="relative h-screen flex flex-col">
@@ -187,8 +123,7 @@ const SlateEditor = ({
             <HoveringToolbar />
 
             <Editable
-              className="focus:outline-none selection:bg-blue-500/15"
-              style={{ outline: "0px" }}
+              className="focus:outline-none selection:bg-blue-500/15 outline-0"
               renderLeaf={memoizedRenderLeaf}
               renderElement={memoizedRenderBlock}
               onKeyDown={handleShortcut}
@@ -207,4 +142,4 @@ const SlateEditor = ({
   );
 };
 
-export default CollaborativeEditor;
+export default PageEditor;
