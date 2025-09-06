@@ -1,15 +1,24 @@
+import getHotkeyFromEvent from "@/core/shortcut/utils/getHotketFromEvent";
+import { type KeyboardEvent } from "react";
 import { create } from "zustand";
 import { devtools } from "zustand/middleware";
-import { type KeyboardEvent } from "react";
-import { type Editor } from "slate";
-import isHotkey from "is-hotkey";
 
-export type ShortcutAction = (
+export type ShortcutAction<T = any> = (
   event: KeyboardEvent,
-  editor: Editor
+  context: T
 ) => boolean | void;
 
-export interface ShortcutExtension {
+/**
+ * Lưu ý: Mỗi bộ extension chỉ có các phím tắt tồn tại duy nhất một lần.
+ * Nếu có nhiều extension cùng đăng ký một phím tắt, thì chỉ có extension
+ * có độ ưu tiên (priority) cao nhất được kích hoạt.
+ *
+ * Ví dụ:
+ * - Extension A có priority = 10, đăng ký "mod+b" cho action "toggle-bold"
+ * - Extension B có priority = 5, đăng ký "mod+b" cho action "toggle-italic"
+ * Khi người dùng nhấn "mod+b", chỉ có action "toggle-bold" của extension A được gọi.
+ */
+export interface ShortcutExtension<T = any> {
   /**
    * Tên của bộ shortcut muốn đăng ký
    */
@@ -21,26 +30,44 @@ export interface ShortcutExtension {
   priority: number;
 
   /**
-   * Liệt kê cách bộ hành vi, cấu trúc: <tên hành vi, (event, editor) => boolean>
+   * Yêu cầu phạm vi sử dụng (scope) khi đăng ký, ví dụ "editor", "sidebar", "global"
+   * Mặc định là "global", tức là không cần scope
+   *
+   * Khi một extension có scope, thì nó chỉ được kích hoạt khi scope đó đang active,
+   *
+   * Lưu ý: Nếu một extension không yêu cầu scope (scope = "global"),
+   * thì nó sẽ luôn được kích hoạt trong mọi scope
+   *
+   * Ví dụ:
+   * - Một extension chỉ dành cho editor, thì cần đặt scope = "editor"
+   * - Một extension dùng chung cho toàn app, thì đặt scope = "global"
+   *
+   * Mục đích của thuộc tính này là để tránh xung đột phím tắt giữa các phần khác nhau
+   * của ứng dụng, đồng thời giúp quản lý các phím tắt theo từng ngữ cảnh (context) cụ thể.
    */
-  actions: Record<string, ShortcutAction>;
+  scope?: string | "global";
 
   /**
-   * Đáng lẽ cái này phải chết rồi
-   *
-   * @deprecated
-   * @param event
-   * @param editor
-   * @returns
+   * Liệt kê cách bộ hành vi, cấu trúc: <tên hành vi, (event, editor) => boolean>
    */
-  onKeyDown?: (event: KeyboardEvent, editor: Editor) => boolean | void;
-}
+  actions: Record<string, ShortcutAction<T>>;
 
-/**
- * Sử dụng để thiết lập shortcut
- */
-export interface ShortcutConfig {
-  [hotkey: string]: string; // hotkey -> action name
+  /**
+   * Context truyền vào cho các action handler khi thực thi.
+   */
+  context?: T;
+
+  /**
+   * Cấu hình phím tắt cho extension này. Với cú pháp là <phím tắt, action>
+   *
+   * Ví dụ:
+   * ```ts
+   * {
+   *   "mod+b": "toggle-bold"
+   * }
+   * ```
+   */
+  keySettings?: Record<string, string>;
 }
 
 /**
@@ -50,20 +77,87 @@ export interface ShortcutConfig {
  * xử lý sự kiện phím, và cung cấp các tiện ích để lấy danh sách phím tắt và actions hiện có.
  */
 interface ShortcutStore {
-  // State
+  /**
+   * Các extension phím tắt đã được đăng ký
+   */
   extensions: ShortcutExtension[];
-  config: ShortcutConfig;
 
-  // Actions
-  registerExtension: (extension: ShortcutExtension) => void;
+  /**
+   * Scope hiện đang active, ví dụ "editor", "sidebar", "global". Ở một thời điểm
+   * chỉ có một scope được active.
+   */
+  activeScope: string;
+
+  /**
+   * Đăng ký một bộ shortcut extension phím tắt mới vào hệ thống.
+   * Các extension sẽ được sắp xếp lại theo thứ tự ưu tiên (priority).
+   *
+   * @param extension - Extension phím tắt cần đăng ký
+   * @returns
+   */
+  registerExtension: (extension: ShortcutExtension<any>) => void;
+
+  /**
+   * Hủy đăng ký một extension phím tắt theo tên.
+   * @param name - Tên extension cần hủy đăng ký
+   */
   unregisterExtension: (name: string) => void;
-  updateConfig: (config: ShortcutConfig) => void;
-  handleKeyDown: (event: KeyboardEvent, editor: Editor) => boolean;
-  getShortcuts: () => Array<{ hotkey: string; action: string; extension: string }>;
+
+  /**
+   * Thiết lập scope đang active.
+   *
+   * @param scope
+   * @returns
+   */
+  setActiveScope: (scope: string) => void;
+
+  /**
+   * Cập nhật cấu hình các phím tắt.
+   * @param config - Đối tượng cấu hình mới sẽ được gộp vào cấu hình hiện tại
+   */
+  updateConfig: (config: Record<string, string>) => void;
+
+  /**
+   * Xử lý sự kiện nhấn phím.
+   *
+   * @param event - Sự kiện bàn phím
+   * @param scoop - Tên scope hiện tại
+   * @param context - Đối tượng context tương ứng với scope
+   * @returns true nếu sự kiện đã được xử lý, ngược lại trả về false
+   */
+  handleKeyDown: (
+    event: KeyboardEvent,
+    scoop?: string,
+    context?: any
+  ) => boolean;
+
+  /**
+   * Lấy danh sách các extension phím tắt đã đăng ký.
+   * @returns Danh sách các extension phím tắt
+   */
+  getExtensions: () => ShortcutExtension[];
+
+  /**
+   * @returns Danh sách tất cả các phím tắt hiện tại cùng action và extension tương ứng
+   */
+  getShortcuts: () => Array<{
+    hotkey: string;
+    action: string;
+    extension: string;
+  }>;
+
+  /**
+   *
+   * @returns
+   */
   getAvailableActions: () => Array<{ extension: string; action: string }>;
 
+  // New methods
+  registerScope: (scope: string, context: any) => void;
+  unregisterScope: (scope: string) => void;
+
   // Private helpers (có thể expose để debug)
-  findActionHandlers: (actionName: string) => ShortcutAction[];
+  findActionHandlers: (actionName: string, scop?: string) => ShortcutAction[];
 }
 
 /**
@@ -77,7 +171,7 @@ export const useShortcutStore = create<ShortcutStore>()(
     (set, get) => ({
       // Khởi tạo các state
       extensions: [],
-      config: {},
+      activeScope: "",
 
       /**
        * Đăng ký một extension phím tắt mới vào hệ thống.
@@ -97,67 +191,55 @@ export const useShortcutStore = create<ShortcutStore>()(
        */
       unregisterExtension: (name) =>
         set((state) => ({
-          extensions: state.extensions.filter((p) => p.name !== name)
+          extensions: state.extensions.filter((p) => p.name !== name),
         })),
 
-      /**
-       * Cập nhật cấu hình các phím tắt.
-       * @param config Đối tượng cấu hình mới sẽ được gộp vào cấu hình hiện tại
-       */
-      updateConfig: (config) =>
-        set((state) => ({
-          config: { ...state.config, ...config }
-        })),
+      setActiveScope: (scope) => set(() => ({ activeScope: scope })),
 
       /**
-       * Xử lý sự kiện nhấn phím (keydown) trong editor.
-       * Ưu tiên gọi handler onKeyDown của từng extension, sau đó kiểm tra các phím tắt đã cấu hình.
-       *
-       * Các phím tắt đã cấu hình sẽ được gọi dựa trên piority
+       * Xử lý sự kiện nhấn phím. Tức là xử lý phím tắt đóooo
        *
        * @param event Sự kiện bàn phím
-       * @param editor Đối tượng editor
        * @returns true nếu sự kiện đã được xử lý, ngược lại trả về false
        */
-      handleKeyDown: (event, editor) => {
-        const { extensions: extensions, config, findActionHandlers } = get();
+      handleKeyDown: (event) => {
+        const { extensions, activeScope } = get();
+        const eventHotkey = getHotkeyFromEvent(event as any);
 
-        // Chạy qua từng extension theo priority
-        for (const extension of extensions) {
-          if (extension.onKeyDown) {
-            const handled = extension.onKeyDown(event, editor);
-            if (handled) return true;
-          }
-        }
+        // Helper to find the highest priority extension with this hotkey in a given scope
+        const findMatchingExtension = (scope: string) =>
+          extensions
+            .filter(
+              (ext) =>
+                (ext.scope ?? "global") === scope &&
+                !!ext.keySettings?.[eventHotkey]
+            )
+            .sort((a, b) => b.priority - a.priority)[0];
 
-        // Kiểm tra config shortcuts
-        for (const [hotkey, actionName] of Object.entries(config)) {
-          if (isHotkey(hotkey, event)) {
-            const handlers = findActionHandlers(actionName);
-            for (const handler of handlers) {
-              const handled = handler(event, editor);
-              if (handled) return true;
-            }
+        // Thử tìm extension phù hợp trong active scope trước, sau đó đến global scope
+        // Nếu tìm thấy, gọi action tương ứng và trả về true
+        // Nếu không tìm thấy, trả về false
+        // Lưu ý: Có thể mở rộng để kiểm tra nhiều scope khác nhau nếu cần (Cái này đánh dấu cho mai sau nè)
+        // Ví dụ: [activeScope, "sidebar", "global"]
+        // Trong đó "sidebar" có thể là một scope khác đang active
+        // Cách này giúp hỗ trợ nhiều scope hơn thay vì chỉ một active scope
+        const scopesToCheck = [activeScope, "global"];
+
+        for (const scope of scopesToCheck) {
+          const extention = findMatchingExtension(scope);
+          if (!extention) continue;
+          const actionName = extention.keySettings?.[eventHotkey];
+          const action = actionName && extention.actions[actionName];
+          if (action) {
+            return action(event, extention.context);
           }
         }
 
         return false;
       },
 
-      /**
-       * Lấy danh sách tất cả các phím tắt hiện tại cùng action và extension tương ứng.
-       * @returns Mảng các đối tượng chứa `{hotkey, action, pluginName}`
-       */
-      getShortcuts: () => {
-        const { config, extensions: extensions } = get();
-        return Object.entries(config).map(([hotkey, actionName]) => {
-          const extension = extensions.find((p) => p.actions[actionName]);
-          return {
-            hotkey,
-            action: actionName,
-            extension: extension?.name || "unknown"
-          };
-        });
+      getExtensions: () => {
+        return get().extensions;
       },
 
       /**
@@ -169,27 +251,13 @@ export const useShortcutStore = create<ShortcutStore>()(
         return extensions.flatMap((extension) =>
           Object.keys(extension.actions).map((action) => ({
             extension: extension.name,
-            action
+            action,
           }))
         );
       },
-
-      /**
-       * Tìm danh sách action handler kèm theo độ priority của extension chứa nó.
-       * @param actionName Tên action cần tìm
-       * @returns Mảng các đối tượng chứa `handler` (các action được sắp xếp theo độ piority),
-       * hoặc mảng rỗng nếu không tìm thấy
-       */
-      findActionHandlers: (actionName) => {
-        const { extensions: extensions } = get();
-        return extensions
-          .filter((extension) => !!extension.actions[actionName])
-          .sort((a, b) => b.priority - a.priority)
-          .map((extension) => extension.actions[actionName]);
-      }
     }),
     {
-      name: "shortcut-store"
+      name: "shortcut-store",
     }
   )
 );

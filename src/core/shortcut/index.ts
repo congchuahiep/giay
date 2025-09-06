@@ -1,7 +1,6 @@
-export { default as useShortcut } from "./hooks/useShortcut.ts";
 export { useShortcutStore } from "./store/shortcutStore.ts";
+export { default as useRegisterShortcuts } from "./hooks/useRegisterShortcuts.ts";
 export type {
   ShortcutExtension as ShortcutPlugin,
-  ShortcutConfig,
   ShortcutAction,
 } from "./store/shortcutStore.ts";

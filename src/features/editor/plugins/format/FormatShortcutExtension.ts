@@ -10,6 +10,11 @@ const FormatShortcutExtension: ShortcutPlugin = {
       return true;
     },
   },
+
+  keySettings: {
+    "mod+k": "toggle-code-block",
+    "mod+`": "toggle-code-block",
+  },
 };
 
 export default FormatShortcutExtension;

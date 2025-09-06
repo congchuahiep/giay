@@ -30,6 +30,13 @@ const MarkShortcutExtension: ShortcutExtension = {
       return true;
     },
   },
+  keySettings: {
+    "mod+b": "mark-bold",
+    "mod+i": "mark-italic",
+    "mod+u": "mark-underline",
+    "mod+shift+x": "mark-strike-through",
+    "mod+e": "mark-code",
+  },
 };
 
 export default MarkShortcutExtension;

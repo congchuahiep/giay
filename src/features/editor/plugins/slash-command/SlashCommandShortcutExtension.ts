@@ -20,6 +20,12 @@ const SlashCommandShortcutExtension: ShortcutExtension = {
       return slashMenuManager.isMenuOpen();
     },
   },
+
+  keySettings: {
+    "/": "slash-command",
+    "escape": "close-slash-command", // UNMODIFIED
+    "enter": "enter-handler", // UNMODIFIED
+  },
 };
 
 export default SlashCommandShortcutExtension;

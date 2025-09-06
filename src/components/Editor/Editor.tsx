@@ -1,5 +1,5 @@
 // Import React dependencies.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // Import the Slate editor factory.
 import { type Descendant } from "slate";
 import type { RenderElementProps, RenderLeafProps } from "slate-react";
@@ -19,7 +19,6 @@ import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider"
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
 import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
-import { useShortcut, type ShortcutConfig } from "@/core/shortcut";
 import useClipboard from "@/features/editor/plugins/clipboard";
 import { withDeleteEditor } from "@/features/editor/plugins/delete";
 import {
@@ -41,6 +40,7 @@ import {
   DefaultBehaviourShortCutExtension,
   withUtilsEditor,
 } from "@/features/editor/plugins/utils";
+import { useRegisterShortcuts } from "@/core/shortcut";
 
 /**
  * Danh sách các plugin
@@ -60,13 +60,13 @@ const plugins = [
 /**
  * Danh sách các phím tắt tuỳ chỉnh
  */
-const customConfig: ShortcutConfig = {
-  "mod+shift+b": "mark-bold",
-  "mod+shift+i": "mark-italic",
-  "ctrl+k": "toggle-code-block",
-};
+// const editorConfig: ShortcutConfig = {
+//   "mod+shift+b": "mark-bold",
+//   "mod+shift+i": "mark-italic",
+//   "ctrl+k": "toggle-code-block",
+// };
 
-const customExtensions = [
+const editorExtensions = [
   FormatShortcutExtension,
   MarkShortcutExtension,
   MarkdownShortcutExtension,
@@ -106,12 +106,15 @@ const PageEditor = ({
   }, [editor]);
 
   // Khúc này đăng ký các sự kiện
-  const handleShortcut = useShortcut(
-    customExtensions,
+  const { enableShortcuts, disableShortcuts } = useRegisterShortcuts(
+    "editor",
     editor,
-    customConfig,
-    "editor"
-  );
+    editorExtensions
+  ) || {
+    enableShortcuts: undefined,
+    disableShortcuts: undefined,
+  };
+
   const [handlePaste, handleCopy] = useClipboard(editor);
 
   return (
@@ -126,9 +129,13 @@ const PageEditor = ({
               className="focus:outline-none selection:bg-blue-500/15 outline-0"
               renderLeaf={memoizedRenderLeaf}
               renderElement={memoizedRenderBlock}
-              onKeyDown={handleShortcut}
+              // onKeyDown={handleShortcut}
               onPaste={handlePaste}
               onCopy={handleCopy}
+              onFocus={() => enableShortcuts && enableShortcuts()}
+              onBlur={() => disableShortcuts && disableShortcuts()}
+              placeholder="Start typing..."
+              spellCheck={false}
               autoFocus
             />
             <TrailingEmptyParagraph />
