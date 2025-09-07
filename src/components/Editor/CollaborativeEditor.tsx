@@ -27,8 +27,7 @@ const CollaborativeEditor = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="flex items-center justify-between p-2 bg-gray-50 border-b">
-        <h1 className="text-lg font-medium">Slate Editor</h1>
+      <div className="fixed right-4 top-14 p-2">
         <StatusIndicator status={status} />
       </div>
 

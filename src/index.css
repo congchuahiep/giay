@@ -5,9 +5,14 @@
 @import "./styles/content-visibility";
 @import "./styles/scrollbar";
 
-@custom-variant dark (&:is(.dark *));
+html,
+body {
+  background: transparent;
+}
 
 :root {
+  color-scheme: light dark;
+
   --background: oklch(0.9821 0 0);
   --foreground: oklch(0.3485 0 0);
   --card: oklch(1 0 0);

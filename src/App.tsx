@@ -61,11 +61,10 @@ function App() {
     <main className="overflow-hidden">
       <Titlebar />
       <ShortcutListener />
-      
 
       {/* EDITOR CONTAINER */}
-      <div className="overflow-auto">
-        <div className="px-12 pt-10 m-auto w-full md:w-3xl dark:bg-gray-900">
+      <div className="overflow-auto mt-10">
+        <div className="px-12 m-auto w-full md:w-3xl dark:text-white">
           <CollaborativeEditor />
         </div>
       </div>
