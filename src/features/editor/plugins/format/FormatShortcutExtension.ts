@@ -1,6 +1,7 @@
-import type { ShortcutPlugin } from "@/core/shortcut";
+import type { ShortcutExtension } from "@/core/shortcut";
+import type { Editor } from "slate";
 
-const FormatShortcutExtension: ShortcutPlugin = {
+const FormatShortcutExtension: ShortcutExtension<Editor> = {
   name: "block",
   priority: 10,
   actions: {

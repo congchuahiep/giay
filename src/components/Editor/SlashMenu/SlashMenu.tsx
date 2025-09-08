@@ -3,8 +3,8 @@ import { useRegisterShortcuts, useShortcutStore } from "@/core/shortcut";
 import {
   OpenSlashCommandShortcutExtension,
   SlashCommandShortcutExtension,
-  useSlashCommandStore,
-} from "@/features/editor/plugins/slash-command";
+  useSlashMenuStore,
+} from "@/features/editor/plugins/slash-menu";
 import { useFuseSearch } from "@/features/search/useFuseSearch";
 import { cn, scrollToDataAttribute } from "@/utils";
 import { useEffect, useMemo, useRef } from "react";
@@ -24,9 +24,9 @@ export default function SlashCommandMenu({}: SlashCommandMenuProps) {
     updateSearchQuery,
     open: openSlashCommand,
     close: closeSlashCommand,
-  } = useSlashCommandStore();
+  } = useSlashMenuStore();
 
-  const slashMenuState = useSlashCommandStore.getState();
+  const slashMenuState = useSlashMenuStore.getState();
 
   const { setActiveShortcutScope } = useShortcutStore();
 

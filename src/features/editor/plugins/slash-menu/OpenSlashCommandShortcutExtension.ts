@@ -1,5 +1,5 @@
-import type { ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
-import type SlashEditor from "@/features/editor/plugins/slash-command/interface";
+import type { ShortcutExtension } from "@/core/shortcut/types/ShortcutExtension";
+import type SlashEditor from "@/features/editor/plugins/slash-menu/interface";
 import type { SafeMenuPlacement } from "@/types";
 
 interface OpenSlashCommandShortcutContext {

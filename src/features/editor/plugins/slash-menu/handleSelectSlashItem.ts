@@ -1,5 +1,5 @@
 import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems.tsx";
-import type { SlashMenuState } from "@/features/editor/plugins/slash-command/SlashCommandManager";
+import type { SlashMenuState } from "./types/SlashMenuState";
 import { Editor, Transforms } from "slate";
 
 /**
@@ -16,8 +16,6 @@ export default function handleSelectSlashItem(
   closeSlashCommand: () => void
 ): boolean {
   const { selection } = editor;
-
-  console.log("handleSlashCommandSelection", slashMenuState);
 
   if (!selection || !slashMenuState.isOpen) {
     return false;

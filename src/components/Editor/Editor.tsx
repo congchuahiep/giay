@@ -33,7 +33,7 @@ import {
   withMarkdownEditor,
 } from "@/features/editor/plugins/markdown";
 import { withSelectEditor } from "@/features/editor/plugins/select";
-import { withSlashEditor } from "@/features/editor/plugins/slash-command";
+import { withSlashEditor } from "@/features/editor/plugins/slash-menu";
 import {
   DefaultBehaviourShortCutExtension,
   withUtilsEditor,
@@ -54,7 +54,7 @@ const plugins = [
   // withHistory,
 ];
 
-const editorExtensions = [
+const editorShortcutExtensions = [
   FormatShortcutExtension,
   MarkShortcutExtension,
   MarkdownShortcutExtension,
@@ -93,7 +93,7 @@ const PageEditor = ({
   }, [editor]);
 
   // Đăng ký sự kiện bàn phím
-  useRegisterShortcuts("editor", editor, editorExtensions);
+  useRegisterShortcuts("editor", editor, editorShortcutExtensions);
   const { setActiveShortcutScope } = useShortcutStore();
 
   const [handlePaste, handleCopy] = useClipboard(editor);

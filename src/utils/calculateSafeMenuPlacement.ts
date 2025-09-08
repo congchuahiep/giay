@@ -55,9 +55,6 @@ export default function calculateSafeMenuPlacement(
     }
 
     if (isInViewport) {
-      console.log("Checking placement:", placement );
-      console.log("Checking placement:", pos );
-      console.log("Checking placement:", viewportHeight - cursorRect.y );
       return {
         position: { x: pos.x, y: pos.y },
         placement: placement,
@@ -65,11 +62,6 @@ export default function calculateSafeMenuPlacement(
       };
     }
   }
-
-  console.log(
-    "No perfect position found, calculating optimal...",
-    viewportHeight - cursorRect.y
-  );
 
   return {
     position: {

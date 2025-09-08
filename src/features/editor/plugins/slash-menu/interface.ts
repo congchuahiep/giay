@@ -1,5 +1,5 @@
 import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems";
-import type { SlashMenuState } from "@/features/editor/plugins/slash-command/SlashCommandManager";
+import type { SlashMenuState } from "./types/SlashMenuState";
 import type { SafeMenuPlacement } from "@/types";
 
 export default interface SlashEditor {

@@ -1,4 +1,4 @@
-import { type ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
+import { type ShortcutExtension } from "@/core/shortcut/types/ShortcutExtension";
 import type { Editor } from "slate";
 
 const DefaultBehaviourShortCutExtension: ShortcutExtension<Editor> = {

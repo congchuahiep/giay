@@ -1,4 +1,4 @@
-import { type ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
+import type { ShortcutExtension } from "@/core/shortcut";
 import type { Editor } from "slate";
 
 const MarkdownShortcutExtension: ShortcutExtension<Editor> = {

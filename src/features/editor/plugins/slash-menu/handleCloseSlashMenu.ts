@@ -1,4 +1,4 @@
-import slashMenuManager from "@/features/editor/plugins/slash-command/SlashCommandManager";
+import slashMenuManager from "@/features/editor/plugins/slash-menu/stores/useSlashMenuStore";
 import type { KeyboardEvent } from "react";
 
 export default function handleCloseSlashCommand(event: KeyboardEvent): boolean {

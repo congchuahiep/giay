@@ -1,8 +1,7 @@
 import CollaborativeEditor from "@/components/Editor/CollaborativeEditor";
 import Titlebar from "@/components/Window/Titlebar";
-import { useRegisterShortcuts } from "@/core/shortcut";
+import { useRegisterShortcuts, type ShortcutExtension } from "@/core/shortcut";
 import { ShortcutListener } from "@/core/shortcut/components/ShortcutListener";
-import type { ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
 import { useMemo, useState } from "react";
 
 interface AppContext {

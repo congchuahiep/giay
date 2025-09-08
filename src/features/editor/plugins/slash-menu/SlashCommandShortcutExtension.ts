@@ -1,7 +1,7 @@
-import type { ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
 import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems";
 import type { Editor } from "slate";
-import type { SlashMenuState } from "@/features/editor/plugins/slash-command/SlashCommandManager";
+import type { SlashMenuState } from "./types/SlashMenuState";
+import type { ShortcutExtension } from "@/core/shortcut";
 
 interface SlashCommandShortcutContext {
   editor: Editor;

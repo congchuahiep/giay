@@ -3,7 +3,7 @@ import type { FormatEditor } from "@/features/editor/plugins/format";
 import type { InsertEditor } from "@/features/editor/plugins/insert";
 import type { MarkdownEditor } from "@/features/editor/plugins/markdown";
 import type { SelectEditor } from "@/features/editor/plugins/select";
-import type { SlashEditor } from "@/features/editor/plugins/slash-command";
+import type { SlashEditor } from "@/features/editor/plugins/slash-menu";
 import type { BlockType, ElementBlock } from "@/features/editor/types/block";
 import type { LeafText, MarkType } from "@/features/editor/types/leaf";
 import type { UtilsEditor } from "@/features/editor/plugins/utils";

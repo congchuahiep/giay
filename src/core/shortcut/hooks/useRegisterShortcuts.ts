@@ -1,13 +1,11 @@
 import { useEffect } from "react";
-import {
-  useShortcutStore,
-  type ShortcutExtension,
-} from "../store/shortcutStore";
+import { useShortcutStore } from "../store/useShortcutStore";
+import type { ShortcutExtension } from "@/core/shortcut";
 
 /**
  * Hook này được sử dụng để đăng ký các phím tắt với một scope cụ thể.
  *
- * @param scope - Tên scope để đăng ký (ví dụ: "editor", "sidebar", "global"), nếu 
+ * @param scope - Tên scope để đăng ký (ví dụ: "editor", "sidebar", "global"), nếu
  * không để, hoặc để là "global" thì tức bộ phím tắt này hoạt động toàn cục
  * @param context - Ngữ cảnh để truyền vào các action của extension
  * @param extensions - Mảng các extension để đăng ký
@@ -18,8 +16,7 @@ export default function useRegisterShortcuts<T = any>(
   extensions: ShortcutExtension<T>[],
   keySettings: Record<string, string> = {}
 ): void {
-  const { registerExtension, unregisterExtension } =
-    useShortcutStore();
+  const { registerExtension, unregisterExtension } = useShortcutStore();
 
   // Đăng ký bộ shortcut khi component mount
   useEffect(() => {

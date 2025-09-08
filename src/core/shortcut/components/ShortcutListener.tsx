@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useShortcutStore } from "../store/shortcutStore";
+import { useShortcutStore } from "../store/useShortcutStore";
 
 /**
    * Component này lắng nghe tất cả các phím tắt trong ứng dụng.
