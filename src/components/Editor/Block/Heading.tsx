@@ -7,7 +7,7 @@ export const Heading1Block = (props: RenderElementProps) => {
 
   return (
     <h1
-      className="p-1 mt-10 text-4xl font-extrabold tracking-tight scroll-m-20"
+      className="mt-10 mb-2 text-4xl font-extrabold tracking-tight scroll-m-20"
       {...props.attributes}
     >
       <LeafPlaceholder isEmpty={isEmpty} placeholder="Heading 1" />
@@ -21,7 +21,7 @@ export const Heading2Block = (props: RenderElementProps) => {
 
   return (
     <h2
-      className="p-1 mt-6 text-3xl font-bold tracking-tight scroll-m-20"
+      className="mt-6 text-3xl font-bold tracking-tight scroll-m-20"
       {...props.attributes}
     >
       <LeafPlaceholder isEmpty={isEmpty} placeholder="Heading 2" />

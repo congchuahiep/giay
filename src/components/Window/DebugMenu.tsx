@@ -13,7 +13,7 @@ const DebugMenu = () => {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger>Tauri</ContextMenuTrigger>
+      <ContextMenuTrigger>Giấy</ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem
           onClick={() => {

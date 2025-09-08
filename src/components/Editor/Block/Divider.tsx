@@ -2,6 +2,7 @@ import { useSelected, type RenderElementProps } from "slate-react";
 import { useSlateStatic, ReactEditor } from "slate-react";
 import { Transforms } from "slate";
 import { cn } from "@/utils";
+import { Separator } from "@/components/ui/separator";
 
 const DividerBlock = (props: RenderElementProps) => {
   const editor = useSlateStatic();
@@ -28,7 +29,7 @@ const DividerBlock = (props: RenderElementProps) => {
     <div
       {...props.attributes}
       className={cn(
-        "flex items-center cursor-pointer p-2 outline-none select-none",
+        "flex items-center cursor-pointer py-2 outline-none select-none",
         isSelected && "bg-blue-500/15 rounded-sm"
       )}
       contentEditable={false}
@@ -39,7 +40,7 @@ const DividerBlock = (props: RenderElementProps) => {
       {/* Hidden children để Slate vẫn có thể track */}
       <span className="hidden select-none">{props.children}</span>
       {/* Divider line */}
-      <hr className="border-stone-300 border-1 transition-colors duration-150 flex-1" />
+      <Separator />
     </div>
   );
 };

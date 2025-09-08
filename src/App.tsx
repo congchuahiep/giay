@@ -1,8 +1,8 @@
 import CollaborativeEditor from "@/components/Editor/CollaborativeEditor";
-import Titlebar from "@/components/Window/Titlebar";
+import { useSidebar } from "@/components/ui/sidebar";
 import { useRegisterShortcuts, type ShortcutExtension } from "@/core/shortcut";
 import { ShortcutListener } from "@/core/shortcut/components/ShortcutListener";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 interface AppContext {
   toggleSidebar: () => void;
@@ -14,12 +14,9 @@ const AppShortcutExtension: ShortcutExtension<AppContext> = {
   priority: 200, // High priority
   actions: {
     "toggle-sidebar": (event, context) => {
-      if (context) {
-        event.preventDefault();
-        context.toggleSidebar();
-        return true;
-      }
-      return false;
+      event.preventDefault();
+      context.toggleSidebar();
+      return true;
     },
     "open-settings": (event, context) => {
       if (context) {
@@ -38,32 +35,27 @@ const AppShortcutExtension: ShortcutExtension<AppContext> = {
 };
 
 function App() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const { toggleSidebar } = useSidebar();
 
-  const appContext = useMemo(
+  const appShortcutContext = useMemo(
     () => ({
-      toggleSidebar: () => {
-        console.log("Open sidebar!!!!!!!!!!");
-        setSidebarOpen(!sidebarOpen);
-      },
+      toggleSidebar,
       openSettings: () => {
         console.log("Open settings!!!!!!!!!!");
         /* open settings logic */
       },
     }),
-    []
+    [toggleSidebar]
   );
 
-  useRegisterShortcuts("global", appContext, [AppShortcutExtension]);
+  useRegisterShortcuts("global", appShortcutContext, [AppShortcutExtension]);
 
   return (
-    <main className="overflow-hidden">
-      <Titlebar />
+    <main className=" w-full">
       <ShortcutListener />
-
       {/* EDITOR CONTAINER */}
       <div className="overflow-auto mt-12">
-        <div className="px-12 m-auto w-full md:w-3xl dark:text-white">
+        <div className="px-12 m-auto w-full max-w-3xl lg:w-3xl dark:text-white">
           <CollaborativeEditor />
         </div>
       </div>
