@@ -1,6 +1,6 @@
 import { getCurrentWindow } from '@tauri-apps/api/window';
 
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { CornersOutIcon } from "@phosphor-icons/react/dist/csr/CornersOut";
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
@@ -18,7 +18,7 @@ const Titlebar = () => {
       className={cn(
         "fixed top-0 left-0 right-0 z-50",
         "h-10 flex items-center justify-between px-3 select-none",
-        "bg-stone-100/50 dark:bg-stone-900/30 border-b border-gray-200 dark:border-gray-800"
+        "bg-stone-100/50 dark:bg-stone-900/30 dark:text-white"
       )}
     >
       <DebugMenu />

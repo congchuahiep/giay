@@ -1,7 +1,7 @@
 import { useSelected, type RenderElementProps } from "slate-react";
 import { useSlateStatic, ReactEditor } from "slate-react";
 import { Transforms } from "slate";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 const DividerBlock = (props: RenderElementProps) => {
   const editor = useSlateStatic();

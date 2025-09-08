@@ -104,12 +104,12 @@ interface ShortcutStore {
   unregisterExtension: (name: string) => void;
 
   /**
-   * Thiết lập scope đang active.
+   * Thiết lập scope đang active. Nếu không truyền scope, thì mặc định sẽ là "global"
    *
    * @param scope
    * @returns
    */
-  setActiveScope: (scope: string) => void;
+  setActiveShortcutScope: (scope?: string) => void;
 
   /**
    * Cập nhật cấu hình các phím tắt.
@@ -194,7 +194,8 @@ export const useShortcutStore = create<ShortcutStore>()(
           extensions: state.extensions.filter((p) => p.name !== name),
         })),
 
-      setActiveScope: (scope) => set(() => ({ activeScope: scope })),
+      setActiveShortcutScope: (scope = "global") =>
+        set(() => ({ activeScope: scope })),
 
       /**
        * Xử lý sự kiện nhấn phím. Tức là xử lý phím tắt đóooo

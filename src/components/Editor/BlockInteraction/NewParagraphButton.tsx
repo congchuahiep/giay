@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import type { MouseEvent } from "react";
 import { Path } from "slate";

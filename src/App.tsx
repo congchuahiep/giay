@@ -63,7 +63,7 @@ function App() {
       <ShortcutListener />
 
       {/* EDITOR CONTAINER */}
-      <div className="overflow-auto mt-10">
+      <div className="overflow-auto mt-12">
         <div className="px-12 m-auto w-full md:w-3xl dark:text-white">
           <CollaborativeEditor />
         </div>

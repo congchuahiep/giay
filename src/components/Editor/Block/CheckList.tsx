@@ -1,6 +1,6 @@
 import { Checkbox } from "@/components/ui/checkbox";
 import type { CheckListBlock } from "@/features/editor/types/block";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { Transforms } from "slate";
 import {
   ReactEditor,

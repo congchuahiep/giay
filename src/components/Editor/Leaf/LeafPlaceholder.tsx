@@ -12,7 +12,7 @@ const LeafPlaceholder = ({
     {isEmpty && (
       <span
         contentEditable={false}
-        className="absolute text-stone-900 select-none opacity-25 pointer-events-none"
+        className="absolute text-stone-900 dark:text-stone-100 select-none opacity-25 pointer-events-none"
       >
         {placeholder}
       </span>

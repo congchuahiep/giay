@@ -1,6 +1,6 @@
 import DropIndicator from "@/components/Editor/BlockInteraction/DropIndicator";
 import { useDragStore } from "@/features/editor/stores";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { useDroppable } from "@dnd-kit/core";
 import { useState } from "react";
 import type { RenderElementProps } from "slate-react";

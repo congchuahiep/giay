@@ -5,9 +5,11 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { useShortcutStore } from "@/core/shortcut";
+import { useSlashCommandStore } from "@/features/editor/plugins/slash-command";
 
 const DebugMenu = () => {
   const { getExtensions } = useShortcutStore();
+  const slashMenuState = useSlashCommandStore.getState();
 
   return (
     <ContextMenu>
@@ -19,6 +21,13 @@ const DebugMenu = () => {
           }}
         >
           Extension list
+        </ContextMenuItem>
+        <ContextMenuItem
+          onClick={() => {
+            console.log(slashMenuState);
+          }}
+        >
+          Slash menu state
         </ContextMenuItem>
 
       </ContextMenuContent>

@@ -1,5 +1,5 @@
 import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems.tsx";
-import slashMenuManager from "@/features/editor/plugins/slash-command/SlashCommandManager";
+import type { SlashMenuState } from "@/features/editor/plugins/slash-command/SlashCommandManager";
 import { Editor, Transforms } from "slate";
 
 /**
@@ -9,19 +9,25 @@ import { Editor, Transforms } from "slate";
  * - Nếu block hiện tại rỗng: chuyển đổi block hiện tại thành loại được chọn
  * - Nếu block hiện tại không rỗng: xoá slash command text và chèn block mới
  */
-export default function handleSlashCommandSelection(
+export default function handleSelectSlashItem(
   editor: Editor,
-  item: SlashMenuItem
+  item: SlashMenuItem,
+  slashMenuState: SlashMenuState,
+  closeSlashCommand: () => void
 ): boolean {
   const { selection } = editor;
-  const state = slashMenuManager.getState();
 
-  if (!selection || !state.isOpen) {
+  console.log("handleSlashCommandSelection", slashMenuState);
+
+  if (!selection || !slashMenuState.isOpen) {
     return false;
   }
 
   // Tạo range từ anchor position đến selection hiện tại để xoá slash command text
-  const anchorPoint = { ...selection.anchor, offset: state.anchorOffset };
+  const anchorPoint = {
+    ...selection.anchor,
+    offset: slashMenuState.anchorOffset,
+  };
   const currentPoint = selection.anchor;
 
   const slashCommandRange = {
@@ -37,8 +43,13 @@ export default function handleSlashCommandSelection(
     editor.setNodes({ type: item.blockType });
   } else {
     editor.insertBlock({ type: item.blockType });
+    // Đặt con trỏ vào block mới chèn
+    Transforms.select(editor, {
+      path: [selection.anchor.path[0] + 1, 0],
+      offset: 0,
+    });
   }
 
-  slashMenuManager.close();
+  closeSlashCommand();
   return true;
 }

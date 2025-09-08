@@ -1,6 +1,6 @@
 import ToggleMarkButton from "@/components/Editor/Toolbar/ToggleMarkButton";
 import { Portal } from "@/components/Portal";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { CodeIcon } from "@phosphor-icons/react/dist/icons/Code";
 import { TextBIcon } from "@phosphor-icons/react/dist/icons/TextB";
 import { TextItalicIcon } from "@phosphor-icons/react/dist/icons/TextItalic";

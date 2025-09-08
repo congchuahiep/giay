@@ -19,7 +19,7 @@ import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider"
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
 import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
 import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
-import { useRegisterShortcuts } from "@/core/shortcut";
+import { useRegisterShortcuts, useShortcutStore } from "@/core/shortcut";
 import useClipboard from "@/features/editor/plugins/clipboard";
 import { withDeleteEditor } from "@/features/editor/plugins/delete";
 import {
@@ -33,10 +33,7 @@ import {
   withMarkdownEditor,
 } from "@/features/editor/plugins/markdown";
 import { withSelectEditor } from "@/features/editor/plugins/select";
-import {
-  SlashCommandShortcutExtension,
-  withSlashEditor,
-} from "@/features/editor/plugins/slash-command";
+import { withSlashEditor } from "@/features/editor/plugins/slash-command";
 import {
   DefaultBehaviourShortCutExtension,
   withUtilsEditor,
@@ -57,20 +54,10 @@ const plugins = [
   // withHistory,
 ];
 
-/**
- * Danh sách các phím tắt tuỳ chỉnh
- */
-// const editorConfig: ShortcutConfig = {
-//   "mod+shift+b": "mark-bold",
-//   "mod+shift+i": "mark-italic",
-//   "ctrl+k": "toggle-code-block",
-// };
-
 const editorExtensions = [
   FormatShortcutExtension,
   MarkShortcutExtension,
   MarkdownShortcutExtension,
-  SlashCommandShortcutExtension,
   DefaultBehaviourShortCutExtension,
 ];
 
@@ -105,15 +92,9 @@ const PageEditor = ({
     return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
   }, [editor]);
 
-  // Khúc này đăng ký các sự kiện
-  const { enableShortcuts, disableShortcuts } = useRegisterShortcuts(
-    "editor",
-    editor,
-    editorExtensions
-  ) || {
-    enableShortcuts: undefined,
-    disableShortcuts: undefined,
-  };
+  // Đăng ký sự kiện bàn phím
+  useRegisterShortcuts("editor", editor, editorExtensions);
+  const { setActiveShortcutScope } = useShortcutStore();
 
   const [handlePaste, handleCopy] = useClipboard(editor);
 
@@ -121,18 +102,18 @@ const PageEditor = ({
     <Slate editor={editor} initialValue={initialValue}>
       <DragProvider editor={editor}>
         <Cursors>
-          <div className="relative h-screen flex flex-col">
+          <div className="relative flex flex-col h-screen">
             <Toolbar />
             <HoveringToolbar />
 
             <Editable
               className="focus:outline-none selection:bg-blue-500/15 outline-0"
-              renderLeaf={memoizedRenderLeaf}
+            renderLeaf={memoizedRenderLeaf}
               renderElement={memoizedRenderBlock}
               onPaste={handlePaste}
               onCopy={handleCopy}
-              onFocus={() => enableShortcuts && enableShortcuts()}
-              onBlur={() => disableShortcuts && disableShortcuts()}
+              onFocus={() => setActiveShortcutScope("editor")}
+              onBlur={() => setActiveShortcutScope()}
               placeholder="Start typing..."
               spellCheck={false}
               autoFocus
