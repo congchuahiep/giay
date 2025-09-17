@@ -19,7 +19,7 @@ export default interface SlashEditor {
       anchorOffset: number
     ) => void,
     slashRef: React.RefObject<HTMLDivElement | null>,
-    slashContainerRef: React.RefObject<HTMLDivElement | null>
+    slashContainerRef: React.RefObject<HTMLDivElement | null>,
   ) => boolean;
 
   /**

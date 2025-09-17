@@ -5,10 +5,8 @@ import { CornersOutIcon } from "@phosphor-icons/react/dist/csr/CornersOut";
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import { isTauri } from "@tauri-apps/api/core";
-import DebugMenu from "@/components/Window/DebugMenu";
-import { SidebarTrigger } from "@/components/ui/sidebar";
 
-const Titlebar = () => {
+const Titlebar = ({ children }: { children?: React.ReactNode }) => {
   if (!isTauri()) return null;
 
   const appWindow = getCurrentWindow();
@@ -23,8 +21,7 @@ const Titlebar = () => {
       )}
     >
       <div className="flex items-center gap-2">
-        <SidebarTrigger className="cursor-pointer" />
-        <DebugMenu />
+        {children}
       </div>
       {/* <div>Titlebar</div> */}
       <div className="flex items-center gap-2">

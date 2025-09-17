@@ -1,8 +1,9 @@
-import type { ShortcutExtension } from "@/core/shortcut";
 import type { Editor } from "slate";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 
 const FormatShortcutExtension: ShortcutExtension<Editor> = {
-  name: "block",
+  name: "format",
   priority: 10,
   actions: {
     "toggle-code-block": (event, editor) => {
@@ -10,11 +11,6 @@ const FormatShortcutExtension: ShortcutExtension<Editor> = {
       editor.toggleBlock("code");
       return true;
     },
-  },
-
-  keySettings: {
-    "mod+k": "toggle-code-block",
-    "mod+`": "toggle-code-block",
   },
 };
 

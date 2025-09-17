@@ -1,6 +1,6 @@
 import { useEffect } from "react";
-import { useShortcutStore } from "../store/useShortcutStore";
 import type { ShortcutExtension } from "@/core/shortcut";
+import { useShortcutStore } from "../store/useShortcutStore";
 
 /**
  * Hook này được sử dụng để đăng ký các phím tắt với một scope cụ thể.
@@ -11,33 +11,34 @@ import type { ShortcutExtension } from "@/core/shortcut";
  * @param extensions - Mảng các extension để đăng ký
  */
 export default function useRegisterShortcuts<T = any>(
-  scope: string,
-  context: T,
-  extensions: ShortcutExtension<T>[],
-  keySettings: Record<string, string> = {}
+	scope: string,
+	context: T,
+	extensions: ShortcutExtension<T>[],
 ): void {
-  const { registerExtension, unregisterExtension } = useShortcutStore();
+	const { registerExtension, unregisterExtension } = useShortcutStore();
 
-  // Đăng ký bộ shortcut khi component mount
-  useEffect(() => {
-    const scopedExtensions = extensions.map((ext) => ({
-      ...ext,
-      scope,
-    }));
+	// Đăng ký bộ shortcut khi component mount
+	// biome-ignore lint/correctness/useExhaustiveDependencies: suppress dependency extensions
+	useEffect(() => {
+		const scopedExtensions = extensions.map((ext) => ({
+			...ext,
+			scope,
+		}));
 
-    scopedExtensions.forEach((extension) =>
-      registerExtension({
-        ...extension,
-        scope,
-        context,
-        keySettings: { ...keySettings, ...extension.keySettings },
-      })
-    );
+		// biome-ignore lint/suspicious/useIterableCallbackReturn: What?
+		scopedExtensions.forEach((extension) =>
+			registerExtension({
+				...extension,
+				scope,
+				context,
+			}),
+		);
 
-    return () => {
-      scopedExtensions.forEach((extension) =>
-        unregisterExtension(extension.name)
-      );
-    };
-  }, [scope, context]);
+		return () => {
+			// biome-ignore lint/suspicious/useIterableCallbackReturn: What? #2
+			scopedExtensions.forEach((extension) =>
+				unregisterExtension(extension.name),
+			);
+		};
+	}, [scope, context]);
 }

@@ -1,5 +1,6 @@
-import type { ShortcutExtension } from "@/core/shortcut";
 import type { Editor } from "slate";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 
 const MarkdownShortcutExtension: ShortcutExtension<Editor> = {
   name: "markdown",
@@ -14,11 +15,6 @@ const MarkdownShortcutExtension: ShortcutExtension<Editor> = {
       editor.handleDividerShortcut(event);
       return true;
     },
-  },
-
-  keySettings: {
-    "space": "markdown-shortcut", // UNMODIFIED
-    "-": "divider-markdown-shortcut", // UNMODIFIED
   },
 };
 

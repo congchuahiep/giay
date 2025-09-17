@@ -3,19 +3,19 @@ import handleSlashMenuSelection from "@/features/editor/plugins/slash-menu/handl
 import type SlashEditor from "@/features/editor/plugins/slash-menu/interface";
 import type { SlashMenuState } from "./types/SlashMenuState";
 import type { Editor } from "slate";
-import OpenSlashCommandShortcutExtension from "@/features/editor/plugins/slash-menu/OpenSlashCommandShortcutExtension";
-import SlashCommandShortcutExtension from "@/features/editor/plugins/slash-menu/SlashCommandShortcutExtension";
+import OpenSlashMenuShortcutExtension from "@/features/editor/plugins/slash-menu/OpenSlashMenuShortcutExtension";
+import SlashMenuShortcutExtension from "@/features/editor/plugins/slash-menu/SlashMenuShortcutExtension";
 
 export * from "./stores/useSlashMenuStore";
 
-export { OpenSlashCommandShortcutExtension, SlashCommandShortcutExtension };
+export { OpenSlashMenuShortcutExtension as OpenSlashCommandShortcutExtension, SlashMenuShortcutExtension as SlashCommandShortcutExtension };
 export type { SlashEditor, SlashMenuState };
 
 export function withSlashEditor(editor: Editor): Editor & SlashEditor {
   editor.handleOpenSlashMenu = (
     openSlashCommand,
     slashRef,
-    slashContainerRef
+    slashContainerRef,
   ) =>
     handleOpenSlashMenu(editor, openSlashCommand, slashRef, slashContainerRef);
 

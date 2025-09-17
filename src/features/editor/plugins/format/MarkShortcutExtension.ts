@@ -1,4 +1,5 @@
 import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 import type { Editor } from "slate";
 
 const MarkShortcutExtension: ShortcutExtension<Editor> = {
@@ -30,13 +31,6 @@ const MarkShortcutExtension: ShortcutExtension<Editor> = {
       editor.toggleMark("code");
       return true;
     },
-  },
-  keySettings: {
-    "mod+b": "mark-bold",
-    "mod+i": "mark-italic",
-    "mod+u": "mark-underline",
-    "mod+shift+x": "mark-strike-through",
-    "mod+e": "mark-code",
   },
 };
 

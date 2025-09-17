@@ -1,9 +1,10 @@
-import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems";
 import type { Editor } from "slate";
-import type { SlashMenuState } from "./types/SlashMenuState";
+import type { SlashMenuItem } from "@/components/Editor/SlashMenu/SlashMenuItems";
 import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
+import type { SlashMenuState } from "./types/SlashMenuState";
 
-interface SlashCommandShortcutContext {
+interface SlashMenuShortcutContext {
   editor: Editor;
   slashMenuState: SlashMenuState;
   filteredItems: SlashMenuItem[];
@@ -12,9 +13,9 @@ interface SlashCommandShortcutContext {
   scrollToIndex: (index: number) => void;
 }
 
-const SlashCommandShortcutExtension: ShortcutExtension<SlashCommandShortcutContext> =
+const SlashMenuShortcutExtension: ShortcutExtension<SlashMenuShortcutContext> =
   {
-    name: "slash-command",
+    name: "slash-menu",
     priority: 100,
     actions: {
       "close-slash-command": (_, context) => {
@@ -64,19 +65,12 @@ const SlashCommandShortcutExtension: ShortcutExtension<SlashCommandShortcutConte
           editor.handleSelectSlashItem(
             filteredItems[slashMenuState.selectedIndex],
             slashMenuState,
-            context.closeSlashCommand
+            context.closeSlashCommand,
           );
         }
         return true;
       },
     },
-
-    keySettings: {
-      up: "select-previous-item", // UNMODIFIED
-      down: "select-next-item", // UNMODIFIED
-      escape: "close-slash-command", // UNMODIFIED
-      enter: "select-slash-command", // UNMODIFIED
-    },
   };
 
-export default SlashCommandShortcutExtension;
+export default SlashMenuShortcutExtension;

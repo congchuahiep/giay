@@ -1,5 +1,5 @@
 // Import React dependencies.
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // Import the Slate editor factory.
 import { type Descendant } from "slate";
 import type { RenderElementProps, RenderLeafProps } from "slate-react";
@@ -17,116 +17,119 @@ import Toolbar from "./Toolbar";
 
 import { DragProvider } from "@/components/Editor/BlockInteraction/DragProvider";
 import HoveringToolbar from "@/components/Editor/HoveringToolbar";
-import SlashCommandMenu from "@/components/Editor/SlashMenu/SlashMenu";
+import SlashMenu from "@/components/Editor/SlashMenu/SlashMenu";
 import TrailingEmptyParagraph from "@/components/Editor/TrailingEmptyParagraph";
 import { useRegisterShortcuts, useShortcutStore } from "@/core/shortcut";
 import useClipboard from "@/features/editor/plugins/clipboard";
 import { withDeleteEditor } from "@/features/editor/plugins/delete";
 import {
-  FormatShortcutExtension,
-  MarkShortcutExtension,
-  withFormatEditor,
+	FormatShortcutExtension,
+	MarkShortcutExtension,
+	withFormatEditor,
 } from "@/features/editor/plugins/format";
 import { withInsertEditor } from "@/features/editor/plugins/insert";
 import {
-  MarkdownShortcutExtension,
-  withMarkdownEditor,
+	MarkdownShortcutExtension,
+	withMarkdownEditor,
 } from "@/features/editor/plugins/markdown";
 import { withSelectEditor } from "@/features/editor/plugins/select";
 import { withSlashEditor } from "@/features/editor/plugins/slash-menu";
 import {
-  DefaultBehaviourShortCutExtension,
-  withUtilsEditor,
+	DefaultBehaviourShortCutExtension,
+	withUtilsEditor,
 } from "@/features/editor/plugins/utils";
 
 /**
  * Danh sách các plugin
  */
 const plugins = [
-  withMarkdownEditor,
-  withSlashEditor,
-  withInsertEditor,
-  withDeleteEditor,
-  withUtilsEditor,
-  withSelectEditor,
-  withFormatEditor,
-  withReact,
-  // withHistory,
+	withMarkdownEditor,
+	withSlashEditor,
+	withInsertEditor,
+	withDeleteEditor,
+	withUtilsEditor,
+	withSelectEditor,
+	withFormatEditor,
+	withReact,
+	// withHistory,
 ];
 
 const editorShortcutExtensions = [
-  FormatShortcutExtension,
-  MarkShortcutExtension,
-  MarkdownShortcutExtension,
-  DefaultBehaviourShortCutExtension,
+	FormatShortcutExtension,
+	MarkShortcutExtension,
+	MarkdownShortcutExtension,
+	DefaultBehaviourShortCutExtension,
 ];
 
 const PageEditor = ({
-  sharedType,
-  provider,
+	sharedType,
+	provider,
 }: {
-  sharedType: Y.XmlText;
-  provider: WebsocketProvider | undefined;
+	sharedType: Y.XmlText;
+	provider: WebsocketProvider | undefined;
 }) => {
-  const [initialValue] = useState<Descendant[]>([]);
+	const editorRef = useRef<HTMLDivElement>(null);
+	const [initialValue] = useState<Descendant[]>([]);
 
-  // Khởi tạo editor
-  const editor = useMemo(
-    () => initialEditor(plugins, sharedType, provider),
-    [provider, sharedType]
-  );
+	// Khởi tạo editor
+	const editor = useMemo(
+		() => initialEditor(plugins, sharedType, provider),
+		[provider, sharedType],
+	);
 
-  const memoizedRenderLeaf = useCallback(
-    (props: RenderLeafProps) => renderLeaf(props),
-    []
-  );
+	const memoizedRenderLeaf = useCallback(
+		(props: RenderLeafProps) => renderLeaf(props),
+		[],
+	);
 
-  const memoizedRenderBlock = useCallback(
-    (props: RenderElementProps) => renderBlock(props),
-    []
-  );
+	const memoizedRenderBlock = useCallback(
+		(props: RenderElementProps) => renderBlock(props),
+		[],
+	);
 
-  // Kết nối với Yjs
-  useEffect(() => {
-    YjsEditor.connect(editor);
-    return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
-  }, [editor]);
+	// Kết nối với Yjs
+	useEffect(() => {
+		YjsEditor.connect(editor);
+		return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
+	}, [editor]);
 
-  // Đăng ký sự kiện bàn phím
-  useRegisterShortcuts("editor", editor, editorShortcutExtensions);
-  const { setActiveShortcutScope } = useShortcutStore();
+	// Đăng ký sự kiện bàn phím
+	useRegisterShortcuts("editor", editor, editorShortcutExtensions);
+	const { setActiveShortcutScope } = useShortcutStore();
 
-  const [handlePaste, handleCopy] = useClipboard(editor);
+	const [handlePaste, handleCopy] = useClipboard(editor);
 
-  return (
-    <Slate editor={editor} initialValue={initialValue}>
-      <DragProvider editor={editor}>
-        <Cursors>
-          <div className="relative flex flex-col h-screen">
-            <Toolbar />
-            <HoveringToolbar />
+	return (
+		<Slate editor={editor} initialValue={initialValue}>
+			<DragProvider editor={editor}>
+				<Cursors>
+					<Toolbar />
+					<div className="relative flex flex-col h-screen">
+						{editorRef && <HoveringToolbar containerRef={editorRef} />}
+						{editorRef && <SlashMenu containerRef={editorRef} />}
 
-            <Editable
-              className="focus:outline-none selection:bg-blue-500/15 outline-0"
-            renderLeaf={memoizedRenderLeaf}
-              renderElement={memoizedRenderBlock}
-              onPaste={handlePaste}
-              onCopy={handleCopy}
-              onFocus={() => setActiveShortcutScope("editor")}
-              onBlur={() => setActiveShortcutScope()}
-              placeholder="Start typing..."
-              spellCheck={false}
-              autoFocus
-            />
-            <TrailingEmptyParagraph />
-            <SlashCommandMenu />
+						<Editable
+							ref={editorRef}
+							className="focus:outline-none selection:bg-blue-500/15 outline-0 overflow-visible"
+							renderLeaf={memoizedRenderLeaf}
+							renderElement={memoizedRenderBlock}
+							onPaste={handlePaste}
+							onCopy={handleCopy}
+							onFocus={() => setActiveShortcutScope("editor")}
+							onBlur={() => setActiveShortcutScope()}
+							placeholder="Start typing..."
+							spellCheck={false}
+							autoFocus
+						/>
 
-            {/*<BlockSelectionComponent />*/}
-          </div>
-        </Cursors>
-      </DragProvider>
-    </Slate>
-  );
+						<TrailingEmptyParagraph />
+
+						{/*<BlockSelectionComponent />*/}
+					</div>
+				</Cursors>
+			</DragProvider>
+		</Slate>
+	);
 };
 
 export default PageEditor;

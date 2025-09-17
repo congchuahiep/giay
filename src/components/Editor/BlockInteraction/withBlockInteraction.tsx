@@ -80,7 +80,7 @@ export function withBlockInteraction<P extends RenderElementProps>(
         <div
           className={cn(
             "absolute left-0 flex justify-center select-none",
-            "w-6 -ml-9 opacity-0 transition-opacity duration-150 z-100",
+            "w-6 -ml-10 opacity-0 transition-opacity duration-150 z-100",
             showBlockInteraction && "opacity-100",
             // Positioning based on alignment option
             alignCenter ? "top-0 bottom-0" : "top-1"

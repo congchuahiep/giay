@@ -1,8 +1,9 @@
-import { type ShortcutExtension } from "@/core/shortcut/types/ShortcutExtension";
 import type { Editor } from "slate";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 
 const DefaultBehaviourShortCutExtension: ShortcutExtension<Editor> = {
-  name: "navigation",
+  name: "default-behaviour",
   priority: 0,
   actions: {
     "backspace-handler": (event, editor) => {
@@ -24,14 +25,6 @@ const DefaultBehaviourShortCutExtension: ShortcutExtension<Editor> = {
     //   editor.redo();
     //   return true;
     // },
-  },
-
-  keySettings: {
-    "backspace": "backspace-handler", // UNMODIFIED
-    "mod+a": "select-all",
-    // "mod+z": "undo",
-    // "mod+shift+z": "redo",
-    // "mod+y": "redo",
   },
 };
 

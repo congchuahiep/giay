@@ -1,5 +1,3 @@
-import type { KeyboardEvent } from "react";
-
 /**
  * Kiểu định nghĩa hàm xử lý hành động phím tắt
  */

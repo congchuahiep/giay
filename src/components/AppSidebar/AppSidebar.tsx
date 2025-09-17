@@ -1,6 +1,6 @@
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 import { GearIcon } from "@phosphor-icons/react/dist/csr/Gear";
 import { QuestionIcon } from "@phosphor-icons/react/dist/csr/Question";
+import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
 
 import {
   Sidebar,
@@ -13,6 +13,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { openSettingsWindow } from "@/features/navigates";
 import { cn } from "@/utils";
 
 // Menu items.
@@ -41,6 +42,7 @@ const items = [
     title: "Settings",
     url: "#",
     icon: Settings,
+    onClick: openSettingsWindow,
   },
 ];
 
@@ -66,10 +68,11 @@ const AppSidebar = () => {
           <SidebarGroupContent>
             <SidebarMenu>
               {items.map((item) => (
-                <SidebarMenuItem key={item.title}>
+                <SidebarMenuItem key={item.title} onClick={item.onClick}>
                   <SidebarMenuButton
                     asChild
                     className="dark:text-stone-100 dark:hover:bg-stone-700/50 active:text-stone-400"
+                    // onClick={item.onClick}
                   >
                     <a href={item.url}>
                       <item.icon />
@@ -83,7 +86,6 @@ const AppSidebar = () => {
         </SidebarGroup>
       </SidebarContent>
       <SidebarFooter>
-        {/* <div className="flex justify-end items-center dark:stroke-stone-100"> */}
         <SidebarMenu>
           <SidebarMenuItem className="flex justify-end gap-2">
             {footerItems.map((item, index) => (
@@ -92,7 +94,7 @@ const AppSidebar = () => {
                 asChild
                 tooltip={"123"}
                 className={cn(
-                  "p-2 text-stone-500 hover:bg-stone-700/50 rounded-md cursor-pointer"
+                  "p-2 text-stone-500 hover:bg-stone-700/50 rounded-md cursor-pointer",
                 )}
               >
                 {item.icon}
@@ -100,7 +102,6 @@ const AppSidebar = () => {
             ))}
           </SidebarMenuItem>
         </SidebarMenu>
-        {/* </div> */}
       </SidebarFooter>
     </Sidebar>
   );
