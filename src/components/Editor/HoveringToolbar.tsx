@@ -141,7 +141,7 @@ const HoveringToolbar = ({
 			ref={ref}
 			className={cn(
 				"p-0.5 absolute z-10 opacity-0 hover-toolbar left-[] -mt-1",
-				"bg-stone-50 shadow-md rounded-md border-1",
+				"bg-popover shadow-md rounded-md border-1",
 			)}
 			onMouseDown={(e) => {
 				e.preventDefault();

@@ -106,7 +106,7 @@ const PageEditor = ({
 					<Toolbar />
 					<div className="relative flex flex-col h-screen">
 						{editorRef && <HoveringToolbar containerRef={editorRef} />}
-						{editorRef && <SlashMenu containerRef={editorRef} />}
+						{editorRef && <SlashMenu />}
 
 						<Editable
 							ref={editorRef}

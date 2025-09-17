@@ -7,19 +7,17 @@ import {
 } from "@/features/editor/plugins/slash-menu";
 import { useFuseSearch } from "@/features/search/useFuseSearch";
 import { cn, scrollToDataAttribute } from "@/utils";
-import { useCallback, useEffect, useMemo, useRef, type RefObject } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Editor } from "slate";
 import { ReactEditor, useSlateSelection, useSlateStatic } from "slate-react";
 
-export default function SlashMenu({
-	containerRef,
-}: {
-	containerRef: RefObject<HTMLDivElement | null>;
-}) {
+export default function SlashMenu() {
 	const slashRef = useRef<HTMLDivElement | null>(null);
 	const slashContainerRef = useRef<HTMLDivElement | null>(null);
 	const editor = useSlateStatic();
 	const selection = useSlateSelection();
+
+	const [allowMouseHover, setAllowMouseHover] = useState(false);
 
 	const {
 		setSelectedIndex,
@@ -233,14 +231,29 @@ export default function SlashMenu({
 	 */
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Cần phụ thuộc vào selectedIndex để xử lý sự kiện click chuột
 	useEffect(() => {
-		slashContainerRef.current?.classList.add("pointer-events-none");
-		setTimeout(() => {
-			slashContainerRef.current?.classList.remove("pointer-events-none");
-		}, 1);
-	}, [slashMenuState.selectedIndex]);
+		setAllowMouseHover(false);
+		// Reset selectedIndex nếu muốn
+		// setSlashMenuState((prev) => ({ ...prev, selectedIndex: -1 }));
+
+		const enableHover = () => {
+			console.log("Enable hover");
+			setAllowMouseHover(true);
+		};
+
+		// Khi có mousemove thì mới cho phép hover
+		const container = slashContainerRef.current;
+		if (container) {
+			window.addEventListener("mousemove", enableHover, { once: true });
+		}
+
+		return () => {
+			if (container) {
+				window.removeEventListener("mousemove", enableHover);
+			}
+		};
+	}, [slashMenuState.isOpen, filteredItems]);
 
 	/// CÁC EVENT HANDLER
-
 	/**
 	 * Xử lý khi người dùng click vào một item trong slash command menu
 	 * (thường là click chuột trái vào item đó)
@@ -261,7 +274,7 @@ export default function SlashMenu({
 		<div
 			ref={slashRef}
 			className={cn(
-				"h-70 z-50 overflow-hidden fixed left-0 top-0 flex",
+				"h-70 z-50 overflow fixed left-0 top-0 flex",
 				slashMenuState.displayPosition?.placement === "top"
 					? "items-end"
 					: "items-start",
@@ -273,8 +286,9 @@ export default function SlashMenu({
 			<div
 				ref={slashContainerRef}
 				className={cn(
-					"w-64 h-auto max-h-70 border shadow-md bg-white dark:bg-stone-900 rounded-md",
-					"overflow-y-auto",
+					"w-64 h-auto max-h-70 border overflow-y-auto",
+					"shadow-md bg-popover rounded-md",
+					!allowMouseHover && "pointer-events-none",
 				)}
 			>
 				{filteredItems.length === 0 ? (
@@ -284,6 +298,8 @@ export default function SlashMenu({
 				) : (
 					<div>
 						{filteredItems.map((item, index) => (
+							// biome-ignore lint/a11y/noStaticElementInteractions: why not?
+							// biome-ignore lint/a11y/useKeyWithClickEvents: why not #2?
 							<div
 								key={item.id}
 								data-slash-item-index={index}
@@ -295,7 +311,7 @@ export default function SlashMenu({
 									className={cn(
 										"flex gap-3 cursor-pointer items-center p-2 rounded-sm",
 										index === slashMenuState.selectedIndex &&
-											"bg-stone-100 dark:bg-stone-800",
+											"bg-stone-100 dark:bg-stone-700",
 									)}
 								>
 									<span>{item.icon}</span>
