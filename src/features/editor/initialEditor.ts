@@ -1,8 +1,8 @@
-import { composePlugins, type Plugin } from "@/features/editor/composePlugins";
 import { withCursors, withYjs } from "@slate-yjs/core";
 import { createEditor, Editor, Element, Transforms } from "slate";
 import type { WebsocketProvider } from "y-websocket";
-import * as Y from "yjs";
+import type * as Y from "yjs";
+import { composePlugins, type Plugin } from "@/features/editor/composePlugins";
 
 /**
  * Khởi tạo editor, có chế độ cộng tác
@@ -13,64 +13,67 @@ import * as Y from "yjs";
  * @returns
  */
 export default function initialEditor(
-  plugins: Plugin<Editor>[],
-  sharedType: Y.XmlText,
-  provider: WebsocketProvider | undefined
+	plugins: Plugin<Editor>[],
+	sharedType: Y.XmlText,
+	provider: WebsocketProvider | undefined,
 ) {
-  const randomNames = [
-    "Alex",
-    "Sam",
-    "Jordan",
-    "Taylor",
-    "Morgan",
-    "Casey",
-    "Jamie",
-    "Riley",
-  ];
-  const randomColors = [
-    "#ff5733",
-    "#33c1ff",
-    "#ff33a6",
-    "#33ff57",
-    "#ffd633",
-    "#8e44ad",
-    "#e67e22",
-    "#16a085",
-  ];
-  const name = randomNames[Math.floor(Math.random() * randomNames.length)];
-  const color = randomColors[Math.floor(Math.random() * randomColors.length)];
+	const randomNames = [
+		"Alex",
+		"Sam",
+		"Jordan",
+		"Taylor",
+		"Morgan",
+		"Casey",
+		"Jamie",
+		"Riley",
+	];
+	const randomColors = [
+		"#ff5733",
+		"#33c1ff",
+		"#ff33a6",
+		"#33ff57",
+		"#ffd633",
+		"#8e44ad",
+		"#e67e22",
+		"#16a085",
+	];
 
-  // Khởi tạo editor với danh sách các plugin
-  let editor = withYjs(composePlugins(createEditor(), plugins), sharedType);
+	const name = randomNames[Math.floor(Math.random() * randomNames.length)];
+	const color = randomColors[Math.floor(Math.random() * randomColors.length)];
 
-  // Nếu có provider, thêm plugin con trỏ chuột
-  if (provider) {
-    editor = withCursors(editor, provider.awareness, { data: { name, color } });
-  }
+	// Khởi tạo editor với danh sách các plugin
+	let editor = withYjs(composePlugins(createEditor(), plugins), sharedType);
 
-  const { normalizeNode } = editor;
+	// Nếu có provider, thêm plugin con trỏ chuột
+	if (provider && sharedType) {
+		editor = withCursors(editor, provider.awareness, {
+			data: { name, color },
+		});
+	}
 
-  editor.normalizeNode = (entry, options) => {
-    const [node, path] = entry;
+	const { normalizeNode } = editor;
 
-    // Nếu là Element (block) và không có ID, thêm ID
-    if (Element.isElement(node) && !node.id && path.length === 1) {
-      Transforms.setNodes(editor, { id: editor.generateId() }, { at: path });
-      return;
-    }
+	editor.normalizeNode = (entry, options) => {
+		const [node, path] = entry;
 
-    // Nếu editor rỗng, thêm initial value với ID
-    if (Editor.isEditor(node) && node.children.length === 0) {
-      Transforms.insertNodes(editor, editor.buildBlock(), { at: [0] });
-      return;
-    }
+		// Nếu là Element (block) và không có ID, thêm ID
+		if (Element.isElement(node) && !node.id && path.length === 1) {
+			Transforms.setNodes(editor, { id: editor.generateId() }, { at: path });
+			return;
+		}
 
-    return normalizeNode(entry, options);
-  };
+		// Nếu editor rỗng, thêm initial value với ID
+		if (Editor.isEditor(node) && node.children.length === 0) {
+			Transforms.insertNodes(editor, editor.buildBlock(), { at: [0] });
+			return;
+		}
 
-  editor.isVoid = (element) => {
-    return element.type === "divider";
-  };
+		return normalizeNode(entry, options);
+	};
 
-  return editor;
+	editor.isVoid = (element) => {
+		return element.type === "divider";
+	};
+
+	return editor;
 }

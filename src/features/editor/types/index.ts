@@ -12,20 +12,22 @@ import type { HistoryEditor } from "slate-history";
 import { ReactEditor } from "slate-react";
 
 declare module "slate" {
-  interface CustomTypes {
-    Editor: BaseEditor &
-      ReactEditor &
-      HistoryEditor &
-      UtilsEditor &
-      InsertEditor &
-      DeleteEditor &
-      SelectEditor &
-      FormatEditor &
-      MarkdownEditor &
-      SlashEditor;
-    Element: ElementBlock;
-    Text: LeafText;
-  }
+	interface CustomTypes {
+		Editor: BaseEditor &
+			ReactEditor &
+			HistoryEditor &
+			UtilsEditor &
+			InsertEditor &
+			DeleteEditor &
+			SelectEditor &
+			FormatEditor &
+			MarkdownEditor &
+			SlashEditor;
+		Element: ElementBlock;
+		Text: LeafText;
+	}
 }
 
 export type { BlockType, MarkType };
+export * from "./block";
+export * from "./leaf";

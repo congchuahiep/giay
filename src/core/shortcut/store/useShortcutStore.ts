@@ -85,15 +85,12 @@ export const useShortcutStore = create<ShortcutStore>()(
 					// Tìm các extension phù hợp trong scope hiện tại
 					// Tìm action tương ứng với hotkey trong extensions
 					const actionName = findActionByKey(scope, eventHotkey);
-					console.log("actionName: ", actionName);
 
 					// Không tìm thấy action -> bỏ qua
 					if (!actionName) continue;
 
 					const actionContext = getActionContext(actionName);
-					console.log("actionContext: ", actionContext);
 					const action = actions[scope][actionName];
-					console.log("action: ", action);
 					return action(event, actionContext);
 				}
 
@@ -134,8 +131,6 @@ export const useShortcutStore = create<ShortcutStore>()(
 					.omitBy((value) => value === action)
 					.set(key, action)
 					.value();
-
-				console.log(updatedHotkeys);
 
 				set({
 					hotkeys: {

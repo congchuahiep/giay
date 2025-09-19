@@ -48,7 +48,6 @@ export function ShortcutListener() {
 				},
 			);
 
-			console.log(shortcuts);
 			if (!shortcuts) return;
 
 			setHotkey(shortcuts);

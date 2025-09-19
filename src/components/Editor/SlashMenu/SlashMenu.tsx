@@ -149,7 +149,6 @@ export default function SlashMenu() {
 	 */
 	useEffect(() => {
 		const handleResize = () => {
-			console.log("resize");
 			closeSlashCommand();
 		};
 		window.addEventListener("resize", handleResize);
@@ -236,7 +235,6 @@ export default function SlashMenu() {
 		// setSlashMenuState((prev) => ({ ...prev, selectedIndex: -1 }));
 
 		const enableHover = () => {
-			console.log("Enable hover");
 			setAllowMouseHover(true);
 		};
 

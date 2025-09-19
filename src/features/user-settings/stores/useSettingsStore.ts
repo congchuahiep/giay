@@ -9,6 +9,7 @@ import type {
 	UserSettings,
 } from "@/features/user-settings/types/SettingsStore";
 import { defaultShortcutSettings } from "../default-settings/defaultShortcutSettings";
+import { isTauri } from "@tauri-apps/api/core";
 
 // // Tạo store riêng cho settings
 // const settingsDB = await Store.load("settings.json");
@@ -38,6 +39,8 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
 		}),
 
 	init: async () => {
+		if (!isTauri()) return;
+
 		try {
 			const settingsDB = await get().getSettingsDb();
 			await settingsDB.save();

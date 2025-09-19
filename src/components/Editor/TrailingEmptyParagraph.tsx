@@ -10,32 +10,32 @@ import { ReactEditor, useSlateStatic } from "slate-react";
  * Component này hữu ích để cung cấp vùng click ở cuối editor, giúp người dùng dễ dàng thêm nội dung mới.
  */
 const TrailingEmptyParagraph = () => {
-  const editor = useSlateStatic();
+	const editor = useSlateStatic();
 
-  const handleClick = () => {
-    const lastBlock = editor.getLastBlock();
-    if (
-      lastBlock &&
-      lastBlock.type === "paragraph" &&
-      Node.string(lastBlock) === ""
-    ) {
-      editor.select(Editor.end(editor, []));
-      ReactEditor.focus(editor);
-      return;
-    }
+	const handleClick = () => {
+		const lastBlock = editor.getLastBlock();
+		if (
+			lastBlock &&
+			lastBlock.type === "paragraph" &&
+			Node.string(lastBlock) === ""
+		) {
+			editor.select(Editor.end(editor, []));
+			ReactEditor.focus(editor);
+			return;
+		}
 
-    const newBlock = editor.buildBlock();
-    editor.insertBlock(newBlock, { at: Editor.end(editor, []) });
-    editor.select(Editor.end(editor, []));
-    ReactEditor.focus(editor);
-  };
+		const newBlock = editor.buildBlock();
+		editor.insertBlock(newBlock, { at: Editor.end(editor, []) });
+		editor.select(Editor.end(editor, []));
+		ReactEditor.focus(editor);
+	};
 
-  return (
-    <div
-      onClick={handleClick}
-      className="min-h-[30dvh] flex-grow cursor-text"
-    ></div>
-  );
+	return (
+		<div
+			onClick={handleClick}
+			className="min-h-[30dvh] flex-grow cursor-text"
+		></div>
+	);
 };
 
 export default TrailingEmptyParagraph;

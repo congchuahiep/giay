@@ -7,6 +7,10 @@ import { useSidebar } from "@/components/ui/sidebar";
 import { useRegisterShortcuts } from "@/core/shortcut";
 import { AppNavigationShortcutExtension } from "@/features/navigates";
 import { useGlobalModalStore } from "@/stores/modal";
+import { YjsDocumentProvider } from "@/hooks/useYjsDocument";
+
+const WEBSOCKET_URL = import.meta.env.VITE_WEBSOCKET_URL;
+const DOCUMENT_ID = "slate-demo-room";
 
 export interface AppContext {
 	toggleSidebar: () => void;
@@ -37,7 +41,12 @@ function EditorWindow() {
 			{/* EDITOR CONTAINER */}
 			<div className="overflow-y-auto overflow-x-hidden mt-12">
 				<div className="px-12 m-auto w-full max-w-3xl lg:w-3xl dark:text-white">
-					<CollaborativeEditor />
+					<YjsDocumentProvider
+						websocketUrl={WEBSOCKET_URL}
+						pageId={DOCUMENT_ID}
+					>
+						<CollaborativeEditor pageId={DOCUMENT_ID} />
+					</YjsDocumentProvider>
 				</div>
 			</div>
 

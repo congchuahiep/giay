@@ -1,7 +1,7 @@
 // Import React dependencies.
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 // Import the Slate editor factory.
-import { type Descendant } from "slate";
+import { Element, type Descendant, type NodeEntry } from "slate";
 import type { RenderElementProps, RenderLeafProps } from "slate-react";
 import { Editable, Slate, withReact } from "slate-react";
 import { WebsocketProvider } from "y-websocket";
@@ -38,6 +38,10 @@ import {
 	DefaultBehaviourShortCutExtension,
 	withUtilsEditor,
 } from "@/features/editor/plugins/utils";
+import TitleEditor from "./TitleEditor";
+import { useYjsDocumentContext } from "@/hooks/useYjsDocument";
+import { decorateCodeBlock } from "@/features/editor/plugins/code-block";
+import useDecorate from "@/features/editor/hooks/useDecorate";
 
 /**
  * Danh sách các plugin
@@ -61,20 +65,19 @@ const editorShortcutExtensions = [
 	DefaultBehaviourShortCutExtension,
 ];
 
-const PageEditor = ({
-	sharedType,
-	provider,
-}: {
-	sharedType: Y.XmlText;
-	provider: WebsocketProvider | undefined;
-}) => {
+// interface PageEditorProps {
+
+// }
+
+const PageEditor = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
-	const [initialValue] = useState<Descendant[]>([]);
+	const { yDoc, provider } = useYjsDocumentContext();
+	const pageContentData = useMemo(() => yDoc.get("content", Y.XmlText), [yDoc]);
 
 	// Khởi tạo editor
 	const editor = useMemo(
-		() => initialEditor(plugins, sharedType, provider),
-		[provider, sharedType],
+		() => initialEditor(plugins, pageContentData, provider),
+		[pageContentData, provider],
 	);
 
 	const memoizedRenderLeaf = useCallback(
@@ -86,6 +89,8 @@ const PageEditor = ({
 		(props: RenderElementProps) => renderBlock(props),
 		[],
 	);
+
+	const decorate = useDecorate();
 
 	// Kết nối với Yjs
 	useEffect(() => {
@@ -100,24 +105,25 @@ const PageEditor = ({
 	const [handlePaste, handleCopy] = useClipboard(editor);
 
 	return (
-		<Slate editor={editor} initialValue={initialValue}>
+		<Slate editor={editor} initialValue={[]}>
 			<DragProvider editor={editor}>
 				<Cursors>
-					<Toolbar />
-					<div className="relative flex flex-col h-screen">
+					{/*<Toolbar />*/}
+					<TitleEditor />
+					<div className="relative flex flex-col h-full">
 						{editorRef && <HoveringToolbar containerRef={editorRef} />}
 						{editorRef && <SlashMenu />}
 
 						<Editable
 							ref={editorRef}
 							className="focus:outline-none selection:bg-blue-500/15 outline-0 overflow-visible"
+							decorate={decorate}
 							renderLeaf={memoizedRenderLeaf}
 							renderElement={memoizedRenderBlock}
 							onPaste={handlePaste}
 							onCopy={handleCopy}
 							onFocus={() => setActiveShortcutScope("editor")}
 							onBlur={() => setActiveShortcutScope()}
-							placeholder="Start typing..."
 							spellCheck={false}
 							autoFocus
 						/>
