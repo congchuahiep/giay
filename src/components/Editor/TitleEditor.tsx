@@ -18,7 +18,7 @@ export default function TitleEditor() {
 	const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false);
 	const [pageIcon, setPageIcon] = useState<string | null>(null);
 
-	const { provider, pageId } = useYjsPageEditorContext();
+	const { provider, activePage } = useYjsPageEditorContext();
 	const { provider: workspaceProvider } = useYjsWorkspaceContext();
 
 	const pageTitleData = useMemo(() => {
@@ -69,10 +69,12 @@ export default function TitleEditor() {
 		pageIconData.delete(0, pageIconData.length);
 		pageIconData.insert(0, icon);
 
-		const rootPages = workspaceProvider.document.getMap("root-pages");
+		const sidebarPages = workspaceProvider.document.getMap(
+			activePage.parent_page_id ? activePage.parent_page_id : "root-pages",
+		);
 
-		rootPages.set(pageId, {
-			id: pageId,
+		sidebarPages.set(activePage.id, {
+			id: activePage.id,
 			icon: icon,
 			title: pageTitleData.toString(),
 		});
@@ -82,10 +84,12 @@ export default function TitleEditor() {
 
 	// Hàm tuỳ chỉnh logic khi setPageTitle, giúp cho sidebar tự cập nhật
 	const updatePageTitle = (title: string) => {
-		const rootPages = workspaceProvider.document.getMap("root-pages");
+		const sidebarPages = workspaceProvider.document.getMap(
+			activePage.parent_page_id ? activePage.parent_page_id : "root-pages",
+		);
 
-		rootPages.set(pageId, {
-			id: pageId,
+		sidebarPages.set(activePage.id, {
+			id: activePage.id,
 			icon: pageIconData.toString(),
 			title: title,
 		});
@@ -129,7 +133,6 @@ export default function TitleEditor() {
 				initialValue={[]}
 				onChange={(value) => {
 					const text = value[0].children[0].text;
-					console.log(text);
 					updatePageTitle(text);
 				}}
 			>

@@ -10,13 +10,13 @@ const queryClient = new QueryClient();
 
 // biome-ignore lint/style/noNonNullAssertion: right rule ^^
 createRoot(document.getElementById("root")!).render(
-	<StrictMode>
-		<QueryClientProvider client={queryClient}>
-			<SettingsProvider>
-				<BrowserRouter>
-					<AppRoute />
-				</BrowserRouter>
-			</SettingsProvider>
-		</QueryClientProvider>
-	</StrictMode>,
+	// <StrictMode>
+	<QueryClientProvider client={queryClient}>
+		<SettingsProvider>
+			<BrowserRouter>
+				<AppRoute />
+			</BrowserRouter>
+		</SettingsProvider>
+	</QueryClientProvider>,
+	// </StrictMode>,
 );

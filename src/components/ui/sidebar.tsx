@@ -122,7 +122,7 @@ function SidebarProvider({
 					}
 					className={cn(
 						"group/sidebar-wrapper flex min-h-svh w-full",
-						isTauri() ? "bg-transparent" : "bg-neutral-800",
+						isTauri() ? "bg-transparent" : "bg-white dark:bg-neutral-800",
 						className,
 					)}
 					{...props}
@@ -201,7 +201,7 @@ function Sidebar({
 			<div
 				data-slot="sidebar-gap"
 				className={cn(
-					"relative w-(--sidebar-width) bg-transparent transition-[width] duration-200 ease-linear",
+					"relative w-(--sidebar-width) bg-sidebar transition-[width] duration-200 ease-linear",
 					"group-data-[collapsible=offcanvas]:w-0",
 					"group-data-[side=right]:rotate-180",
 					variant === "floating" || variant === "inset"

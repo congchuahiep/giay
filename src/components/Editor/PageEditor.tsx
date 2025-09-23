@@ -71,7 +71,7 @@ const editorShortcutExtensions = [
 
 const PageEditor = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
-	const { provider } = useYjsPageEditorContext();
+	const { provider, status } = useYjsPageEditorContext();
 
 	const pageContentData = useMemo(
 		() => provider.document.get("content", Y.XmlText),
@@ -99,7 +99,9 @@ const PageEditor = () => {
 	// Kết nối với Yjs
 	useEffect(() => {
 		YjsEditor.connect(editor);
-		return () => YjsEditor.disconnect(editor); // Đóng kết nối khi kết thúc làm việc
+		return () => {
+			YjsEditor.disconnect(editor);
+		}; // Đóng kết nối khi kết thúc làm việc
 	}, [editor]);
 
 	// Đăng ký sự kiện bàn phím
@@ -114,6 +116,11 @@ const PageEditor = () => {
 				<Cursors>
 					{/*<Toolbar />*/}
 					<TitleEditor />
+					{status === "connecting" && (
+						<div className="text-xs z-100 fixed right-8 top-16 py-1 px-2 bg-stone-600 text-white rounded">
+							offline
+						</div>
+					)}
 					<div className="relative flex flex-col h-full">
 						{editorRef && <HoveringToolbar containerRef={editorRef} />}
 						{editorRef && <SlashMenu />}

@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import * as Y from "yjs";
 import useInternetConnect from "./useInternetConnect";
 import { HocuspocusProvider } from "@hocuspocus/provider";
+import type { PagePreview } from "@/types";
 
 interface YjsPageEditor {
 	/**
@@ -19,7 +20,7 @@ interface YjsPageEditor {
 	 * ```
 	 */
 	provider: HocuspocusProvider;
-	pageId: string;
+	activePage: PagePreview;
 	status: EditorStatus;
 }
 
@@ -38,12 +39,12 @@ export const useYjsPageEditorContext = () => {
 
 export const YjsPageEditorProvider = ({
 	websocketUrl,
-	pageId,
+	activePage,
 	yDoc,
 	children,
 }: {
 	websocketUrl: string;
-	pageId: string;
+	activePage: PagePreview;
 	yDoc: Y.Doc;
 	children: React.ReactNode;
 }) => {
@@ -52,36 +53,46 @@ export const YjsPageEditorProvider = ({
 	const provider = useMemo(() => {
 		const provider = new HocuspocusProvider({
 			url: websocketUrl,
-			name: pageId,
+			name: activePage.id,
 			document: yDoc,
-
-			onSynced() {
-				setStatus("connected");
-			},
-
-			onDisconnect: () => {
-				setStatus("offline");
-			},
 		});
 
 		return provider;
-	}, [websocketUrl, pageId, yDoc]);
+	}, [websocketUrl, activePage.id, yDoc]);
 
 	// Huỷ kết nối khi đổi trang
 	useEffect(() => {
-		console.log("Connecting to provider: ", provider.document.clientID);
+		// console.log("Connecting to provider: ", provider.document.clientID);
 		setStatus("connecting");
 		provider.connect();
+
+		const onSynced = () => {
+			setStatus("connected");
+		};
+		const onDisconnected = () => {
+			setStatus("offline");
+		};
+
+		provider.on("synced", onSynced);
+		provider.on("disconnected", onDisconnected);
+
 		return () => {
-			console.log("Disconnecting from provider: ", provider.document.clientID);
-			setStatus("initial");
-			provider.disconnect();
+			// console.log("Disconnecting from provider: ", provider.document.clientID);
+			provider.off("synced", onSynced);
+			provider.off("disconnected", onDisconnected);
+			provider.destroy();
 		};
 	}, [provider]);
 
+	useEffect(() => {
+		console.info("YJS PAGE EDITOR STATUS: ", status);
+	}, [status]);
+
 	return (
-		<YjsPageEditorContext.Provider value={{ provider, pageId, status }}>
-			{children}
+		<YjsPageEditorContext.Provider
+			value={{ provider, activePage: activePage, status }}
+		>
+			{status !== "initial" && children}
 		</YjsPageEditorContext.Provider>
 	);
 };

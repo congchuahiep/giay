@@ -72,7 +72,7 @@ export default function initialEditor(
 	};
 
 	editor.isVoid = (element) => {
-		return element.type === "divider";
+		return element.type === "divider" || element.type === "page";
 	};
 
 	return editor;

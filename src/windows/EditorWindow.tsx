@@ -15,10 +15,7 @@ export interface AppContext {
 }
 
 function EditorWindow() {
-	const { pageId, workspaceId } = useParams<{
-		pageId: string;
-		workspaceId: string;
-	}>();
+	const { pageId } = useParams<{ pageId: string }>();
 	const { toggleSidebar } = useSidebar();
 
 	const appShortcutContext = useMemo(

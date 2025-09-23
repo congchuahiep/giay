@@ -30,18 +30,14 @@ import {
 	SidebarMenuItem,
 	SidebarMenuSkeleton,
 } from "../ui/sidebar";
-import { Skeleton } from "../ui/skeleton";
 
 interface PageExplorerProps {
 	workspaceId: string;
 }
 
 export default function PageExplorer({ workspaceId }: PageExplorerProps) {
-	const { provider } = useYjsWorkspaceContext();
-
-	const isMobile = useIsMobile();
+	const { provider, activeWorkspace } = useYjsWorkspaceContext();
 	const navigate = useNavigate();
-	const { pageId } = useParams();
 
 	const { mutate: createPage } = usePageCreate(workspaceId, {
 		onSuccess: (newPage) => {
@@ -51,26 +47,22 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 		},
 	});
 
-	const { mutate: handleDeletePage } = usePageDelete({
-		onSuccess: (deletedPageId) => {
-			const yDocRoot = provider.document;
-			yDocRoot.getMap<PagePreview>("root-pages").delete(deletedPageId);
-			navigate("/");
-		},
-	});
-
 	const [pages, setPages] = useState<Record<string, PagePreview>>({});
-	const [isLoading, setIsLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(true);
 
 	//
 	// CÁC EFFECT
 	//
 
+	// biome-ignore lint/correctness/useExhaustiveDependencies: 123
 	useEffect(() => {
 		const rootPages = provider.document.getMap("root-pages");
 		setPages(rootPages.toJSON());
 
-		console.log(rootPages);
+		// Chờ provider đồng bộ
+		const handleSynced = () => {
+			setIsLoading(false);
+		};
 
 		// Lắng nghe thay đổi trong array
 		const handlePagesChange = () => {
@@ -78,11 +70,13 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 		};
 
 		rootPages.observe(handlePagesChange);
+		provider.on("synced", handleSynced);
 
 		return () => {
 			rootPages.unobserve(handlePagesChange);
+			provider.off("synced", handleSynced);
 		};
-	}, [provider]);
+	}, [activeWorkspace]);
 
 	//
 	// CÁC EVENT
@@ -95,14 +89,6 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 			console.error("Error creating new page:", error);
 		}
 	};
-
-	const handlePageClick = (pageId: string) => {
-		navigate(`/${workspaceId}/${pageId}`);
-	};
-
-	useEffect(() => {
-		console.log(pages);
-	}, [pages]);
 
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -121,7 +107,7 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 			{isLoading ? (
 				<SidebarGroup>
 					<SidebarMenu>
-						{Array.from({ length: 6 }, (_, index) => (
+						{Array.from({ length: 8 }, (_, index) => (
 							// biome-ignore lint/suspicious/noArrayIndexKey: Static element
 							<SidebarMenuItem key={index}>
 								<SidebarMenuSkeleton />
@@ -134,54 +120,7 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 					{Object.entries(pages)
 						.sort((a, b) => a[1].title.localeCompare(b[1].title))
 						.map(([id, item]) => (
-							<SidebarMenuItem
-								key={id}
-								data-page-id={id}
-								onClick={() => handlePageClick(id)}
-							>
-								<SidebarMenuButton title={item.title} isActive={pageId === id}>
-									<span>
-										{item.icon ? (
-											item.icon
-										) : (
-											<FileIcon weight="duotone" size={16} width={20} />
-										)}
-									</span>
-									<span>{item.title ? item.title : "New page"}</span>
-								</SidebarMenuButton>
-								<DropdownMenu>
-									<DropdownMenuTrigger asChild>
-										<SidebarMenuAction showOnHover>
-											<DotsThreeIcon />
-											<span className="sr-only">More</span>
-										</SidebarMenuAction>
-									</DropdownMenuTrigger>
-									<DropdownMenuContent
-										className="w-56 rounded-lg"
-										side={isMobile ? "bottom" : "right"}
-										align={isMobile ? "end" : "start"}
-									>
-										<DropdownMenuItem>
-											<LinkIcon className="text-muted-foreground" />
-											<span>Copy Link</span>
-										</DropdownMenuItem>
-										<DropdownMenuItem>
-											<ArrowUpRightIcon className="text-muted-foreground" />
-											<span>Open in New Tab</span>
-										</DropdownMenuItem>
-										<DropdownMenuSeparator />
-										<DropdownMenuItem
-											onClick={(e) => {
-												e.stopPropagation();
-												handleDeletePage({ id });
-											}}
-										>
-											<TrashIcon className="text-muted-foreground" />
-											<span>Delete</span>
-										</DropdownMenuItem>
-									</DropdownMenuContent>
-								</DropdownMenu>
-							</SidebarMenuItem>
+							<PageItem key={id} pageId={id} pageData={item} />
 						))}
 				</SidebarMenu>
 			) : (
@@ -201,3 +140,99 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 // 		<span>More</span>
 // 	</SidebarMenuButton>
 // </SidebarMenuItem>;
+
+interface PageItemProps {
+	pageId: string;
+	pageData: PagePreview;
+}
+
+function PageItem({ pageId, pageData }: PageItemProps) {
+	const navigate = useNavigate();
+
+	const { pageId: currentPageId } = useParams();
+	const { activeWorkspace } = useYjsWorkspaceContext();
+
+	const handlePageClick = (pageId: string) => {
+		navigate(`/${activeWorkspace.id}/${pageId}`);
+	};
+
+	return (
+		<SidebarMenuItem
+			data-page-id={pageId}
+			onClick={() => handlePageClick(pageId)}
+		>
+			<SidebarMenuButton
+				title={pageData.title}
+				isActive={pageId === currentPageId}
+			>
+				<span>
+					{pageData.icon ? (
+						pageData.icon
+					) : (
+						<FileIcon weight="duotone" size={16} width={20} />
+					)}
+				</span>
+				<span className={cn(!pageData.title && "text-neutral-500")}>
+					{pageData.title ? pageData.title : "Untitled"}
+				</span>
+			</SidebarMenuButton>
+			<PageItemAction pageData={pageData} />
+		</SidebarMenuItem>
+	);
+}
+
+interface PageItemActionProps {
+	pageData: PagePreview;
+}
+
+function PageItemAction({ pageData }: PageItemActionProps) {
+	const isMobile = useIsMobile();
+	const navigate = useNavigate();
+	const { pageId: currentPageId } = useParams();
+	const { provider } = useYjsWorkspaceContext();
+
+	const { mutate: handleDeletePage } = usePageDelete({
+		onSuccess: (deletedPageId) => {
+			const yDocRoot = provider.document;
+			yDocRoot.getMap<PagePreview>("root-pages").delete(deletedPageId);
+			if (deletedPageId === currentPageId) {
+				navigate("/");
+			}
+		},
+	});
+
+	return (
+		<DropdownMenu>
+			<DropdownMenuTrigger asChild>
+				<SidebarMenuAction showOnHover>
+					<DotsThreeIcon />
+					<span className="sr-only">More</span>
+				</SidebarMenuAction>
+			</DropdownMenuTrigger>
+			<DropdownMenuContent
+				className="w-56 rounded-lg"
+				side={isMobile ? "bottom" : "right"}
+				align={isMobile ? "end" : "start"}
+			>
+				<DropdownMenuItem>
+					<LinkIcon className="text-muted-foreground" />
+					<span>Copy Link</span>
+				</DropdownMenuItem>
+				<DropdownMenuItem>
+					<ArrowUpRightIcon className="text-muted-foreground" />
+					<span>Open in New Tab</span>
+				</DropdownMenuItem>
+				<DropdownMenuSeparator />
+				<DropdownMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+						handleDeletePage({ id: pageData.id });
+					}}
+				>
+					<TrashIcon className="text-muted-foreground" />
+					<span>Delete</span>
+				</DropdownMenuItem>
+			</DropdownMenuContent>
+		</DropdownMenu>
+	);
+}

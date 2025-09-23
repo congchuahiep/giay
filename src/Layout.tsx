@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AppSidebar } from "@/components/AppSidebar";
-import DebugMenu from "@/components/Tauri/DebugMenu";
-import Titlebar from "@/components/Tauri/Titlebar";
+import DebugMenu from "@/components/Titlebar/DebugMenu";
+import Titlebar from "@/components/Titlebar/Titlebar";
 import {
 	SidebarInset,
 	SidebarProvider,

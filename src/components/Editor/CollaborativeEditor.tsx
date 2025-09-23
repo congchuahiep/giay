@@ -1,7 +1,13 @@
 // Import các custom hooks mới
+
+import { useEffect } from "react";
 import PageEditor from "@/components/Editor/PageEditor";
-import { YjsPageEditorProvider } from "@/hooks/YjsPageEditorProvider";
+import {
+	useYjsPageEditorContext,
+	YjsPageEditorProvider,
+} from "@/hooks/YjsPageEditorProvider";
 import { usePageQuery } from "@/services/pages";
+import { Skeleton } from "../ui/skeleton";
 
 const YJS_PAGE_URL = import.meta.env.VITE_YJS_PAGE_SERVER;
 
@@ -13,16 +19,18 @@ interface CollaborativeEditorProps {
  * Khởi động Editor bao gồm các tính năng cộng tác
  */
 const CollaborativeEditor = ({ pageId }: CollaborativeEditorProps) => {
-	const { data: pageData, isLoading } = usePageQuery(pageId);
+	const { data: pageData, isFetching, isError } = usePageQuery(pageId);
 
-	if (isLoading) return <div>Loading...</div>;
+	if (isFetching) return <EditorLoading />;
+
+	if (isError) return <div>Internal server error</div>;
 
 	if (!pageData) return <div>Page not found</div>;
 
 	return (
 		<YjsPageEditorProvider
 			websocketUrl={YJS_PAGE_URL}
-			pageId={pageId}
+			activePage={{ ...pageData, children: [] }}
 			yDoc={pageData.page_data}
 		>
 			<div className="h-screen flex flex-col">
@@ -32,43 +40,17 @@ const CollaborativeEditor = ({ pageId }: CollaborativeEditorProps) => {
 	);
 };
 
-// // Component hiển thị trạng thái
-// const StatusIndicator = ({ status }: { status: EditorStatus }) => {
-// 	const getStatusColor = () => {
-// 		switch (status) {
-// 			case "connected":
-// 				return "bg-green-500";
-// 			case "connecting":
-// 				return "bg-yellow-500";
-// 			case "saving":
-// 				return "bg-blue-500";
-// 			case "offline":
-// 				return "bg-red-500";
-// 			default:
-// 				return "bg-gray-500";
-// 		}
-// 	};
-
-// 	const getStatusLabel = () => {
-// 		switch (status) {
-// 			case "connected":
-// 				return "Online";
-// 			case "connecting":
-// 				return "Connecting...";
-// 			case "offline":
-// 				return "Offline";
-// 			case "saving":
-// 				return "Saving...";
-// 			default:
-// 				return "Unknown";
-// 		}
-// 	};
-
-// 	return (
-// 		<div className={`px-2 py-1 text-xs rounded text-white ${getStatusColor()}`}>
-// 			{getStatusLabel()}
-// 		</div>
-// 	);
-// };
+function EditorLoading() {
+	return (
+		<div className="flex flex-col gap-2 mt-20">
+			<Skeleton className="w-full h-[120px]" />
+			<Skeleton className="w-full h-[24px] opacity-80" />
+			<Skeleton className="w-full h-[24px] opacity-60" />
+			<Skeleton className="w-full h-[24px] opacity-40" />
+			<Skeleton className="w-full h-[24px] opacity-20" />
+			<Skeleton className="w-full h-[24px] opacity-5" />
+		</div>
+	);
+}
 
 export default CollaborativeEditor;

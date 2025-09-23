@@ -28,10 +28,11 @@ async function fetchPageDataFromServer(pageId: string): Promise<Page> {
 				id: rawData.id,
 				title: rawData.title,
 				icon: rawData.icon,
+				// Bổ sung children
+				parent_page_id: rawData.parent_page_id,
 				page_data: yDoc,
 			};
 
-			console.log("Decoded page data:", page);
 			return page;
 		})
 		.catch((error) => {

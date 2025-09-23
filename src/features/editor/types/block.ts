@@ -7,6 +7,13 @@ export interface BaseBlock {
 	children: Descendant[];
 }
 
+export interface PageBlock extends BaseBlock {
+	type: "page";
+	icon: string;
+	title: string;
+	pageId: string;
+}
+
 export interface ParagraphBlock extends BaseBlock {
 	type: "paragraph";
 }
@@ -40,7 +47,8 @@ export type ElementBlock =
 	| CheckListBlock
 	| CodeBlock
 	| QuoteBlock
-	| DividerBlock;
+	| DividerBlock
+	| PageBlock;
 
 export type BlockType = ElementBlock["type"];
 export * from "./code-block";

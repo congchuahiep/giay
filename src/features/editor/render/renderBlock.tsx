@@ -1,30 +1,32 @@
 import type { RenderElementProps } from "slate-react";
 import {
-  BulletListBlock,
-  CheckList,
-  CodeBlock,
-  Heading1Block,
-  Heading2Block,
-  Heading3Block,
-  Heading4Block,
-  ParagraphBlock,
-  QuoteBlock,
-  DividerBlock,
+	BulletListBlock,
+	CheckList,
+	CodeBlock,
+	Heading1Block,
+	Heading2Block,
+	Heading3Block,
+	Heading4Block,
+	ParagraphBlock,
+	QuoteBlock,
+	DividerBlock,
+	PageBlock,
 } from "@/components/Editor/Block";
 import { withBlockInteraction } from "@/components/Editor/BlockInteraction";
 
 // Map các block types với components
 const blockComponents = {
-  h1: withBlockInteraction(Heading1Block),
-  h2: withBlockInteraction(Heading2Block),
-  h3: withBlockInteraction(Heading3Block),
-  h4: withBlockInteraction(Heading4Block),
-  code: withBlockInteraction(CodeBlock),
-  bulletList: withBlockInteraction(BulletListBlock),
-  checkList: withBlockInteraction(CheckList),
-  divider: withBlockInteraction(DividerBlock, { alignCenter: true }),
-  quote: withBlockInteraction(QuoteBlock),
-  paragraph: withBlockInteraction(ParagraphBlock), // default case
+	h1: withBlockInteraction(Heading1Block),
+	h2: withBlockInteraction(Heading2Block),
+	h3: withBlockInteraction(Heading3Block),
+	h4: withBlockInteraction(Heading4Block),
+	code: withBlockInteraction(CodeBlock),
+	bulletList: withBlockInteraction(BulletListBlock),
+	checkList: withBlockInteraction(CheckList),
+	divider: withBlockInteraction(DividerBlock, { alignCenter: true }),
+	quote: withBlockInteraction(QuoteBlock),
+	paragraph: withBlockInteraction(ParagraphBlock), // default case
+	page: withBlockInteraction(PageBlock, { alignCenter: true }),
 } as const;
 
 /**
@@ -33,9 +35,9 @@ const blockComponents = {
  * @returns
  */
 export default function renderBlock(props: RenderElementProps) {
-  const blockType = props.element.type as keyof typeof blockComponents;
-  const BlockComponent =
-    blockComponents[blockType] || blockComponents.paragraph;
+	const blockType = props.element.type as keyof typeof blockComponents;
+	const BlockComponent =
+		blockComponents[blockType] || blockComponents.paragraph;
 
-  return <BlockComponent {...props} />;
+	return <BlockComponent {...props} />;
 }
