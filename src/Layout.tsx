@@ -14,13 +14,17 @@ import YjsWorkspaceProvider from "./providers/YjsWorkspaceProvider";
 import { useWorkspacesQuery } from "./services/workspaces";
 import type { Workspace } from "./types";
 import { Outlet } from "react-router-dom";
+import { useAuthStore } from "./stores/auth";
+import CreateWorkspaceDialog from "./windows/CreateWorkspaceDialog";
+import { useQueryClient } from "@tanstack/react-query";
 
 const YJS_WORKSPACE_URL = import.meta.env.VITE_YJS_WORKSPACE_SERVER;
 
 export default function Layout() {
 	const { init } = useSettingsStore(); // Khởi tạo settings store ngay khi app load
-
-	const { data: workspaces, isLoading } = useWorkspacesQuery();
+	const { token } = useAuthStore();
+	const { data: workspaces, isLoading } = useWorkspacesQuery(token);
+	const queryClient = useQueryClient();
 
 	const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(
 		null,
@@ -41,7 +45,14 @@ export default function Layout() {
 	}
 
 	if (!workspaces || !activeWorkspace) {
-		return <div>No active workspace</div>; // TODO: Xử lý việc tạo workspace mới
+		return (
+			<CreateWorkspaceDialog
+				open={true}
+				onCreated={() => {
+					queryClient.invalidateQueries(["workspaces"]);
+				}}
+			/>
+		);
 	}
 
 	return (
@@ -50,19 +61,17 @@ export default function Layout() {
 			workspace={activeWorkspace}
 			userWorkspaces={workspaces}
 		>
-			<ThemeProvider storageKey="theme">
-				<ShortcutListener />
-				<SidebarProvider>
-					<Titlebar>
-						<SidebarTrigger className="cursor-pointer" />
-						<DebugMenu />
-					</Titlebar>
-					<AppSidebar />
-					<SidebarInset>
-						<Outlet />
-					</SidebarInset>
-				</SidebarProvider>
-			</ThemeProvider>
+			<ShortcutListener />
+			<SidebarProvider>
+				<Titlebar>
+					<SidebarTrigger className="cursor-pointer" />
+					<DebugMenu />
+				</Titlebar>
+				<AppSidebar />
+				<SidebarInset>
+					<Outlet />
+				</SidebarInset>
+			</SidebarProvider>
 		</YjsWorkspaceProvider>
 	);
 }

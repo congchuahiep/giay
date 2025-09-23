@@ -14,9 +14,17 @@ export const endpoint = {
 	workspaces: {
 		list: "/workspaces/",
 		create: "/workspaces/",
-		update: "/workspaces/:id/",
 		delete: "/workspaces/:id/",
 		rootPage: (id: string) => `/workspaces/${id}/root-pages/`,
+		user: "/workspaces/user/",
+	},
+	users: {
+		create: "/users/",
+		currentUser: "/users/current/",
+	},
+	auth: {
+		getToken: "/api/token/",
+		refreshToken: "/api/token/refresh/",
 	},
 };
 
