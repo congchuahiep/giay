@@ -22,12 +22,11 @@ export type PageRawData = {
 	icon: string;
 	parent_page_id: string;
 	page_data: string;
+	children: PagePreview[];
 };
 
 export type PageInWorkspace = {
 	id: string;
 	title: string;
 	icon: string;
-	parent_id: string;
-	workspace_data: Y.Doc;
 };

@@ -18,16 +18,16 @@ export default function TitleEditor() {
 	const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false);
 	const [pageIcon, setPageIcon] = useState<string | null>(null);
 
-	const { provider, activePage } = useYjsPageEditorContext();
+	const { provider: pageProvider, activePage } = useYjsPageEditorContext();
 	const { provider: workspaceProvider } = useYjsWorkspaceContext();
 
 	const pageTitleData = useMemo(() => {
-		return provider.document.get("title", Y.XmlText);
-	}, [provider]);
+		return pageProvider.document.get("title", Y.XmlText);
+	}, [pageProvider]);
 
 	const pageIconData = useMemo(() => {
-		return provider.document.get("icon", Y.Text);
-	}, [provider]);
+		return pageProvider.document.get("icon", Y.Text);
+	}, [pageProvider]);
 
 	const editor = useMemo(() => {
 		return withYjs(withReact(withTitleSchema(createEditor())), pageTitleData);

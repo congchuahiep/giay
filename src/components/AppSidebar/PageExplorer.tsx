@@ -1,25 +1,32 @@
 import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
-import { DotsThreeIcon } from "@phosphor-icons/react/dist/csr/DotsThree";
+import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { FileIcon } from "@phosphor-icons/react/dist/csr/File";
 import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
-import { useEffect, useState } from "react";
+import { SpinnerIcon } from "@phosphor-icons/react/dist/csr/Spinner";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import * as Y from "yjs";
 import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
-import { useIsMobile } from "@/hooks/useIsMobile";
-import { usePageCreate, usePageDelete } from "@/services/pages/";
+import {
+	usePageChildrenQuery,
+	usePageCreate,
+	usePageDelete,
+} from "@/services/pages/";
 import type { PagePreview } from "@/types/Page";
 import { cn } from "@/utils";
-import { Button } from "../ui/button";
 import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "../ui/dropdown-menu";
+	Collapsible,
+	CollapsibleContent,
+	CollapsibleTrigger,
+} from "../ui/collapsible";
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from "../ui/context-menu";
 import {
 	SidebarGroup,
 	SidebarGroupAction,
@@ -29,6 +36,7 @@ import {
 	SidebarMenuButton,
 	SidebarMenuItem,
 	SidebarMenuSkeleton,
+	SidebarMenuSub,
 } from "../ui/sidebar";
 
 interface PageExplorerProps {
@@ -134,13 +142,6 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 	);
 }
 
-// <SidebarMenuItem>
-// 	<SidebarMenuButton className="text-sidebar-foreground/70">
-// 		<DotsThreeIcon />
-// 		<span>More</span>
-// 	</SidebarMenuButton>
-// </SidebarMenuItem>;
-
 interface PageItemProps {
 	pageId: string;
 	pageData: PagePreview;
@@ -148,45 +149,147 @@ interface PageItemProps {
 
 function PageItem({ pageId, pageData }: PageItemProps) {
 	const navigate = useNavigate();
+	const [isHovered, setIsHovered] = useState(false);
+	const [isCollapseOpen, setIsCollapseOpen] = useState(false);
 
 	const { pageId: currentPageId } = useParams();
-	const { activeWorkspace } = useYjsWorkspaceContext();
+	const { activeWorkspace, provider: workspaceProvider } =
+		useYjsWorkspaceContext();
 
-	const handlePageClick = (pageId: string) => {
-		navigate(`/${activeWorkspace.id}/${pageId}`);
-	};
+	const {
+		data: pageChildrenData,
+		refetch: fetchPageChildren,
+		isFetching,
+	} = usePageChildrenQuery(pageId, {
+		enabled: currentPageId === pageId,
+		initialData: [],
+	});
+	const [pageChildren, setPageChildren] = useState<PagePreview[]>([]);
+
+	const handlePageExplanation = useCallback(async () => {
+		await fetchPageChildren();
+
+		const pageChildrenShared =
+			workspaceProvider.document.getMap<PagePreview>(pageId);
+
+		pageChildrenData?.forEach((child) => {
+			pageChildrenShared.set(child.id, child);
+		});
+	}, [fetchPageChildren, pageChildrenData, pageId, workspaceProvider]);
+
+	const handlePageClick = useCallback(
+		async (e: React.MouseEvent, pageId: string) => {
+			e.stopPropagation();
+			navigate(`/${activeWorkspace.id}/${pageId}`);
+			setIsCollapseOpen(true);
+		},
+		[navigate, activeWorkspace.id],
+	);
+
+	// TODO: Triển khai việc tự mở vị trí hiện tại của trang khi mới truy cập
+	// useEffect(() => {
+	// 	if (currentPageId === pageId)
+	// 		handlePageExplanation().then(() => {
+	// 			setIsOpenCollapsed(true);
+	// 		});
+	// }, [currentPageId, pageId, handlePageExplanation]);
+
+	useEffect(() => {
+		if (isCollapseOpen) {
+			handlePageExplanation();
+		}
+	}, [isCollapseOpen, handlePageExplanation]);
+
+	useEffect(() => {
+		const pageChildrenShared =
+			workspaceProvider.document.getMap<PagePreview>(pageId);
+
+		const handlePageChildrenChange = () => {
+			setPageChildren(Object.values(pageChildrenShared.toJSON()));
+		};
+		pageChildrenShared.observe(handlePageChildrenChange);
+
+		return () => {
+			pageChildrenShared.unobserve(handlePageChildrenChange);
+		};
+	}, [workspaceProvider, pageId]);
 
 	return (
-		<SidebarMenuItem
-			data-page-id={pageId}
-			onClick={() => handlePageClick(pageId)}
-		>
-			<SidebarMenuButton
-				title={pageData.title}
-				isActive={pageId === currentPageId}
+		<PageItemAction pageData={pageData}>
+			<SidebarMenuItem
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+				data-page-id={pageId}
+				onClick={(e) => handlePageClick(e, pageId)}
 			>
-				<span>
-					{pageData.icon ? (
-						pageData.icon
-					) : (
-						<FileIcon weight="duotone" size={16} width={20} />
-					)}
-				</span>
-				<span className={cn(!pageData.title && "text-neutral-500")}>
-					{pageData.title ? pageData.title : "Untitled"}
-				</span>
-			</SidebarMenuButton>
-			<PageItemAction pageData={pageData} />
-		</SidebarMenuItem>
+				<SidebarMenuButton
+					title={pageData.title}
+					isActive={pageId === currentPageId}
+					className={cn(isFetching && "animate-pulse")}
+				>
+					<span>
+						{pageData.icon ? (
+							pageData.icon
+						) : (
+							<FileIcon weight="duotone" size={16} width={20} />
+						)}
+					</span>
+					<span className={cn(!pageData.title && "text-neutral-500")}>
+						{pageData.title ? pageData.title : "Untitled"}
+					</span>
+				</SidebarMenuButton>
+				<Collapsible
+					open={isCollapseOpen}
+					onOpenChange={() => setIsCollapseOpen(!isCollapseOpen)}
+					className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+				>
+					<CollapsibleTrigger asChild>
+						<SidebarMenuAction
+							onClick={(e) => {
+								e.stopPropagation();
+							}}
+							className={cn(
+								isHovered ? "visible" : "invisible",
+								"cursor-pointer",
+							)}
+						>
+							{isFetching ? (
+								<SpinnerIcon
+									size={16}
+									// TODO: Làm cho cái spinner xoay tròn
+									className="ml-2 transition-all rotate-180 duration-300 repeat-infinite"
+								/>
+							) : (
+								<CaretDownIcon className="transition-transform" />
+							)}
+						</SidebarMenuAction>
+					</CollapsibleTrigger>
+					<CollapsibleContent>
+						<SidebarMenuSub>
+							{Array.isArray(pageChildren) &&
+								pageChildren
+									?.sort((a, b) => a.title.localeCompare(b.title))
+									.map((subItem) => (
+										<PageItem
+											key={subItem.id}
+											pageId={subItem.id}
+											pageData={subItem}
+										/>
+									))}
+						</SidebarMenuSub>
+					</CollapsibleContent>
+				</Collapsible>
+			</SidebarMenuItem>
+		</PageItemAction>
 	);
 }
 
 interface PageItemActionProps {
 	pageData: PagePreview;
+	children: React.ReactNode;
 }
 
-function PageItemAction({ pageData }: PageItemActionProps) {
-	const isMobile = useIsMobile();
+function PageItemAction({ pageData, children }: PageItemActionProps) {
 	const navigate = useNavigate();
 	const { pageId: currentPageId } = useParams();
 	const { provider } = useYjsWorkspaceContext();
@@ -194,7 +297,11 @@ function PageItemAction({ pageData }: PageItemActionProps) {
 	const { mutate: handleDeletePage } = usePageDelete({
 		onSuccess: (deletedPageId) => {
 			const yDocRoot = provider.document;
-			yDocRoot.getMap<PagePreview>("root-pages").delete(deletedPageId);
+			yDocRoot
+				.getMap<PagePreview>(
+					pageData.parent_page_id ? pageData.parent_page_id : "root-pages",
+				)
+				.delete(deletedPageId);
 			if (deletedPageId === currentPageId) {
 				navigate("/");
 			}
@@ -202,37 +309,29 @@ function PageItemAction({ pageData }: PageItemActionProps) {
 	});
 
 	return (
-		<DropdownMenu>
-			<DropdownMenuTrigger asChild>
-				<SidebarMenuAction showOnHover>
-					<DotsThreeIcon />
-					<span className="sr-only">More</span>
-				</SidebarMenuAction>
-			</DropdownMenuTrigger>
-			<DropdownMenuContent
-				className="w-56 rounded-lg"
-				side={isMobile ? "bottom" : "right"}
-				align={isMobile ? "end" : "start"}
-			>
-				<DropdownMenuItem>
+		<ContextMenu>
+			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
+			<ContextMenuContent className="w-56 rounded-lg">
+				<ContextMenuItem>
 					<LinkIcon className="text-muted-foreground" />
 					<span>Copy Link</span>
-				</DropdownMenuItem>
-				<DropdownMenuItem>
+				</ContextMenuItem>
+				<ContextMenuItem>
 					<ArrowUpRightIcon className="text-muted-foreground" />
 					<span>Open in New Tab</span>
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem
+				</ContextMenuItem>
+				<ContextMenuSeparator />
+				<ContextMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
 						handleDeletePage({ id: pageData.id });
 					}}
+					variant="destructive"
 				>
 					<TrashIcon className="text-muted-foreground" />
 					<span>Delete</span>
-				</DropdownMenuItem>
-			</DropdownMenuContent>
-		</DropdownMenu>
+				</ContextMenuItem>
+			</ContextMenuContent>
+		</ContextMenu>
 	);
 }

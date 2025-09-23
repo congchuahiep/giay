@@ -44,20 +44,6 @@ const useAppsidebarItems = (navigate: NavigateFunction) => [
 	},
 ];
 
-const footerItemClass = "dark:text-stone-100";
-
-const footerItems = [
-	{
-		title: "Help",
-		icon: <QuestionIcon className={footerItemClass} />,
-	},
-	{
-		title: "Settings",
-		icon: <GearIcon className={footerItemClass} />,
-		onClick: openSettingsWindow,
-	},
-];
-
 const AppSidebar = () => {
 	const navigate = useNavigate();
 
@@ -96,25 +82,6 @@ const AppSidebar = () => {
 					<PageExplorer workspaceId={activeWorkspace.id} />
 				</SidebarGroupContent>
 			</SidebarContent>
-			<SidebarFooter>
-				<SidebarMenu>
-					<SidebarMenuItem className="flex justify-end gap-2">
-						{footerItems.map((item) => (
-							<SidebarMenuButton
-								key={item.title}
-								asChild
-								onClick={item.onClick}
-								tooltip={"123"}
-								className={cn(
-									"p-2 text-stone-500 hover:bg-stone-700/50 rounded-md cursor-pointer",
-								)}
-							>
-								{item.icon}
-							</SidebarMenuButton>
-						))}
-					</SidebarMenuItem>
-				</SidebarMenu>
-			</SidebarFooter>
 		</Sidebar>
 	);
 };

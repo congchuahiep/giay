@@ -60,9 +60,9 @@ export default function PageBlock(props: RenderElementProps) {
 			<Button
 				variant="secondary"
 				className={cn(
-					"m-1 p-0 border border-stone-300/50 w-full cursor-pointer justify-start",
-					"text-stone-800 bg-stone-50/50 hover:bg-stone-100 shadow-none",
-					"dark:text-stone-50 dark:bg-stone-600/50 dark:hover:bg-stone-800",
+					"m-1 p-0 border shadow-none w-full cursor-pointer justify-start",
+					"text-stone-800 bg-stone-50/50 hover:bg-stone-100 border-stone-300/50",
+					"dark:text-stone-50 dark:bg-stone-800/50 dark:hover:bg-stone-800 dark:border-stone-700/50",
 				)}
 				onClick={handleOnClick}
 			>

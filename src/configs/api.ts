@@ -9,6 +9,7 @@ export const endpoint = {
 		retrieve: (id: string) => `/pages/${id}/`,
 		update: (id: string) => `/pages/${id}/`,
 		delete: (id: string) => `/pages/${id}/`,
+		children: (id: string) => `/pages/${id}/children/`,
 	},
 	workspaces: {
 		list: "/workspaces/",
