@@ -1,14 +1,10 @@
 // Import các custom hooks mới
 import PageEditor from "@/components/Editor/PageEditor";
-import {
-	useYjsDocumentContext,
-	type EditorStatus,
-} from "@/hooks/useYjsDocument";
-import { useYjsSync } from "@/hooks/useYjsSync";
+import { YjsPageEditorProvider } from "@/hooks/YjsPageEditorProvider";
+import { usePageQuery } from "@/services/pages";
 
-// Các import khác...
+const YJS_PAGE_URL = import.meta.env.VITE_YJS_PAGE_SERVER;
 
-// Chuyển các hằng số cấu hình vào file riêng hoặc biến môi trường
 interface CollaborativeEditorProps {
 	pageId: string;
 }
@@ -17,65 +13,62 @@ interface CollaborativeEditorProps {
  * Khởi động Editor bao gồm các tính năng cộng tác
  */
 const CollaborativeEditor = ({ pageId }: CollaborativeEditorProps) => {
-	// Khởi tạo Yjs
-	const { yDoc, provider, status, setStatus, isConnected } =
-		useYjsDocumentContext();
+	const { data: pageData, isLoading } = usePageQuery(pageId);
 
-	// Kích hoạt đồng bộ hóa dữ liệu
-	useYjsSync(pageId, yDoc, provider, isConnected, setStatus);
+	if (isLoading) return <div>Loading...</div>;
 
-	// Hiển thị trạng thái loading
-	if (status === "initial" || !yDoc) {
-		return <div className="p-4">Loading document...</div>;
-	}
+	if (!pageData) return <div>Page not found</div>;
 
 	return (
-		<div className="h-screen flex flex-col">
-			<div className="fixed right-4 top-14 p-2">
-				<StatusIndicator status={status} />
+		<YjsPageEditorProvider
+			websocketUrl={YJS_PAGE_URL}
+			pageId={pageId}
+			yDoc={pageData.page_data}
+		>
+			<div className="h-screen flex flex-col">
+				<PageEditor />
 			</div>
-			<PageEditor />
-		</div>
+		</YjsPageEditorProvider>
 	);
 };
 
-// Component hiển thị trạng thái
-const StatusIndicator = ({ status }: { status: EditorStatus }) => {
-	const getStatusColor = () => {
-		switch (status) {
-			case "connected":
-				return "bg-green-500";
-			case "connecting":
-				return "bg-yellow-500";
-			case "saving":
-				return "bg-blue-500";
-			case "offline":
-				return "bg-red-500";
-			default:
-				return "bg-gray-500";
-		}
-	};
+// // Component hiển thị trạng thái
+// const StatusIndicator = ({ status }: { status: EditorStatus }) => {
+// 	const getStatusColor = () => {
+// 		switch (status) {
+// 			case "connected":
+// 				return "bg-green-500";
+// 			case "connecting":
+// 				return "bg-yellow-500";
+// 			case "saving":
+// 				return "bg-blue-500";
+// 			case "offline":
+// 				return "bg-red-500";
+// 			default:
+// 				return "bg-gray-500";
+// 		}
+// 	};
 
-	const getStatusLabel = () => {
-		switch (status) {
-			case "connected":
-				return "Online";
-			case "connecting":
-				return "Connecting...";
-			case "offline":
-				return "Offline";
-			case "saving":
-				return "Saving...";
-			default:
-				return "Unknown";
-		}
-	};
+// 	const getStatusLabel = () => {
+// 		switch (status) {
+// 			case "connected":
+// 				return "Online";
+// 			case "connecting":
+// 				return "Connecting...";
+// 			case "offline":
+// 				return "Offline";
+// 			case "saving":
+// 				return "Saving...";
+// 			default:
+// 				return "Unknown";
+// 		}
+// 	};
 
-	return (
-		<div className={`px-2 py-1 text-xs rounded text-white ${getStatusColor()}`}>
-			{getStatusLabel()}
-		</div>
-	);
-};
+// 	return (
+// 		<div className={`px-2 py-1 text-xs rounded text-white ${getStatusColor()}`}>
+// 			{getStatusLabel()}
+// 		</div>
+// 	);
+// };
 
 export default CollaborativeEditor;

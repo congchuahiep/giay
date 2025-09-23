@@ -1,21 +1,21 @@
+import type { HocuspocusProvider } from "@hocuspocus/provider";
 import { withCursors, withYjs } from "@slate-yjs/core";
 import { createEditor, Editor, Element, Transforms } from "slate";
-import type { WebsocketProvider } from "y-websocket";
 import type * as Y from "yjs";
 import { composePlugins, type Plugin } from "@/features/editor/composePlugins";
 
 /**
  * Khởi tạo editor, có chế độ cộng tác
  *
- * @param sharedType
+ * @param contentData
  * @param provider
  * @param initialValue
  * @returns
  */
 export default function initialEditor(
 	plugins: Plugin<Editor>[],
-	sharedType: Y.XmlText,
-	provider: WebsocketProvider | undefined,
+	contentData: Y.XmlText,
+	provider: HocuspocusProvider,
 ) {
 	const randomNames = [
 		"Alex",
@@ -42,10 +42,10 @@ export default function initialEditor(
 	const color = randomColors[Math.floor(Math.random() * randomColors.length)];
 
 	// Khởi tạo editor với danh sách các plugin
-	let editor = withYjs(composePlugins(createEditor(), plugins), sharedType);
+	let editor = withYjs(composePlugins(createEditor(), plugins), contentData);
 
 	// Nếu có provider, thêm plugin con trỏ chuột
-	if (provider && sharedType) {
+	if (provider.awareness) {
 		editor = withCursors(editor, provider.awareness, {
 			data: { name, color },
 		});

@@ -8,19 +8,15 @@ pub fn get_migrations() -> Vec<Migration> {
             sql: "
             CREATE TABLE IF NOT EXISTS pages (
             id TEXT PRIMARY KEY,
-            title VARCHAR(255),
+            parent_page_id TEXT,
+            title NVARCHAR(255),
             content TEXT NOT NULL,
             page_data BLOB NOT NULL,
-            sync_status TEXT NOT NULL DEFAULT 'pending' CHECK(sync_status IN ('pending', 'synced')),
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            sync_status VARCHAR(7) NOT NULL DEFAULT 'initial' CHECK(sync_status IN ('initial', 'pending', 'synced')),
+            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (parent_page_id) REFERENCES pages(id)
             );
             ",
-            kind: MigrationKind::Up,
-        },
-        Migration {
-            version: 2,
-            description: "add_emoji_column_to_pages_table",
-            sql: "ALTER TABLE pages ADD COLUMN page_icon VARCHAR(1);",
             kind: MigrationKind::Up,
         },
     ]

@@ -39,7 +39,7 @@ import {
 	withUtilsEditor,
 } from "@/features/editor/plugins/utils";
 import TitleEditor from "./TitleEditor";
-import { useYjsDocumentContext } from "@/hooks/useYjsDocument";
+import { useYjsPageEditorContext } from "@/hooks/YjsPageEditorProvider";
 import { decorateCodeBlock } from "@/features/editor/plugins/code-block";
 import useDecorate from "@/features/editor/hooks/useDecorate";
 
@@ -71,8 +71,12 @@ const editorShortcutExtensions = [
 
 const PageEditor = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
-	const { yDoc, provider } = useYjsDocumentContext();
-	const pageContentData = useMemo(() => yDoc.get("content", Y.XmlText), [yDoc]);
+	const { provider } = useYjsPageEditorContext();
+
+	const pageContentData = useMemo(
+		() => provider.document.get("content", Y.XmlText),
+		[provider],
+	);
 
 	// Khởi tạo editor
 	const editor = useMemo(

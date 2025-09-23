@@ -103,7 +103,7 @@ export const useShortcutStore = create<ShortcutStore>()(
 			 */
 			findActionByKey: (scope: string, key: string) => {
 				const { hotkeys } = get();
-				return hotkeys[scope][key];
+				return hotkeys[scope]?.[key];
 			},
 
 			/**

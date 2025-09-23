@@ -1,7 +1,6 @@
 import { GearIcon } from "@phosphor-icons/react/dist/csr/Gear";
 import { QuestionIcon } from "@phosphor-icons/react/dist/csr/Question";
-import { Calendar, Home, Inbox, Search, Settings } from "lucide-react";
-
+import { Home, Search, Settings } from "lucide-react";
 import {
 	Sidebar,
 	SidebarContent,
@@ -9,19 +8,28 @@ import {
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
+	SidebarHeader,
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { openSettingsWindow } from "@/features/navigates";
 import { cn } from "@/utils";
+import WorkspaceButton from "./WorkspaceButton";
+import PageExplorer from "./PageExplorer";
+import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
+import { useNavigate, type NavigateFunction } from "react-router-dom";
 
 // Menu items.
-const items = [
+const useAppsidebarItems = (navigate: NavigateFunction) => [
 	{
 		title: "Home",
 		url: "#",
 		icon: Home,
+		onClick: () => {
+			// Navigate đến trang mới
+			navigate("/");
+		},
 	},
 	{
 		title: "Search",
@@ -51,8 +59,16 @@ const footerItems = [
 ];
 
 const AppSidebar = () => {
+	const navigate = useNavigate();
+
+	const { activeWorkspace } = useYjsWorkspaceContext();
+	const sidebarItems = useAppsidebarItems(navigate);
+
 	return (
-		<Sidebar className="pt-10" variant="inset">
+		<Sidebar className="pt-12" variant="inset">
+			<SidebarHeader>
+				<WorkspaceButton />
+			</SidebarHeader>
 			<SidebarContent>
 				<SidebarGroup>
 					<SidebarGroupLabel className="dark:text-stone-300">
@@ -60,7 +76,7 @@ const AppSidebar = () => {
 					</SidebarGroupLabel>
 					<SidebarGroupContent>
 						<SidebarMenu>
-							{items.map((item) => (
+							{sidebarItems.map((item) => (
 								<SidebarMenuItem key={item.title} onClick={item.onClick}>
 									<SidebarMenuButton
 										asChild
@@ -76,6 +92,9 @@ const AppSidebar = () => {
 						</SidebarMenu>
 					</SidebarGroupContent>
 				</SidebarGroup>
+				<SidebarGroupContent>
+					<PageExplorer workspaceId={activeWorkspace.id} />
+				</SidebarGroupContent>
 			</SidebarContent>
 			<SidebarFooter>
 				<SidebarMenu>
