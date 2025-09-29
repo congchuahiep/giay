@@ -39,14 +39,20 @@ import {
 	withUtilsEditor,
 } from "@/features/editor/plugins/utils";
 import TitleEditor from "./TitleEditor";
-import { useYjsPageEditorContext } from "@/hooks/YjsPageEditorProvider";
-import { decorateCodeBlock } from "@/features/editor/plugins/code-block";
 import useDecorate from "@/features/editor/hooks/useDecorate";
+import { useYjsPage } from "@/features/yjs-page";
+import { useNavigate } from "react-router-dom";
+import {
+	PageBlockShortcutExtension,
+	withPageBlock,
+} from "@/features/editor/plugins/page-block";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
 
 /**
  * Danh sách các plugin
  */
 const plugins = [
+	withPageBlock,
 	withMarkdownEditor,
 	withSlashEditor,
 	withInsertEditor,
@@ -65,13 +71,15 @@ const editorShortcutExtensions = [
 	DefaultBehaviourShortCutExtension,
 ];
 
-// interface PageEditorProps {
-
-// }
+const pageShortcutExtensions = [PageBlockShortcutExtension];
 
 const PageEditor = () => {
+	const navigate = useNavigate();
+
 	const editorRef = useRef<HTMLDivElement>(null);
-	const { provider, status } = useYjsPageEditorContext();
+	const provider = useYjsPage((state) => state.provider);
+	const workspaceId = useYjsWorkspace((state) => state.activeWorkspace.id);
+	const status = useYjsPage((state) => state.status);
 
 	const pageContentData = useMemo(
 		() => provider.document.get("content", Y.XmlText),
@@ -83,6 +91,14 @@ const PageEditor = () => {
 		() => initialEditor(plugins, pageContentData, provider),
 		[pageContentData, provider],
 	);
+
+	const pageBlockShortcutContext = useMemo(() => {
+		return {
+			editor,
+			workspaceId,
+			navigate,
+		};
+	}, [editor, workspaceId, navigate]);
 
 	const memoizedRenderLeaf = useCallback(
 		(props: RenderLeafProps) => renderLeaf(props),
@@ -106,6 +122,12 @@ const PageEditor = () => {
 
 	// Đăng ký sự kiện bàn phím
 	useRegisterShortcuts("editor", editor, editorShortcutExtensions);
+	useRegisterShortcuts(
+		"editor",
+		pageBlockShortcutContext,
+		pageShortcutExtensions,
+	);
+
 	const { setActiveShortcutScope } = useShortcutStore();
 
 	const [handlePaste, handleCopy] = useClipboard(editor);
@@ -116,7 +138,7 @@ const PageEditor = () => {
 				<Cursors>
 					{/*<Toolbar />*/}
 					<TitleEditor />
-					{status === "connecting" && (
+					{status === "disconnected" && (
 						<div className="text-xs z-100 fixed right-8 top-16 py-1 px-2 bg-stone-600 text-white rounded">
 							offline
 						</div>

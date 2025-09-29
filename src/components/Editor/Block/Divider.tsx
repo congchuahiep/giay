@@ -1,8 +1,12 @@
-import { useSelected, type RenderElementProps } from "slate-react";
-import { useSlateStatic, ReactEditor } from "slate-react";
 import { Transforms } from "slate";
-import { cn } from "@/utils";
+import {
+	ReactEditor,
+	type RenderElementProps,
+	useSelected,
+	useSlateStatic,
+} from "slate-react";
 import { Separator } from "@/components/ui/separator";
+import { cn } from "@/utils";
 
 const DividerBlock = (props: RenderElementProps) => {
 	const editor = useSlateStatic();
@@ -13,29 +17,16 @@ const DividerBlock = (props: RenderElementProps) => {
 		Transforms.select(editor, path);
 	};
 
-	/**
-	 * Xử lý vấn đề xoá node, chỉ divider đặc biệt có logic gắn liền nó thế này
-	 * không khuyến khích tạo các logic xử lý này ngay bên trong element
-	 * @param event
-	 */
-	const handleKeyDown = (event: React.KeyboardEvent) => {
-		if (event.key === "Backspace" || event.key === "Delete") {
-			event.preventDefault();
-			Transforms.setNodes(editor, { type: "paragraph" });
-		}
-	};
-
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: Divider is a static element and can be interacted with using keyboard
 		<div
 			{...props.attributes}
 			className={cn(
 				"flex items-center cursor-pointer px-1 py-2 outline-none select-none",
-				isSelected && "bg-blue-500/15 rounded-sm",
+				isSelected && "bg-primary/30 rounded-sm",
 			)}
 			contentEditable={false}
-			onClick={handleClick}
-			onKeyDown={handleKeyDown}
-			tabIndex={0}
+			onKeyUp={handleClick}
 		>
 			{/* Hidden children để Slate vẫn có thể track */}
 			<span className="hidden select-none">{props.children}</span>

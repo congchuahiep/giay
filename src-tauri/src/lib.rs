@@ -1,11 +1,20 @@
 mod models;
 
 use tauri::Manager;
+use tauri_plugin_sql::Migration;
 use window_vibrancy::*;
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
-    let migrations = models::pages::get_migrations();
+    let migrations = vec![
+        models::pages::get_migrations(),
+        models::users::get_migrations(),
+        models::workspaces::get_migrations(),
+        models::workspace_user::get_migrations(),
+    ]
+    .into_iter()
+    .flatten()
+    .collect::<Vec<Migration>>();
 
     tauri::Builder::default()
         .plugin(tauri_plugin_store::Builder::new().build())

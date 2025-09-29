@@ -26,6 +26,9 @@ export const defaultShortcutSettings: Record<string, Hotkeys> = {
 		// "mod+z": "undo",
 		// "mod+shift+z": "redo",
 		// "mod+y": "redo",
+		//
+
+		enter: "enter-page", // TODO: Có thể gặp xung đột!
 	},
 
 	global: {

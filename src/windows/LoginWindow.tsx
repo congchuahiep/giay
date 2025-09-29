@@ -1,12 +1,12 @@
 /** biome-ignore-all lint/correctness/useUniqueElementIds: Id use for input elements */
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import Titlebar from "@/components/Titlebar/Titlebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { api, endpoint } from "@/configs/api";
 import { useAuthStore } from "@/stores/auth";
-import Titlebar from "@/components/Titlebar/Titlebar";
-import { useNavigate } from "react-router-dom";
 
 function validateEmail(email: string) {
 	return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);

@@ -1,5 +1,6 @@
+import type { Element } from "slate";
+import { v4 as uuidv4 } from "uuid";
 import type { ElementBlock } from "@/features/editor/types/block.ts";
-import type { Editor, Element } from "slate";
 
 /**
  * Tạo block mới dựa trên type, lưu ý này chỉ là khởi tạo block
@@ -10,31 +11,22 @@ import type { Editor, Element } from "slate";
  * này, nó cũng đảm bảo block mới tạo là duy nhất bằng id uuidv4
  */
 export default function buildBlock(
-  editor: Editor,
-  additionalProps: Partial<ElementBlock> = {}
+	additionalProps: Partial<ElementBlock> = {},
 ): Element {
-  const baseBlock = {
-    id: editor.generateId(),
-    children: [{ text: "" }],
-    ...additionalProps,
-  };
+	const baseBlock = {
+		id: uuidv4(),
+		children: [{ text: "" }],
+		...additionalProps,
+	};
 
-  const { type } = additionalProps;
+	const { type } = additionalProps;
 
-  switch (type) {
-    case "h1":
-    case "h2":
-    case "h3":
-    case "paragraph":
-    case "h4":
-    case "bulletList":
-    case "code":
-    case "quote":
-    case "divider":
-      return { ...baseBlock, type: type };
-    case "checkList":
-      return { ...baseBlock, type: "checkList", checked: false };
-    default:
-      return { ...baseBlock, type: "paragraph" };
-  }
+	switch (type) {
+		case undefined:
+			return { ...baseBlock, type: "paragraph" };
+		case "checkList":
+			return { ...baseBlock, type: "checkList", checked: false };
+		default:
+			return { ...baseBlock, type: type };
+	}
 }

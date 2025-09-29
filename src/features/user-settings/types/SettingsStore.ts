@@ -68,6 +68,13 @@ export interface SettingsStore {
 	updateHotkey: (scope: string, key: string, action: string) => Promise<void>;
 
 	/**
+	 * Tải lại các cài đặt từ tệp settings
+	 *
+	 * @returns
+	 */
+	reload: () => Promise<void>;
+
+	/**
 	 * Reset tất cả các cài đặt về mặc định
 	 * @returns
 	 */

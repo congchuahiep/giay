@@ -4,13 +4,12 @@ import { Transforms } from "slate";
 import {
 	ReactEditor,
 	type RenderElementProps,
+	useSelected,
 	useSlateStatic,
 } from "slate-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
 import type { PageBlock as PageBlockType } from "@/features/editor/types";
-import { useYjsPageEditorContext } from "@/hooks/YjsPageEditorProvider";
 import {
 	usePageCreate,
 	usePageDelete,
@@ -25,12 +24,16 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
+import { useYjsPage } from "@/features/yjs-page";
 
 export default function PageBlock(props: RenderElementProps) {
-	const { activeWorkspace } = useYjsWorkspaceContext();
-	const { activePage } = useYjsPageEditorContext();
 	const navigate = useNavigate();
 	const editor = useSlateStatic();
+	const isSelected = useSelected();
+
+	const currentPage = useYjsPage((state) => state.currentPage);
+	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
 	const element = props.element as PageBlockType;
 
 	const { mutate: createPage } = usePageCreate(activeWorkspace.id, {
@@ -43,7 +46,7 @@ export default function PageBlock(props: RenderElementProps) {
 	const { data: page, isLoading } = usePagePreviewQuery(element.pageId, {
 		retry: (failureCount, error) => {
 			if (error.message.includes("404")) {
-				createPage({ parentPageId: activePage.id });
+				createPage({ parentPageId: currentPage.id });
 				return false;
 			}
 			return failureCount < 3;
@@ -55,34 +58,64 @@ export default function PageBlock(props: RenderElementProps) {
 		navigate(`/${activeWorkspace.id}/${page.id}`);
 	};
 
+	/**
+	 * Xử lý các phím khi người dùng đang chọn page block hiện tại.
+	 *
+	 * Các logic gắn liền với block thế này không được khuyến khích tạo cho lắm
+	 * @param event
+	 */
+	const handleKeyDown = (event: React.KeyboardEvent) => {
+		// if (event.key === "Backspace" || event.key === "Delete") {
+		// 	event.preventDefault();
+		// 	Transforms.setNodes(editor, { type: "paragraph" });
+		// }
+		//
+		console.log("Key pressed:", event.key);
+		if (event.key === "Enter") {
+			event.preventDefault();
+			console.log("Enter key pressed");
+			if (!page) return;
+			navigate(`/${activeWorkspace.id}/${page.id}`);
+		}
+	};
+
 	return (
 		<PageBlockContextMenu element={element} render={!isLoading}>
-			<Button
-				variant="secondary"
-				className={cn(
-					"m-1 p-0 border shadow-none w-full cursor-pointer justify-start",
-					"text-stone-800 bg-stone-50/50 hover:bg-stone-100 border-stone-300/50",
-					"dark:text-stone-50 dark:bg-stone-800/50 dark:hover:bg-stone-800 dark:border-stone-700/50",
-				)}
-				onClick={handleOnClick}
+			{/*biome-ignore lint/a11y/noStaticElementInteractions: PageBlock is a static
+			element and can be interacted with using keyboard*/}
+			<div
+				{...props.attributes}
+				className={cn("rounded-sm p-1", isSelected && "bg-primary/30")}
+				onKeyDown={handleKeyDown}
 			>
-				{page && !isLoading ? (
-					<div className="pl-3 p-1 gap-2 flex items-center">
-						<span>
-							{page.icon ? (
-								page.icon
-							) : (
-								<FileIcon weight="duotone" size={16} width={20} />
-							)}
-						</span>
-						<span>{page.title ? page.title : "Untitled"}</span>
-					</div>
-				) : (
-					<Skeleton className="w-full h-full opacity-25" />
-				)}
-				{/* Hidden children để Slate vẫn có thể track */}
-				<span className="hidden select-none">{props.children}</span>
-			</Button>
+				<Button
+					variant="secondary"
+					className={cn(
+						" p-0 border shadow-none w-full cursor-pointer justify-start",
+						"text-stone-800 bg-stone-50/50 hover:bg-stone-100 border-stone-300/50",
+						"dark:text-stone-50 dark:bg-stone-800/50 dark:hover:bg-stone-800 dark:border-stone-700/50",
+					)}
+					contentEditable={false}
+					onClick={handleOnClick}
+				>
+					{page && !isLoading ? (
+						<div className="pl-3 p-1 gap-2 flex items-center select-none">
+							<span>
+								{page.icon ? (
+									page.icon
+								) : (
+									<FileIcon weight="duotone" size={16} width={20} />
+								)}
+							</span>
+							<span>{page.title ? page.title : "Untitled"}</span>
+						</div>
+					) : (
+						<Skeleton className="w-full h-full opacity-25" />
+					)}
+					{/* Hidden children để Slate vẫn có thể track */}
+					<span className="hidden select-none">{props.children}</span>
+				</Button>
+			</div>
 		</PageBlockContextMenu>
 	);
 }

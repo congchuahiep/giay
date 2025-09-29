@@ -3,8 +3,8 @@ import { useEffect, useMemo, useState } from "react";
 import { createEditor, Editor, Transforms } from "slate";
 import { Editable, Slate, withReact } from "slate-react";
 import * as Y from "yjs";
-import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
-import { useYjsPageEditorContext } from "@/hooks/YjsPageEditorProvider";
+import { useYjsPage } from "@/features/yjs-page";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
 import { cn } from "@/utils";
 import { Button } from "../ui/button";
 import {
@@ -18,8 +18,9 @@ export default function TitleEditor() {
 	const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false);
 	const [pageIcon, setPageIcon] = useState<string | null>(null);
 
-	const { provider: pageProvider, activePage } = useYjsPageEditorContext();
-	const { provider: workspaceProvider } = useYjsWorkspaceContext();
+	const currentPage = useYjsPage((state) => state.currentPage);
+	const pageProvider = useYjsPage((state) => state.provider);
+	const workspaceProvider = useYjsWorkspace((state) => state.provider);
 
 	const pageTitleData = useMemo(() => {
 		return pageProvider.document.get("title", Y.XmlText);
@@ -70,11 +71,11 @@ export default function TitleEditor() {
 		pageIconData.insert(0, icon);
 
 		const sidebarPages = workspaceProvider.document.getMap(
-			activePage.parent_page_id ? activePage.parent_page_id : "root-pages",
+			currentPage.parent_page_id ? currentPage.parent_page_id : "root-pages",
 		);
 
-		sidebarPages.set(activePage.id, {
-			id: activePage.id,
+		sidebarPages.set(currentPage.id, {
+			id: currentPage.id,
 			icon: icon,
 			title: pageTitleData.toString(),
 		});
@@ -85,11 +86,11 @@ export default function TitleEditor() {
 	// Hàm tuỳ chỉnh logic khi setPageTitle, giúp cho sidebar tự cập nhật
 	const updatePageTitle = (title: string) => {
 		const sidebarPages = workspaceProvider.document.getMap(
-			activePage.parent_page_id ? activePage.parent_page_id : "root-pages",
+			currentPage.parent_page_id ? currentPage.parent_page_id : "root-pages",
 		);
 
-		sidebarPages.set(activePage.id, {
-			id: activePage.id,
+		sidebarPages.set(currentPage.id, {
+			id: currentPage.id,
 			icon: pageIconData.toString(),
 			title: title,
 		});

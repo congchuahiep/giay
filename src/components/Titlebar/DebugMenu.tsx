@@ -6,11 +6,13 @@ import {
 } from "@/components/ui/context-menu";
 import { useShortcutStore } from "@/core/shortcut";
 import { useSlashMenuStore } from "@/features/editor/plugins/slash-menu";
+import { useSettingsStore } from "@/features/user-settings/stores/useSettingsStore";
 
 const DebugMenu = () => {
 	const { getActions, getHotkeys, updateHotkey, getExtensions } =
 		useShortcutStore();
 	const slashMenuState = useSlashMenuStore.getState();
+	const reload = useSettingsStore((state) => state.reload);
 
 	return (
 		<ContextMenu>
@@ -38,6 +40,13 @@ const DebugMenu = () => {
 					}}
 				>
 					Update hotkey
+				</ContextMenuItem>
+				<ContextMenuItem
+					onClick={() => {
+						reload();
+					}}
+				>
+					Reload settings
 				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
