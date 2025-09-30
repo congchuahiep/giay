@@ -59,10 +59,8 @@ export const useShortcutStore = create<ShortcutStore>()(
 			 * @param scope
 			 * @returns
 			 */
-			setActiveShortcutScope: (scope = "global") => {
-				console.log(`Active scope changed to ${scope}`);
-				set(() => ({ activeScope: scope }));
-			},
+			setActiveShortcutScope: (scope = "global") =>
+				set(() => ({ activeScope: scope })),
 
 			/**
 			 * Xử lý sự kiện nhấn phím. Tức là xử lý phím tắt đóooo
