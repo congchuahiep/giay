@@ -1,14 +1,16 @@
-import { useQuery, type UseQueryOptions } from "@tanstack/react-query";
+import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { api, endpoint } from "@/configs";
 import type { PagePreview, PageRawData } from "@/types/Page";
 
 export function usePagePreviewQuery(
-	pageId: string,
+	pageId: string | undefined,
 	options?: Omit<UseQueryOptions<PagePreview, Error>, "queryKey" | "queryFn">,
 ) {
 	return useQuery<PagePreview>({
+		enabled: !!pageId,
 		queryKey: ["pages", pageId],
-		queryFn: () => fetchPageDataFromServer(pageId),
+		// biome-ignore lint/style/noNonNullAssertion: Đã được giải quyết bằng enabled: !!pageId
+		queryFn: () => fetchPageDataFromServer(pageId!),
 		...options,
 	});
 }

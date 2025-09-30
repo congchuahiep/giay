@@ -18,7 +18,7 @@ import type UtilsEditor from "@/features/editor/plugins/utils/interface.ts";
 import getCurrentBlockType from "./getCurrentBlockType.ts";
 import isCurrentBlockEmpty from "./isCurrentBlockEmpty.ts";
 
-export { DefaultBehaviourShortCutExtension };
+export { DefaultBehaviourShortCutExtension, buildBlock };
 export type { UtilsEditor };
 
 /**

@@ -52,7 +52,6 @@ import { useYjsWorkspace } from "@/features/yjs-workspace";
  * Danh sách các plugin
  */
 const plugins = [
-	withPageBlock,
 	withMarkdownEditor,
 	withSlashEditor,
 	withInsertEditor,
@@ -60,6 +59,7 @@ const plugins = [
 	withUtilsEditor,
 	withSelectEditor,
 	withFormatEditor,
+	withPageBlock,
 	withReact,
 	// withHistory,
 ];

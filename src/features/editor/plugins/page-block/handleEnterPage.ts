@@ -13,8 +13,6 @@ export default function handleEnterPage(
 
 	if (currentBlock.type === "page") {
 		const pageBlock = currentBlock as PageBlock;
-		console.log("Workspace id:", workspaceId);
-		console.log("Navigating to page:", pageBlock.id);
 		navigate(`/${workspaceId}/${pageBlock.pageId}`);
 		return true;
 	}

@@ -63,27 +63,24 @@ function handleCollapsedSelection(editor: Editor, selection: Range): boolean {
 		const prevPath = Path.previous(currentPath);
 		const prevBlock = Node.get(editor, prevPath) as Element | undefined;
 
-		// Select vào block bên trên nếu block trên là void
-		if (
-			!prevBlock ||
-			Node.string(prevBlock).length !== 0 ||
-			editor.isVoid(prevBlock)
-		) {
+		// Nếu không có block phía trước hoặc block phía trước không rỗng
+		if (!prevBlock || Node.string(prevBlock).length !== 0) {
+			return false;
+		}
+
+		// Nếu block phía trước là void thì chuyển selection sang đó
+		if (prevBlock && editor.isVoid(prevBlock)) {
 			editor.select(prevPath);
 			return true;
 		}
 
-		// Đối với trường hợp Node bên trên không có giá trị nào, mặc định Slate sẽ xoá
-		// node đó luôn (bruh), thế nên ở đây ta viết thêm 1 chút logic ngăn chặn việc
-		// Slate tự động xoá node bên trên nếu nó rỗng
-		//
-		// **Tin tao đi, nhờ có chức năng này là editor tăng life quality lên rất là nhiều đó 😉**
-		editor.setNodes({ type: prevBlock.type }); // Chèn text đó vào block rỗng
-		editor.removeNodes({ at: prevPath }); // Xoá block trước đó
-
+		// Nếu block phía trước rỗng, giữ lại block đó thay vì để Slate tự động xoá
+		// Chuyển kiểu block hiện tại sang kiểu của block phía trước, sau đó xoá block phía trước
+		editor.setNodes({ type: prevBlock.type });
+		editor.removeNodes({ at: prevPath });
 		return true;
 	} catch {
-		console.log("Hihi, còn cái ở trên đâu mà đòi xoá z tròi?");
+		console.log("Không có block phía trên để xoá.");
 		return false;
 	}
 }

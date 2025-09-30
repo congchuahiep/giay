@@ -3,10 +3,11 @@ import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { FileIcon } from "@phosphor-icons/react/dist/csr/File";
 import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
-import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { SpinnerIcon } from "@phosphor-icons/react/dist/csr/Spinner";
+import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
 import {
 	usePageChildrenQuery,
 	usePageCreate,
@@ -37,12 +38,12 @@ import {
 	SidebarMenuSkeleton,
 	SidebarMenuSub,
 } from "../ui/sidebar";
-import { useYjsWorkspace } from "@/features/yjs-workspace";
 
-// interface PageExplorerProps {
-// 	workspaceId: string;
-// }
-
+/**
+ * Component hiển thị sidebar danh sách các trang trong workspace dưới dạng cấu
+ * trúc cây. Bao gồm nút tạo trang mới và danh sách các trang gốc, cho phép mở
+ * rộng để xem các trang con.
+ */
 export default function PageExplorer() {
 	return (
 		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
@@ -55,15 +56,17 @@ export default function PageExplorer() {
 	);
 }
 
+/**
+ * Nút tạo trang mới trong workspace. Khi bấm sẽ tạo một trang mới và chuyển
+ * hướng đến trang đó.
+ */
 function PageCreateButton() {
 	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
 	const provider = useYjsWorkspace((state) => state.provider);
 	const navigate = useNavigate();
 
-	const { mutate: createPage } = usePageCreate(activeWorkspace.id, {
+	const { mutate: createPage } = usePageCreate(activeWorkspace.id, provider, {
 		onSuccess: (newPage) => {
-			const yDocRoot = provider.document;
-			yDocRoot.getMap<PagePreview>("root-pages").set(newPage.id, newPage);
 			navigate(`/${activeWorkspace.id}/${newPage.id}`);
 		},
 	});
@@ -89,6 +92,12 @@ function PageCreateButton() {
 	);
 }
 
+/**
+ * Hiển thị danh sách các trang gốc trong workspace.
+ * Nếu đang kết nối dữ liệu sẽ hiển thị skeleton loading, nếu không có trang sẽ
+ * hiển thị thông báo. Các trang được sắp xếp theo tên và có thể mở rộng để xem
+ * các trang con.
+ */
 function PageList() {
 	const provider = useYjsWorkspace((state) => state.provider);
 	const status = useYjsWorkspace((state) => state.status);
@@ -139,6 +148,12 @@ interface PageItemProps {
 	pageData: PagePreview;
 }
 
+/**
+ * Đại diện cho một trang trong danh sách, có thể là trang gốc hoặc trang con.
+ * Hỗ trợ mở rộng để hiển thị các trang con, hiển thị icon, tiêu đề và trạng
+ * thái đang chọn. Khi hover sẽ hiện nút mở rộng, và có menu ngữ cảnh cho các
+ * thao tác như xóa, copy link.
+ */
 function PageItem({ pageId, pageData }: PageItemProps) {
 	const navigate = useNavigate();
 	const [isHovered, setIsHovered] = useState(false);
@@ -152,17 +167,19 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 		data: pageChildrenData,
 		refetch: fetchPageChildren,
 		isFetching,
+		isSuccess,
 	} = usePageChildrenQuery(pageId, {
 		enabled: currentPageId === pageId,
 		initialData: [],
 	});
 	const [pageChildren, setPageChildren] = useState<PagePreview[]>([]);
 
-	const handlePageExplanation = useCallback(async () => {
+	const handlePageExpandation = useCallback(async () => {
 		await fetchPageChildren();
 
 		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
 
+		pageChildrenShared.clear(); // Xoá dữ liệu cũ
 		pageChildrenData?.forEach((child) => {
 			pageChildrenShared.set(child.id, child);
 		});
@@ -187,9 +204,9 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 
 	useEffect(() => {
 		if (isCollapseOpen) {
-			handlePageExplanation();
+			handlePageExpandation();
 		}
-	}, [isCollapseOpen, handlePageExplanation]);
+	}, [isCollapseOpen, handlePageExpandation]);
 
 	useEffect(() => {
 		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
@@ -256,7 +273,8 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 					</CollapsibleTrigger>
 					<CollapsibleContent>
 						<SidebarMenuSub>
-							{Array.isArray(pageChildren) &&
+							{isSuccess &&
+								Array.isArray(pageChildren) &&
 								pageChildren
 									?.sort((a, b) => a.title.localeCompare(b.title))
 									.map((subItem) => (
@@ -279,20 +297,18 @@ interface PageItemActionProps {
 	children: React.ReactNode;
 }
 
+/**
+ * Bọc quanh mỗi PageItem để cung cấp menu ngữ cảnh (context menu) cho các thao
+ * tác như copy link, mở tab mới, xóa trang....
+ */
 function PageItemAction({ pageData, children }: PageItemActionProps) {
 	const { pageId: currentPageId } = useParams();
 
 	const navigate = useNavigate();
 	const provider = useYjsWorkspace((state) => state.provider);
 
-	const { mutate: handleDeletePage } = usePageDelete({
+	const { mutate: handleDeletePage } = usePageDelete(provider, {
 		onSuccess: (deletedPageId) => {
-			const yDocRoot = provider.document;
-			yDocRoot
-				.getMap<PagePreview>(
-					pageData.parent_page_id ? pageData.parent_page_id : "root-pages",
-				)
-				.delete(deletedPageId);
 			if (deletedPageId === currentPageId) {
 				navigate("/");
 			}
@@ -315,7 +331,7 @@ function PageItemAction({ pageData, children }: PageItemActionProps) {
 				<ContextMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
-						handleDeletePage({ id: pageData.id });
+						handleDeletePage({ page_id: pageData.id });
 					}}
 					variant="destructive"
 				>

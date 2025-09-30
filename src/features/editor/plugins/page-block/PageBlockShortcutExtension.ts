@@ -18,6 +18,12 @@ const PageBlockShortcutExtension: ShortcutExtension<PageBlockShortCutExtensionCo
 				const { editor, workspaceId, navigate } = context;
 				return editor.handleEnterPage(editor, workspaceId, navigate);
 			},
+			"delete-page": (event, context) => {
+				const { editor, workspaceId, navigate } = context;
+				event.stopPropagation();
+				console.log("delete-page");
+				return editor.handleDeletePage(editor, workspaceId, navigate);
+			},
 		},
 	};
 
