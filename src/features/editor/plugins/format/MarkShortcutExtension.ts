@@ -1,6 +1,8 @@
-import { type ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
+import type { Editor } from "slate";
 
-const MarkShortcutExtension: ShortcutExtension = {
+const MarkShortcutExtension: ShortcutExtension<Editor> = {
   name: "mark",
   priority: 10,
   actions: {

@@ -2,7 +2,7 @@ import { type JSX } from "react";
 import { Button } from "@/components/ui/button";
 import { useSlateSelector, useSlateStatic } from "slate-react";
 import type { MarkType } from "@/features/editor/types";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 
 const ToggleMarkButton = ({
   icon,

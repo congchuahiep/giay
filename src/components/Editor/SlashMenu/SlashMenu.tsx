@@ -1,272 +1,330 @@
-import { useEffect, useRef, useState } from "react";
 import { SLASH_MENU_ITEMS } from "@/components/Editor/SlashMenu/SlashMenuItems";
+import { useRegisterShortcuts, useShortcutStore } from "@/core/shortcut";
 import {
-  slashMenuManager,
-  type SlashMenuState,
-} from "@/features/editor/plugins/slash-command";
-import { cn } from "@/lib/utils";
-import { ReactEditor, useSlateSelection, useSlateStatic } from "slate-react";
+	OpenSlashCommandShortcutExtension,
+	SlashCommandShortcutExtension,
+	useSlashMenuStore,
+} from "@/features/editor/plugins/slash-menu";
 import { useFuseSearch } from "@/features/search/useFuseSearch";
+import { cn, scrollToDataAttribute } from "@/utils";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Editor } from "slate";
+import { ReactEditor, useSlateSelection, useSlateStatic } from "slate-react";
 
-interface SlashCommandMenuProps {}
+export default function SlashMenu() {
+	const slashRef = useRef<HTMLDivElement | null>(null);
+	const slashContainerRef = useRef<HTMLDivElement | null>(null);
+	const editor = useSlateStatic();
+	const selection = useSlateSelection();
 
-export default function SlashCommandMenu({}: SlashCommandMenuProps) {
-  const ref = useRef<HTMLDivElement | null>(null);
-  const scrollContainerRef = useRef<HTMLDivElement | null>(null);
-  const editor = useSlateStatic();
-  const selection = useSlateSelection();
-  const [menuState, setMenuState] = useState<SlashMenuState>(() =>
-    slashMenuManager.getState()
-  );
+	const [allowMouseHover, setAllowMouseHover] = useState(false);
 
-  // Lọc items dựa trên search query
-  // Sử dụng Fuse.js để tìm kiếm
-  const { filteredItems } = useFuseSearch(
-    SLASH_MENU_ITEMS,
-    menuState.searchQuery,
-    {
-      threshold: 0.3, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
-      minMatchCharLength: 1, // Độ dài tối thiểu của chuỗi tìm kiếm
-      shouldSort: true, // TODO Tìm hiểu kỹ hơn thuật toán sort
-      keys: [
-        // Các trường để tìm kiếm
-        {
-          name: "title",
-          weight: 0.5, // Trọng số cao hơn cho title
-        },
-        {
-          name: "description",
-          weight: 0.1,
-        },
-        {
-          name: "blockType",
-          weight: 0.4,
-        },
-      ],
-    }
-  );
+	const {
+		setSelectedIndex,
+		updateSearchQuery,
+		open: openSlashCommand,
+		close: closeSlashCommand,
+	} = useSlashMenuStore();
 
-  // Đăng ký slash command, dùng để theo dõi trạng thái đóng/mở
-  // slate command bằng `slashMenuManager`
-  useEffect(() => {
-    const unsubscribe = slashMenuManager.subscribe((state) => {
-      setMenuState(state);
-    });
+	const slashMenuState = useSlashMenuStore.getState();
 
-    return unsubscribe;
-  }, []);
+	const { setActiveShortcutScope } = useShortcutStore();
 
-  // Tự động reset selectedIndex khi filteredItems thay đổi
-  useEffect(() => {
-    if (menuState.selectedIndex >= filteredItems.length) {
-      slashMenuManager.setSelectedIndex(0);
-    }
-  }, [filteredItems.length, menuState.selectedIndex]);
+	// Lọc items dựa trên search query
+	// Sử dụng Fuse.js để tìm kiếm
+	const { filteredItems } = useFuseSearch(
+		SLASH_MENU_ITEMS,
+		slashMenuState.searchQuery,
+		{
+			threshold: 0.3, // Độ chính xác (0.0 = perfect match, 1.0 = match anything)
+			minMatchCharLength: 1, // Độ dài tối thiểu của chuỗi tìm kiếm
+			shouldSort: true, // TODO Tìm hiểu kỹ hơn thuật toán sort
+			keys: [
+				// Các trường để tìm kiếm
+				{
+					name: "title",
+					weight: 0.5, // Trọng số cao hơn cho title
+				},
+				{
+					name: "description",
+					weight: 0.1,
+				},
+				{
+					name: "blockType",
+					weight: 0.4,
+				},
+			],
+		},
+	);
 
-  // Xử lý các nút lên-xuống-enter để cho phép người dùng lựa chọn
-  // các option trong slash menu
-  useEffect(() => {
-    if (!menuState.isOpen || !ref.current || !menuState.cursorCoordinates)
-      return;
+	/// HELPER FUNCTION
 
-    const el = ref.current;
+	// Tự scroll đến vị trí của slash item bằng index
+	const scrollToIndex = useCallback((index: number) => {
+		scrollToDataAttribute("slash-item-index", index, slashContainerRef);
+	}, []);
 
-    el.style.left = `${menuState.cursorCoordinates.x}px`;
-    el.style.top = `${menuState.cursorCoordinates.y}px`;
+	/**
+	 * Reset vị trí scroll về đầu mỗi khi menu đóng
+	 */
+	const resetPosition = useCallback(() => {
+		if (!slashContainerRef.current) return;
+		slashContainerRef.current.scrollTop = 0;
+	}, []);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      switch (event.key) {
-        case "ArrowDown":
-          event.preventDefault();
-          const nextIndex =
-            menuState.selectedIndex < filteredItems.length - 1
-              ? menuState.selectedIndex + 1
-              : 0;
-          slashMenuManager.setSelectedIndex(nextIndex);
+	/// ĐĂNG KÝ SHORTCUTS
 
-          scrollToIndex(nextIndex);
-          break;
-        case "ArrowUp":
-          event.preventDefault();
-          const prevIndex =
-            menuState.selectedIndex > 0
-              ? menuState.selectedIndex - 1
-              : filteredItems.length - 1;
-          slashMenuManager.setSelectedIndex(prevIndex);
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Không cần phụ thuộc vào các biến khác
+	const slashMenuShortcutContext = useMemo(
+		() => ({
+			editor,
+			slashMenuState,
+			filteredItems,
+			closeSlashCommand,
+			scrollToIndex,
+			setSelectedIndex,
+		}),
+		[slashMenuState],
+	);
 
-          scrollToIndex(prevIndex);
-          break;
-        case "Enter":
-          event.preventDefault();
-          if (filteredItems[menuState.selectedIndex]) {
-            editor.handleSlashCommandSelection(
-              filteredItems[menuState.selectedIndex]
-            );
-          }
-          // Note: SlashCommandPlugin sẽ xử lý preventDefault này
-          break;
-        case "Backspace":
-          // Kiểm tra xem có xoá ký tự "/" không
-          const { selection } = editor;
-          if (selection) {
-            const state = slashMenuManager.getState();
-            const currentOffset = selection.anchor.offset;
+	const openSlashMenuShortcutContext = useMemo(
+		() => ({
+			editor,
+			openSlashCommand,
+			slashRef,
+			slashContainerRef,
+		}),
+		[editor, openSlashCommand],
+	);
 
-            // Nếu đang ở ngay sau anchor và sắp xoá "/"
-            if (currentOffset === state.anchorOffset + 1) {
-              slashMenuManager.close();
-            }
-          }
-          break;
-      }
-    };
+	// Đăng ký shortcut để mở editor
+	useRegisterShortcuts(
+		"editor", // Mở trên phạm vi editor
+		openSlashMenuShortcutContext,
+		[OpenSlashCommandShortcutExtension],
+	);
 
-    document.addEventListener("keydown", handleKeyDown);
-    return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [menuState.isOpen, menuState.selectedIndex, filteredItems]);
+	// Đăng ký bộ shortcut khi đang mở editor
+	useRegisterShortcuts("slash-menu", slashMenuShortcutContext, [
+		SlashCommandShortcutExtension,
+	]);
 
-  // Helper function để scroll đến index
-  const scrollToIndex = (index: number) => {
-    if (!scrollContainerRef.current) return;
+	/// CÁC USEEFFECT
+	//
 
-    const scrollContainer = scrollContainerRef.current;
-    const selectedElement = scrollContainer.querySelector(
-      `[data-index="${index}"]`
-    ) as HTMLElement;
+	/**
+	 * Khi menu mở, kích hoạt scope phím tắt của slash-command
+	 */
+	useEffect(() => {
+		// Chỉ scroll slashContainerRef, còn lại chặn mọi thứ
+		const preventOutsideScroll = (e: WheelEvent) => {
+			if (slashContainerRef.current?.contains(e.target as Node)) {
+				e.stopPropagation();
+			} else {
+				e.preventDefault();
+			}
+		};
 
-    if (selectedElement) {
-      const elementTop = selectedElement.offsetTop;
-      const elementBottom = elementTop + selectedElement.offsetHeight;
-      const containerScrollTop = scrollContainer.scrollTop;
-      const containerHeight = scrollContainer.clientHeight;
+		if (slashMenuState.isOpen) {
+			setActiveShortcutScope("slash-menu"); // Chuyển sang scope slash-command
+			// Chặn không được cuộn trang khi mở menu không CSS
+			document.addEventListener("wheel", preventOutsideScroll, {
+				passive: false,
+			});
+		} else {
+			setActiveShortcutScope("editor"); // Trả về scope editor khi slash menu đóng
+			document.removeEventListener("wheel", preventOutsideScroll);
+			resetPosition();
+		}
 
-      if (elementTop < containerScrollTop) {
-        scrollContainer.scrollTop = elementTop;
-      } else if (elementBottom > containerScrollTop + containerHeight) {
-        scrollContainer.scrollTop = elementBottom - containerHeight;
-      }
-    }
-  };
+		return () => {
+			document.removeEventListener("wheel", preventOutsideScroll);
+			resetPosition();
+		};
+	}, [slashMenuState.isOpen, setActiveShortcutScope, resetPosition]);
 
-  // Thực hiện việc tự động đóng slash menu:
-  // - Anchor bị xoá
-  // - Cursor di chuyển ra khỏi vùng anchor
-  // Ngoài ra còn xử lý việc cập nhật search query theo thời gian thực
-  useEffect(() => {
-    if (!slashMenuManager.isMenuOpen()) return;
+	/**
+	 * Khi viewport bị thay đổi (người dùng tuỳ chỉnh kích thước màn hình)
+	 * -> đóng menu
+	 */
+	useEffect(() => {
+		const handleResize = () => {
+			closeSlashCommand();
+		};
+		window.addEventListener("resize", handleResize);
+		return () => window.removeEventListener("resize", handleResize);
+	}, [closeSlashCommand]);
 
-    const state = slashMenuManager.getState();
+	/**
+	 * Tự động reset selectedIndex về vị trí đầu tiên khi filteredItems thay đổi
+	 */
+	useEffect(() => {
+		if (slashMenuState.selectedIndex >= filteredItems.length) {
+			setSelectedIndex(0);
+		}
+	}, [filteredItems.length, slashMenuState.selectedIndex, setSelectedIndex]);
 
-    // Kiểm tra nếu không có selection
-    if (!selection) {
-      slashMenuManager.close();
-      return;
-    }
+	/**
+	 * Kiểm tra vị trí selection hiện tại của người dùng, nhờ đó nó thực hiện được
+	 * hai việc:
+	 * - Tự động đóng slash menu: khi anchor bị xoá, khi cursor di chuyển ra khỏi
+	 * vùng anchor
+	 * - Cập nhật danh sách search query theo thời gian thực
+	 */
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Không cần phụ thuộc vào biến slashMenuState.isOpen
+	useEffect(() => {
+		if (!slashMenuState.isOpen) return;
 
-    // Kiểm tra xem cursor có còn ở đúng vị trí anchor không
-    const currentOffset = selection.anchor.offset;
-    const anchorOffset = state.anchorOffset;
+		// Kiểm tra nếu không có selection
+		if (!selection) {
+			closeSlashCommand();
+			return;
+		}
 
-    // Nếu cursor di chuyển về trước anchor hoặc quá xa anchor
-    if (currentOffset <= anchorOffset || currentOffset > anchorOffset + 15) {
-      slashMenuManager.close();
-      return;
-    }
+		// Kiểm tra xem cursor có còn ở đúng vị trí anchor không
+		const currentOffset = selection.anchor.offset;
 
-    try {
-      const anchorPoint = { ...selection.anchor, offset: anchorOffset };
-      const currentPoint = selection.anchor;
+		// Nếu cursor di chuyển về trước anchor hoặc quá xa anchor
+		if (
+			currentOffset <= slashMenuState.anchorOffset ||
+			currentOffset > slashMenuState.anchorOffset + 15
+		) {
+			closeSlashCommand();
+			return;
+		}
 
-      const textFromAnchor = Editor.string(editor, {
-        anchor: anchorPoint,
-        focus: currentPoint,
-      });
+		try {
+			const anchorPoint = {
+				...selection.anchor,
+				offset: slashMenuState.anchorOffset,
+			};
+			const currentPoint = selection.anchor;
 
-      // Nếu không bắt đầu bằng "/" thì đóng menu
-      if (!textFromAnchor.startsWith("/")) {
-        slashMenuManager.close();
-        return;
-      }
+			const textFromAnchor = Editor.string(editor, {
+				anchor: anchorPoint,
+				focus: currentPoint,
+			});
 
-      // Cập nhật search query (bỏ ký tự "/" đầu tiên)
-      const searchQuery = textFromAnchor.slice(1);
-      if (searchQuery !== state.searchQuery) {
-        slashMenuManager.updateSearchQuery(searchQuery);
-      }
-    } catch (error) {
-      // Nếu có lỗi khi lấy text, đóng menu
-      console.warn("Error in useSlashMenuAutoClose:", error);
-      slashMenuManager.close();
-    }
-  }, [selection]);
+			// Nếu không bắt đầu bằng "/" thì đóng menu
+			if (!textFromAnchor.startsWith("/")) {
+				closeSlashCommand();
+				return;
+			}
 
-  // Khi mới mở menu, tạm khoá khả năng người dùng sử dụng chuột tương
-  // tác với menu trong một vài giây ngắn, việc này tăng thêm QOL lên
-  // kha khá đó ^^
-  useEffect(() => {
-    setTimeout(() => {
-      scrollContainerRef.current?.classList.remove("pointer-events-none");
-    }, 50);
-  });
+			// Cập nhật search query (bỏ ký tự "/" đầu tiên)
+			const searchQuery = textFromAnchor.slice(1);
+			if (searchQuery !== slashMenuState.searchQuery) {
+				updateSearchQuery(searchQuery);
+			}
+		} catch (error) {
+			// Nếu có lỗi khi lấy text, đóng menu
+			console.warn("Error in useSlashMenuAutoClose:", error);
+			closeSlashCommand();
+		}
+	}, [selection]);
 
-  // Slash Command Menu không mở -> trả về null
-  if (!menuState.isOpen) return null;
+	/**
+	 * Khi mới mở menu, tạm khoá khả năng người dùng sử dụng chuột tương
+	 * tác với menu trong một vài giây ngắn, việc này tăng thêm QOL lên
+	 * kha khá đó ^^
+	 */
+	// biome-ignore lint/correctness/useExhaustiveDependencies: Cần phụ thuộc vào selectedIndex để xử lý sự kiện click chuột
+	useEffect(() => {
+		setAllowMouseHover(false);
+		// Reset selectedIndex nếu muốn
+		// setSlashMenuState((prev) => ({ ...prev, selectedIndex: -1 }));
 
-  const newLocal = () => {
-    editor.handleSlashCommandSelection(filteredItems[menuState.selectedIndex]);
-    // Focus vào Slate editor sau khi chọn
-    ReactEditor.focus(editor);
-  };
-  // Slash Command Menu mở -> thực hiện render menu
-  return (
-    <div
-      ref={ref}
-      className={cn(
-        "z-50",
-        menuState.cursorCoordinates && `fixed left-0 top-0`
-      )}
-    >
-      <div
-        ref={scrollContainerRef}
-        className={cn(
-          "w-64 max-h-70 border shadow-md bg-white rounded-md",
-          "overflow-y-auto scroll-py-1 pointer-events-none"
-        )}
-      >
-        {filteredItems.length === 0 ? (
-          <div className="items-center p-3 rounded-sm text-sm">
-            No blocks found.
-          </div>
-        ) : (
-          <div>
-            {filteredItems.map((item, index) => (
-              <div
-                key={item.id}
-                data-index={index}
-                onClick={newLocal}
-                onMouseEnter={() => slashMenuManager.setSelectedIndex(index)}
-                className={cn("p-1")}
-              >
-                <div
-                  className={cn(
-                    "flex gap-3 cursor-pointer items-center p-2 rounded-sm",
-                    index === menuState.selectedIndex && "bg-stone-100"
-                  )}
-                >
-                  <span>{item.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-medium text-sm">{item.title}</div>
-                    <div className="text-xs text-gray-500">
-                      {item.description}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+		const enableHover = () => {
+			setAllowMouseHover(true);
+		};
+
+		// Khi có mousemove thì mới cho phép hover
+		const container = slashContainerRef.current;
+		if (container) {
+			window.addEventListener("mousemove", enableHover, { once: true });
+		}
+
+		return () => {
+			if (container) {
+				window.removeEventListener("mousemove", enableHover);
+			}
+		};
+	}, [slashMenuState.isOpen, filteredItems]);
+
+	/// CÁC EVENT HANDLER
+	/**
+	 * Xử lý khi người dùng click vào một item trong slash command menu
+	 * (thường là click chuột trái vào item đó)
+	 * Chức năng chính là gọi hàm handleSlashCommandSelection của editor
+	 */
+	const onSlashItemClick = () => {
+		editor.handleSelectSlashItem(
+			filteredItems[slashMenuState.selectedIndex],
+			slashMenuState,
+			closeSlashCommand,
+		);
+		// Focus vào Slate editor sau khi chọn
+		ReactEditor.focus(editor);
+	};
+
+	// Slash Command Menu mở -> thực hiện render menu
+	return (
+		<div
+			ref={slashRef}
+			className={cn(
+				"h-70 z-50 overflow fixed left-0 top-0 flex",
+				slashMenuState.displayPosition?.placement === "top"
+					? "items-end"
+					: "items-start",
+				slashMenuState.isOpen
+					? "opacity-100 pointer-events-auto"
+					: "opacity-0 pointer-events-none",
+			)}
+		>
+			<div
+				ref={slashContainerRef}
+				className={cn(
+					"w-64 h-auto max-h-70 border overflow-y-auto",
+					"shadow-md bg-popover rounded-md",
+					!allowMouseHover && "pointer-events-none",
+				)}
+			>
+				{filteredItems.length === 0 ? (
+					<div className="items-center p-3 text-sm rounded-sm">
+						No blocks found.
+					</div>
+				) : (
+					<div>
+						{filteredItems.map((item, index) => (
+							// biome-ignore lint/a11y/noStaticElementInteractions: why not?
+							// biome-ignore lint/a11y/useKeyWithClickEvents: why not #2?
+							<div
+								key={item.id}
+								data-slash-item-index={index}
+								onClick={onSlashItemClick}
+								onMouseEnter={() => setSelectedIndex(index)}
+								className={cn("p-1")}
+							>
+								<div
+									className={cn(
+										"flex gap-3 cursor-pointer items-center p-2 rounded-sm",
+										index === slashMenuState.selectedIndex &&
+											"bg-stone-100 dark:bg-stone-700",
+									)}
+								>
+									<span>{item.icon}</span>
+									<div className="flex-1">
+										<div className="text-sm font-medium">{item.title}</div>
+										<div className="text-xs text-stone-500">
+											{item.description}
+										</div>
+									</div>
+								</div>
+							</div>
+						))}
+					</div>
+				)}
+			</div>
+		</div>
+	);
 }

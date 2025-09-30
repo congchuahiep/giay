@@ -1,7 +1,9 @@
-import { type ShortcutExtension } from "@/core/shortcut/store/shortcutStore";
+import type { Editor } from "slate";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 
-const DefaultBehaviourShortCutExtension: ShortcutExtension = {
-  name: "navigation",
+const DefaultBehaviourShortCutExtension: ShortcutExtension<Editor> = {
+  name: "default-behaviour",
   priority: 0,
   actions: {
     "backspace-handler": (event, editor) => {
@@ -14,15 +16,15 @@ const DefaultBehaviourShortCutExtension: ShortcutExtension = {
       return true;
     },
 
-    "undo": (_, editor) => {
-      editor.undo();
-      return true;
-    },
+    // "undo": (_, editor) => {
+    //   editor.undo();
+    //   return true;
+    // },
 
-    "redo": (_, editor) => {
-      editor.redo();
-      return true;
-    },
+    // "redo": (_, editor) => {
+    //   editor.redo();
+    //   return true;
+    // },
   },
 };
 

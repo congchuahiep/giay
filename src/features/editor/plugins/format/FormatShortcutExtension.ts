@@ -1,7 +1,9 @@
-import type { ShortcutPlugin } from "@/core/shortcut";
+import type { Editor } from "slate";
+import type { ShortcutExtension } from "@/core/shortcut";
+import { defaultShortcutSettings } from "@/features/user-settings/default-settings/defaultShortcutSettings";
 
-const FormatShortcutExtension: ShortcutPlugin = {
-  name: "block",
+const FormatShortcutExtension: ShortcutExtension<Editor> = {
+  name: "format",
   priority: 10,
   actions: {
     "toggle-code-block": (event, editor) => {

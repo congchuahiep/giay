@@ -7,7 +7,7 @@ const QuoteBlock = (props: RenderElementProps) => {
 
   return (
     <blockquote
-      className="m-1 py-1 pl-3 border-l-3 border-black"
+      className="m-1 py-1 pl-3 border-l-3 border-black dark:border-stone-50"
       {...props.attributes}
       spellCheck={false}
     >

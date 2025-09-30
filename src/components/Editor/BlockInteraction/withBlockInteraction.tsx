@@ -1,6 +1,7 @@
+/** biome-ignore-all lint/a11y/noStaticElementInteractions: Static element used for drag and drop */
 import DropIndicator from "@/components/Editor/BlockInteraction/DropIndicator";
 import { useDragStore } from "@/features/editor/stores";
-import { cn } from "@/lib/utils";
+import { cn } from "@/utils";
 import { useDroppable } from "@dnd-kit/core";
 import { useState } from "react";
 import type { RenderElementProps } from "slate-react";
@@ -8,10 +9,10 @@ import DragHandle from "./DragHandle";
 import NewParagraphButton from "./NewParagraphButton";
 
 interface WithBlockInteractionOptions {
-  /**
-   * Block Interaction sẽ được căn giữa với chính giữa block
-   */
-  alignCenter?: boolean;
+	/**
+	 * Block Interaction sẽ được căn giữa với chính giữa block
+	 */
+	alignCenter?: boolean;
 }
 
 /**
@@ -27,82 +28,81 @@ interface WithBlockInteractionOptions {
  * @returns Component mới với các tính năng tương tác block
  */
 export function withBlockInteraction<P extends RenderElementProps>(
-  Component: React.ComponentType<P>,
-  options: WithBlockInteractionOptions = {}
+	Component: React.ComponentType<P>,
+	options: WithBlockInteractionOptions = {},
 ) {
-  const { alignCenter = false } = options;
+	const { alignCenter = false } = options;
 
-  return function BlockInteractionWrapper(props: P) {
-    const [isHovered, setIsHovered] = useState(false);
-    const [isDragHandleHovered, setIsDragHandleHovered] = useState(false);
+	return function BlockInteractionWrapper(props: P) {
+		const [isHovered, setIsHovered] = useState(false);
+		const [isDragHandleHovered, setIsDragHandleHovered] = useState(false);
 
-    // Zustand store state
-    const { isDragging, draggedBlockId, overBlockId, dropPosition } =
-      useDragStore();
+		// Zustand store state
+		const { isDragging, draggedBlockId, overBlockId, dropPosition } =
+			useDragStore();
 
-    // Block đang được drag là block hiện tại?
-    const isCurrentBlockDragged =
-      isDragging && draggedBlockId === props.element.id;
+		// Block đang được drag là block hiện tại?
+		const isCurrentBlockDragged =
+			isDragging && draggedBlockId === props.element.id;
 
-    // Thiết lập Droppable
-    const { setNodeRef: setDroppableRef } = useDroppable({
-      id: props.element.id,
-      data: { blockData: props.element },
-    });
+		// Thiết lập Droppable
+		const { setNodeRef: setDroppableRef } = useDroppable({
+			id: props.element.id,
+			data: { blockData: props.element },
+		});
 
-    // Xác định xem có nên hiển thị drop indicator hay không
-    const shouldShowIndicator =
-      isDragging && overBlockId === props.element.id && !isCurrentBlockDragged;
+		// Xác định xem có nên hiển thị drop indicator hay không
+		const shouldShowIndicator =
+			isDragging && overBlockId === props.element.id && !isCurrentBlockDragged;
 
-    // Hiển thị interaction UI khi hover và không đang drag
-    const showBlockInteraction =
-      (isHovered || isDragHandleHovered) && !isDragging;
+		// Hiển thị interaction UI khi hover và không đang drag
+		const showBlockInteraction =
+			(isHovered || isDragHandleHovered) && !isDragging;
 
-    return (
-      <div
-        ref={setDroppableRef}
-        className={cn(
-          "relative",
-          // Visual feedback khi block đang được kéo
-          isCurrentBlockDragged && "text-muted-foreground opacity-40",
-          isDragging && !isCurrentBlockDragged && "cursor-grab"
-        )}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        data-block-id={props.element.id}
-      >
-        {/* Drop indicators */}
-        {shouldShowIndicator && (
-          <DropIndicator isTop={dropPosition === "top"} />
-        )}
+		return (
+			<div
+				ref={setDroppableRef}
+				className={cn(
+					"relative",
+					// Visual feedback khi block đang được kéo
+					isCurrentBlockDragged && "text-muted-foreground opacity-40",
+				)}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+				data-block-id={props.element.id}
+			>
+				{/* Drop indicators */}
+				{shouldShowIndicator && (
+					<DropIndicator isTop={dropPosition === "top"} />
+				)}
 
-        {/* Block interaction controls */}
-        <div
-          className={cn(
-            "absolute left-0 flex justify-center select-none",
-            "w-6 -ml-9 opacity-0 transition-opacity duration-150",
-            showBlockInteraction && "opacity-100",
-            // Positioning based on alignment option
-            alignCenter ? "top-0 bottom-0" : "top-1"
-          )}
-          onMouseDown={(e: React.MouseEvent) => {
-            e.preventDefault();
-            e.stopPropagation();
-          }}
-        >
-          <NewParagraphButton blockId={props.element.id} />
-          <DragHandle
-            onMouseEnter={() => setIsDragHandleHovered(true)}
-            onMouseLeave={() => setIsDragHandleHovered(false)}
-            blockData={props.element}
-          />
-        </div>
+				{/* Block interaction controls */}
+				<div
+					className={cn(
+						"absolute left-0 flex justify-center select-none",
+						"w-6 -ml-10 opacity-0 transition-opacity duration-150 z-10",
+						showBlockInteraction && "opacity-100",
+						// Positioning based on alignment option
+						alignCenter ? "top-0 bottom-0" : "top-1",
+					)}
+					onMouseDown={(e: React.MouseEvent) => {
+						e.preventDefault();
+						e.stopPropagation();
+					}}
+				>
+					<NewParagraphButton blockId={props.element.id} />
+					<DragHandle
+						onMouseEnter={() => setIsDragHandleHovered(true)}
+						onMouseLeave={() => setIsDragHandleHovered(false)}
+						blockData={props.element}
+					/>
+				</div>
 
-        {/* Original component */}
-        <Component {...props} />
-      </div>
-    );
-  };
+				{/* Original component */}
+				<Component {...props} />
+			</div>
+		);
+	};
 }
 
 export default withBlockInteraction;

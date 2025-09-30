@@ -6,5 +6,6 @@ export type LeafText = {
 	underline?: boolean;
 	strikeThrough?: boolean;
 	code?: boolean;
+	codeBlock?: boolean;
 	text: string;
 };
