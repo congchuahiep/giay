@@ -1,8 +1,11 @@
+import type { HocuspocusProvider } from "@hocuspocus/provider";
+import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { api, endpoint } from "@/configs";
-import { useMutation, type UseMutationOptions } from "@tanstack/react-query";
+import type { PagePreview } from "@/types";
 
 interface DeletePageVariables {
-	id: string;
+	page_id: string;
+	parent_page_id?: string;
 }
 
 /**
@@ -15,11 +18,19 @@ interface DeletePageVariables {
  * @returns
  */
 export function usePageDelete(
+	provider: HocuspocusProvider,
 	options?: UseMutationOptions<string, Error, DeletePageVariables>,
 ) {
 	return useMutation<string, Error, DeletePageVariables>({
-		mutationFn: (variables) => deletePage(variables.id),
+		mutationFn: (variables) => deletePage(variables.page_id),
 		...options,
+		onSuccess: (data, variables, context) => {
+			provider.document
+				.getMap<PagePreview>(variables.parent_page_id || "root-pages")
+				.delete(variables.page_id);
+
+			options?.onSuccess?.(data, variables, context);
+		},
 	});
 }
 

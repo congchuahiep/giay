@@ -11,12 +11,18 @@ interface PageBlockShortCutExtensionContext {
 const PageBlockShortcutExtension: ShortcutExtension<PageBlockShortCutExtensionContext> =
 	{
 		name: "page-block",
-		scope: "editor",
+		scope: "editor.page-block",
 		priority: 0,
 		actions: {
 			"enter-page": (_, context) => {
 				const { editor, workspaceId, navigate } = context;
 				return editor.handleEnterPage(editor, workspaceId, navigate);
+			},
+			"delete-page": (event, context) => {
+				const { editor, workspaceId, navigate } = context;
+				event.stopPropagation();
+				console.log("delete-page");
+				return editor.handleDeletePage(editor, workspaceId, navigate);
 			},
 		},
 	};

@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { devtools } from "zustand/middleware";
 import type { ShortcutStore } from "@/core/shortcut";
 import getHotkeyFromEvent from "@/core/shortcut/utils/getHotketFromEvent";
+import type { KeyboardEvent } from "react";
 
 /**
  * Quản lý các extension phím tắt (shortcut) cho editor.
@@ -67,19 +68,32 @@ export const useShortcutStore = create<ShortcutStore>()(
 			 * @param event Sự kiện bàn phím
 			 * @returns true nếu sự kiện đã được xử lý, ngược lại trả về false
 			 */
-			handleKeyDown: (event) => {
+			handleKeyDown: (event: KeyboardEvent) => {
 				const { activeScope, findActionByKey, actions, getActionContext } =
 					get();
 				const eventHotkey = getHotkeyFromEvent(event);
 
-				// Thử tìm extension phù hợp trong active scope trước, sau đó đến global scope
-				// Nếu tìm thấy, gọi action tương ứng và trả về true
-				// Nếu không tìm thấy, trả về false
-				// Lưu ý: Có thể mở rộng để kiểm tra nhiều scope khác nhau nếu cần (Cái này đánh dấu cho mai sau nè)
-				// Ví dụ: [activeScope, "sidebar", "global"]
-				// Trong đó "sidebar" có thể là một scope khác đang active
-				// Cách này giúp hỗ trợ nhiều scope hơn thay vì chỉ một active scope
-				const scopesToCheck = [activeScope, "global"];
+				// Tách active scope thành các phần tử trong mảng, thứ tự từ cuối lên đầu
+				// Ví dụ: activeScope = "editor.slashmenu" => ["editor.slashmenu", "editor"]
+				// Nếu không có active scope, mặc định là "global"
+				const activeScopeParts = _.chain(activeScope)
+					.split(".")
+					.reduce((acc, part) => {
+						const lastScope = acc[acc.length - 1];
+						const newScope = lastScope ? `${lastScope}.${part}` : part;
+						acc.push(newScope);
+						return acc;
+					}, [] as string[])
+					.reverse()
+					.value();
+
+				// Thử tìm extension phù hợp trong các active scope trước, sau đó đến
+				// global scope:
+				// - Nếu tìm thấy, gọi action tương ứng và trả về true
+				// - Nếu không tìm thấy, tiếp tục mò trong các scope tiếp theo, và nếu
+				// đã mò hết mà vẫn không tìm thấy hoặc không kích hoạt thành công ->
+				// trả về false
+				const scopesToCheck = [...activeScopeParts, "global"];
 
 				for (const scope of scopesToCheck) {
 					// Tìm các extension phù hợp trong scope hiện tại
@@ -91,7 +105,11 @@ export const useShortcutStore = create<ShortcutStore>()(
 
 					const actionContext = getActionContext(actionName);
 					const action = actions[scope][actionName];
-					return action(event, actionContext);
+					const result = action(event, actionContext);
+
+					// Nếu action thành công, trả về true, nếu không thì tiếp tục kiểm tra
+					// scope tiếp theo
+					if (result) return true;
 				}
 
 				return false;

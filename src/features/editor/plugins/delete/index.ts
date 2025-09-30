@@ -3,6 +3,7 @@ import handleDeleteBackward from "./handleDeleteBackward.ts";
 import handleDeleteFragment from "./handleDeleteFragment.ts";
 import { handleDeleteFirstBlock } from "@/features/editor/plugins/delete/handleDeleteFirstBlock.ts";
 import type DeleteEditor from "@/features/editor/plugins/delete/interface.ts";
+import handleDeleteForward from "./handleDeleteForward.ts";
 
 export type { DeleteEditor };
 
@@ -13,29 +14,31 @@ export type { DeleteEditor };
  * - Xoá nhiều ký tự (bằng bất kỳ phím)
  */
 export function withDeleteEditor(editor: Editor): Editor & DeleteEditor {
-  const { deleteBackward, deleteFragment, deleteForward } = editor;
+	const { deleteBackward, deleteFragment, deleteForward } = editor;
 
-  editor.deleteBackward = (...args) => {
-    const handled = handleDeleteBackward(editor);
-    if (!handled) {
-      deleteBackward(...args);
-    }
-  };
+	editor.deleteBackward = (options) => {
+		const handled = handleDeleteBackward(editor);
+		if (!handled) {
+			deleteBackward(options);
+		}
+	};
 
-  // Chưa xử lý vì chưa biết nó có hành vi nào khùng đin khum
-  editor.deleteForward = (...args) => {
-    deleteForward(...args);
-  };
+	editor.deleteForward = (options) => {
+		const handled = handleDeleteForward(editor);
+		if (!handled) {
+			deleteForward(options);
+		}
+	};
 
-  editor.deleteFragment = (...args) => {
-    const handled = handleDeleteFragment(editor);
-    if (!handled) {
-      deleteFragment(...args);
-    }
-  };
+	editor.deleteFragment = (options) => {
+		const handled = handleDeleteFragment(editor);
+		if (!handled) {
+			deleteFragment(options);
+		}
+	};
 
-  editor.handleDeleteFirstBlock = (event) =>
-    handleDeleteFirstBlock(editor, event);
+	editor.handleDeleteFirstBlock = (event) =>
+		handleDeleteFirstBlock(editor, event);
 
-  return editor;
+	return editor;
 }

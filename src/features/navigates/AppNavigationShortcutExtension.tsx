@@ -4,6 +4,7 @@ import type { AppContext } from "@/windows/EditorWindow";
 
 const AppNavigationShortcutExtension: ShortcutExtension<AppContext> = {
 	name: "app-navigation",
+	scope: "global",
 	priority: 0,
 	actions: {
 		"toggle-sidebar": (event, context) => {

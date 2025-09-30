@@ -52,7 +52,6 @@ import { useYjsWorkspace } from "@/features/yjs-workspace";
  * Danh sách các plugin
  */
 const plugins = [
-	withPageBlock,
 	withMarkdownEditor,
 	withSlashEditor,
 	withInsertEditor,
@@ -60,6 +59,7 @@ const plugins = [
 	withUtilsEditor,
 	withSelectEditor,
 	withFormatEditor,
+	withPageBlock,
 	withReact,
 	// withHistory,
 ];
@@ -121,12 +121,8 @@ const PageEditor = () => {
 	}, [editor]);
 
 	// Đăng ký sự kiện bàn phím
-	useRegisterShortcuts("editor", editor, editorShortcutExtensions);
-	useRegisterShortcuts(
-		"editor",
-		pageBlockShortcutContext,
-		pageShortcutExtensions,
-	);
+	useRegisterShortcuts(editor, editorShortcutExtensions);
+	useRegisterShortcuts(pageBlockShortcutContext, pageShortcutExtensions);
 
 	const { setActiveShortcutScope } = useShortcutStore();
 

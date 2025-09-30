@@ -11,7 +11,8 @@ export interface PageBlock extends BaseBlock {
 	type: "page";
 	icon: string;
 	title: string;
-	pageId: string;
+	pageId: string | undefined;
+	isDeleted: boolean;
 }
 
 export interface ParagraphBlock extends BaseBlock {

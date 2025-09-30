@@ -1,11 +1,12 @@
-import { StrictMode } from "react";
+// import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router";
 import AppRoute from "@/AppRoute.tsx";
-import { SettingsProvider } from "./features/user-settings/providers/SettingProvider";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "./components/ui/theme-provider";
+import { SettingsProvider } from "./features/user-settings/providers/SettingProvider";
 
 const queryClient = new QueryClient();
 
@@ -18,6 +19,7 @@ createRoot(document.getElementById("root")!).render(
 				<BrowserRouter>
 					<AppRoute />
 				</BrowserRouter>
+				<Toaster />
 			</ThemeProvider>
 		</SettingsProvider>
 	</QueryClientProvider>,

@@ -1,8 +1,9 @@
-import { api, endpoint } from "@/configs";
-import type { PagePreview } from "@/types";
+import type { HocuspocusProvider } from "@hocuspocus/provider";
 import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import { v4 as uuidv4 } from "uuid";
 import * as Y from "yjs";
+import { api, endpoint } from "@/configs";
+import type { PagePreview } from "@/types";
 
 interface CreatePageVariables {
 	parentPageId?: string;
@@ -17,11 +18,20 @@ interface CreatePageVariables {
  */
 export function usePageCreate(
 	workspaceId: string,
+	provider: HocuspocusProvider,
 	options?: UseMutationOptions<PagePreview, Error, CreatePageVariables>,
 ) {
 	return useMutation<PagePreview, Error, CreatePageVariables>({
 		mutationFn: (variables) => createPage(workspaceId, variables.parentPageId),
 		...options,
+		onSuccess: (data, variables, context) => {
+			provider.document
+				.getMap<PagePreview>(variables.parentPageId || "root-pages")
+				.set(data.id, data);
+			console.log("Mới tạo: ", data.id, provider.document);
+
+			options?.onSuccess?.(data, variables, context);
+		},
 	});
 }
 

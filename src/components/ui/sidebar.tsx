@@ -153,7 +153,7 @@ function Sidebar({
 			<div
 				data-slot="sidebar"
 				className={cn(
-					" text-stone-950 dark:text-stone-50 flex h-full w-(--sidebar-width) flex-col",
+					" text-stone-950 dark:text-stone-50 flex h-full w-(--sidebar-width) flex-col select-none",
 					className,
 				)}
 				{...props}
@@ -357,7 +357,7 @@ function SidebarContent({ className, ...props }: React.ComponentProps<"div">) {
 			data-slot="sidebar-content"
 			data-sidebar="content"
 			className={cn(
-				"flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden",
+				"flex min-h-0 flex-1 flex-col gap-2 overflow-auto group-data-[collapsible=icon]:overflow-hidden select-none",
 				className,
 			)}
 			{...props}

@@ -54,20 +54,5 @@ export function ShortcutListener() {
 		})();
 	}, [registerSettings, setHotkey]);
 
-	// Nạp phím tắt từ settings
-	// Đồng thời tự động cập nhật keySettings khi shortcuts thay đổi
-	// useEffect(() => {
-	//   const shortcuts = getShortcutsSettings();
-	//   if (!shortcuts) return;
-
-	//   const extensions = getExtensions();
-	//   extensions.forEach((extension) => {
-	//     if (shortcuts[extension.name]) {
-	//       // Cập nhật keySettings cho extension này
-	//       updateHotkey(extension.name, shortcuts[extension.name]);
-	//     }
-	//   });
-	// }, [getShortcutsSettings, updateHotkey, getExtensions]);
-
 	return null; // Component này không hiển thị gì cả
 }

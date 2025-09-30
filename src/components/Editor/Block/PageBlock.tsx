@@ -1,5 +1,7 @@
 import { FileIcon } from "@phosphor-icons/react/dist/csr/File";
-import { useEffect } from "react";
+import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
+import { useCallback, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { Transforms } from "slate";
 import {
 	ReactEditor,
@@ -7,95 +9,128 @@ import {
 	useSelected,
 	useSlateStatic,
 } from "slate-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import type { PageBlock as PageBlockType } from "@/features/editor/types";
-import {
-	usePageCreate,
-	usePageDelete,
-	usePagePreviewQuery,
-} from "@/services/pages";
-import { cn } from "@/utils";
-import { useNavigate } from "react-router-dom";
 import {
 	ContextMenu,
 	ContextMenuContent,
 	ContextMenuItem,
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
-import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
-import { useYjsWorkspace } from "@/features/yjs-workspace";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useShortcutStore } from "@/core/shortcut";
+import type { PageBlock as PageBlockType } from "@/features/editor/types";
 import { useYjsPage } from "@/features/yjs-page";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
+import {
+	usePageCreate,
+	usePageDelete,
+	usePagePreviewQuery,
+} from "@/services/pages";
+import { cn } from "@/utils";
 
 export default function PageBlock(props: RenderElementProps) {
 	const navigate = useNavigate();
 	const editor = useSlateStatic();
 	const isSelected = useSelected();
+	const setActiveShortcutScope = useShortcutStore(
+		(state) => state.setActiveShortcutScope,
+	);
 
 	const currentPage = useYjsPage((state) => state.currentPage);
 	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
+	const workspaceProvider = useYjsWorkspace((state) => state.provider);
 	const element = props.element as PageBlockType;
 
-	const { mutate: createPage } = usePageCreate(activeWorkspace.id, {
-		onSuccess: (data) => {
-			const path = ReactEditor.findPath(editor, props.element);
-			Transforms.setNodes(editor, { pageId: data.id }, { at: path });
-		},
-	});
+	/// Khởi tạo các Services
+	const { data: page, isLoading } = usePagePreviewQuery(element.pageId);
 
-	const { data: page, isLoading } = usePagePreviewQuery(element.pageId, {
-		retry: (failureCount, error) => {
-			if (error.message.includes("404")) {
-				createPage({ parentPageId: currentPage.id });
-				return false;
-			}
-			return failureCount < 3;
+	const { mutate: createPage } = usePageCreate(
+		activeWorkspace.id,
+		workspaceProvider,
+		{
+			onSuccess: (data) => {
+				const path = ReactEditor.findPath(editor, element);
+				Transforms.setNodes(editor, { pageId: data.id }, { at: path });
+			},
 		},
-	});
+	);
 
+	const { mutate: deletePage, isPending: deleting } = usePageDelete(
+		workspaceProvider,
+		{
+			onError: (error) => {
+				console.error("Error deleting page:", error);
+				const path = ReactEditor.findPath(editor, element);
+				editor.setNodes({ isDeleted: false }, { at: path });
+				toast.error("Failed to delete page!");
+			},
+			onSuccess: () => {
+				const path = ReactEditor.findPath(editor, element);
+				Transforms.delete(editor, { at: path });
+			},
+		},
+	);
+
+	/**
+	 * Xử lý việc xoá page + xoá trong database
+	 */
+	const handleOnDelete = useCallback(() => {
+		if (!element.pageId) return;
+		const path = ReactEditor.findPath(editor, element);
+		editor.setNodes({ isDeleted: false }, { at: path });
+		deletePage({ page_id: element.pageId, parent_page_id: currentPage.id });
+	}, [element, deletePage, editor, currentPage.id]);
+
+	/**
+	 * Xử lý việc nhấn và để truy cập trang
+	 */
 	const handleOnClick = () => {
 		if (!page) return;
 		navigate(`/${activeWorkspace.id}/${page.id}`);
 	};
 
 	/**
-	 * Xử lý các phím khi người dùng đang chọn page block hiện tại.
-	 *
-	 * Các logic gắn liền với block thế này không được khuyến khích tạo cho lắm
-	 * @param event
+	 * Khởi tạo page nếu chưa có pageId
 	 */
-	const handleKeyDown = (event: React.KeyboardEvent) => {
-		// if (event.key === "Backspace" || event.key === "Delete") {
-		// 	event.preventDefault();
-		// 	Transforms.setNodes(editor, { type: "paragraph" });
-		// }
-		//
-		console.log("Key pressed:", event.key);
-		if (event.key === "Enter") {
-			event.preventDefault();
-			console.log("Enter key pressed");
-			if (!page) return;
-			navigate(`/${activeWorkspace.id}/${page.id}`);
-		}
-	};
+	useEffect(() => {
+		if (!element.pageId) createPage({ parentPageId: currentPage.id });
+	}, [element.pageId, currentPage.id, createPage]);
+
+	/**
+	 * 	Khi focus vào page block -> Chuyển shortcut scope về `editor.page-block`
+	 */
+	useEffect(() => {
+		if (isSelected) setActiveShortcutScope("editor.page-block");
+		else setActiveShortcutScope("editor");
+	}, [isSelected, setActiveShortcutScope]);
+
+	/**
+	 * 	Khi page block bị xóa -> Xóa page và block
+	 */
+	useEffect(() => {
+		if (!element.isDeleted) return;
+		if (!element.pageId) return;
+		deletePage({ page_id: element.pageId, parent_page_id: currentPage.id });
+	}, [element.isDeleted, element.pageId, deletePage, currentPage.id]);
+
+	// Khi đang xoá sẽ không hiển thị gì cả
+	if (deleting) return null;
 
 	return (
-		<PageBlockContextMenu element={element} render={!isLoading}>
-			{/*biome-ignore lint/a11y/noStaticElementInteractions: PageBlock is a static
-			element and can be interacted with using keyboard*/}
+		<PageBlockContextMenu render={!isLoading} handleOnDelete={handleOnDelete}>
 			<div
 				{...props.attributes}
 				className={cn("rounded-sm p-1", isSelected && "bg-primary/30")}
-				onKeyDown={handleKeyDown}
+				contentEditable={false}
 			>
 				<Button
 					variant="secondary"
 					className={cn(
 						" p-0 border shadow-none w-full cursor-pointer justify-start",
-						"text-stone-800 bg-stone-50/50 hover:bg-stone-100 border-stone-300/50",
-						"dark:text-stone-50 dark:bg-stone-800/50 dark:hover:bg-stone-800 dark:border-stone-700/50",
+						"text-stone-800 bg-stone-50/80 hover:bg-stone-100 border-stone-300/50",
+						"dark:text-stone-50 dark:bg-stone-900/80 dark:hover:bg-stone-800 dark:border-stone-700/50",
 					)}
-					contentEditable={false}
 					onClick={handleOnClick}
 				>
 					{page && !isLoading ? (
@@ -122,25 +157,15 @@ export default function PageBlock(props: RenderElementProps) {
 
 interface PageBlockContextMenuProps {
 	children: React.ReactNode;
-	element: PageBlockType;
+	handleOnDelete: () => void;
 	render?: boolean;
 }
 
 function PageBlockContextMenu({
 	children,
-	element,
+	handleOnDelete,
 	render = true,
 }: PageBlockContextMenuProps) {
-	const editor = useSlateStatic();
-
-	const { mutate: deletePage } = usePageDelete();
-
-	const handleOnDelete = () => {
-		const path = ReactEditor.findPath(editor, element);
-		Transforms.delete(editor, { at: path });
-		deletePage({ id: element.pageId });
-	};
-
 	if (!render) return children;
 
 	return (

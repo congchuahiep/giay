@@ -25,7 +25,16 @@ export default function buildBlock(
 		case undefined:
 			return { ...baseBlock, type: "paragraph" };
 		case "checkList":
-			return { ...baseBlock, type: "checkList", checked: false };
+			return { type: "checkList", checked: false, ...baseBlock };
+		case "page":
+			return {
+				type: "page",
+				pageId: undefined,
+				icon: "",
+				title: "",
+				isDeleted: false,
+				...baseBlock,
+			};
 		default:
 			return { ...baseBlock, type: type };
 	}

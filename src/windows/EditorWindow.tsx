@@ -30,9 +30,7 @@ function EditorWindow() {
 		[toggleSidebar],
 	);
 
-	useRegisterShortcuts("global", appShortcutContext, [
-		AppNavigationShortcutExtension,
-	]);
+	useRegisterShortcuts(appShortcutContext, [AppNavigationShortcutExtension]);
 	const { open, type, closeModal } = useGlobalModalStore();
 
 	return (

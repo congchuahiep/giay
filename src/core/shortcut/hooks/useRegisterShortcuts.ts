@@ -11,7 +11,6 @@ import { useShortcutStore } from "../store/useShortcutStore";
  * @param extensions - Mảng các extension để đăng ký
  */
 export default function useRegisterShortcuts<T = any>(
-	scope: string,
 	context: T,
 	extensions: ShortcutExtension<T>[],
 ): void {
@@ -22,14 +21,12 @@ export default function useRegisterShortcuts<T = any>(
 	useEffect(() => {
 		const scopedExtensions = extensions.map((ext) => ({
 			...ext,
-			scope,
 		}));
 
 		// biome-ignore lint/suspicious/useIterableCallbackReturn: What?
 		scopedExtensions.forEach((extension) =>
 			registerExtension({
 				...extension,
-				scope,
 				context,
 			}),
 		);
@@ -40,5 +37,5 @@ export default function useRegisterShortcuts<T = any>(
 				unregisterExtension(extension.name),
 			);
 		};
-	}, [scope, context]);
+	}, [context, registerExtension, unregisterExtension]);
 }
