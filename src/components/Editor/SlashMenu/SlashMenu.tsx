@@ -98,14 +98,12 @@ export default function SlashMenu() {
 	);
 
 	// Đăng ký shortcut để mở editor
-	useRegisterShortcuts(
-		"editor", // Mở trên phạm vi editor
-		openSlashMenuShortcutContext,
-		[OpenSlashCommandShortcutExtension],
-	);
+	useRegisterShortcuts(openSlashMenuShortcutContext, [
+		OpenSlashCommandShortcutExtension,
+	]);
 
 	// Đăng ký bộ shortcut khi đang mở editor
-	useRegisterShortcuts("slash-menu", slashMenuShortcutContext, [
+	useRegisterShortcuts(slashMenuShortcutContext, [
 		SlashCommandShortcutExtension,
 	]);
 

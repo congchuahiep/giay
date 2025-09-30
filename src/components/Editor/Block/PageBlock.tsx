@@ -26,11 +26,15 @@ import {
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
 import { useYjsPage } from "@/features/yjs-page";
+import { useShortcutStore } from "@/core/shortcut";
 
 export default function PageBlock(props: RenderElementProps) {
 	const navigate = useNavigate();
 	const editor = useSlateStatic();
 	const isSelected = useSelected();
+	const setActiveShortcutScope = useShortcutStore(
+		(state) => state.setActiveShortcutScope,
+	);
 
 	const currentPage = useYjsPage((state) => state.currentPage);
 	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
@@ -53,40 +57,22 @@ export default function PageBlock(props: RenderElementProps) {
 		},
 	});
 
+	// Khi focus vào page block -> Chuyển shortcut scope về `editor.page-block`
+	useEffect(() => {
+		if (isSelected) setActiveShortcutScope("editor.page-block");
+		else setActiveShortcutScope("editor");
+	}, [isSelected, setActiveShortcutScope]);
+
 	const handleOnClick = () => {
 		if (!page) return;
 		navigate(`/${activeWorkspace.id}/${page.id}`);
 	};
 
-	/**
-	 * Xử lý các phím khi người dùng đang chọn page block hiện tại.
-	 *
-	 * Các logic gắn liền với block thế này không được khuyến khích tạo cho lắm
-	 * @param event
-	 */
-	const handleKeyDown = (event: React.KeyboardEvent) => {
-		// if (event.key === "Backspace" || event.key === "Delete") {
-		// 	event.preventDefault();
-		// 	Transforms.setNodes(editor, { type: "paragraph" });
-		// }
-		//
-		console.log("Key pressed:", event.key);
-		if (event.key === "Enter") {
-			event.preventDefault();
-			console.log("Enter key pressed");
-			if (!page) return;
-			navigate(`/${activeWorkspace.id}/${page.id}`);
-		}
-	};
-
 	return (
 		<PageBlockContextMenu element={element} render={!isLoading}>
-			{/*biome-ignore lint/a11y/noStaticElementInteractions: PageBlock is a static
-			element and can be interacted with using keyboard*/}
 			<div
 				{...props.attributes}
 				className={cn("rounded-sm p-1", isSelected && "bg-primary/30")}
-				onKeyDown={handleKeyDown}
 			>
 				<Button
 					variant="secondary"

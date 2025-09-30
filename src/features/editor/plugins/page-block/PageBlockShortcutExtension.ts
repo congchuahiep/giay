@@ -11,7 +11,7 @@ interface PageBlockShortCutExtensionContext {
 const PageBlockShortcutExtension: ShortcutExtension<PageBlockShortCutExtensionContext> =
 	{
 		name: "page-block",
-		scope: "editor",
+		scope: "editor.page-block",
 		priority: 0,
 		actions: {
 			"enter-page": (_, context) => {

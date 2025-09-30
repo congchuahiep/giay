@@ -4,13 +4,13 @@ import { defaultShortcutSettings } from "@/features/user-settings/default-settin
 import type { SafeMenuPlacement } from "@/types";
 
 interface OpenSlashMenuShortcutContext {
-  editor: SlashEditor;
-  openSlashCommand: (
-    position: SafeMenuPlacement | undefined,
-    anchorOffset: number,
-  ) => void;
-  slashRef: React.RefObject<HTMLDivElement | null>;
-  slashContainerRef: React.RefObject<HTMLDivElement | null>;
+	editor: SlashEditor;
+	openSlashCommand: (
+		position: SafeMenuPlacement | undefined,
+		anchorOffset: number,
+	) => void;
+	slashRef: React.RefObject<HTMLDivElement | null>;
+	slashContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 /**
@@ -20,20 +20,21 @@ interface OpenSlashMenuShortcutContext {
  * `SlashMenuShortcutExtension.ts`
  */
 const OpenSlashMenuShortcutExtension: ShortcutExtension<OpenSlashMenuShortcutContext> =
-  {
-    name: "open-slash-menu",
-    priority: 50,
-    actions: {
-      "slash-command": (_, context) => {
-        const { editor, slashRef, slashContainerRef, openSlashCommand } =
-          context;
-        return editor.handleOpenSlashMenu(
-          openSlashCommand,
-          slashRef,
-          slashContainerRef,
-        );
-      },
-    },
-  };
+	{
+		name: "open-slash-menu",
+		scope: "editor",
+		priority: 50,
+		actions: {
+			"slash-command": (_, context) => {
+				const { editor, slashRef, slashContainerRef, openSlashCommand } =
+					context;
+				return editor.handleOpenSlashMenu(
+					openSlashCommand,
+					slashRef,
+					slashContainerRef,
+				);
+			},
+		},
+	};
 
 export default OpenSlashMenuShortcutExtension;
