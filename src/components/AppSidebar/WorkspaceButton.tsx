@@ -1,6 +1,5 @@
 import { CaretDownIcon } from "@phosphor-icons/react/dist/csr/CaretDown";
 import { PlusIcon } from "@phosphor-icons/react/dist/csr/Plus";
-import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
 import type { Workspace } from "@/types";
 import {
 	DropdownMenu,
@@ -11,6 +10,8 @@ import {
 	DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
+import { cn } from "@/utils";
 
 // interface WorkspaceButtonProps {
 // 	workspaces: {
@@ -20,8 +21,9 @@ import { SidebarMenu, SidebarMenuButton, SidebarMenuItem } from "../ui/sidebar";
 // }
 
 export default function WorkspaceButton() {
-	const { activeWorkspace, userWorkspaces, setActiveWorkspace } =
-		useYjsWorkspaceContext();
+	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
+	const userWorkspaces = useYjsWorkspace((state) => state.userWorkspaces);
+	const connect = useYjsWorkspace((state) => state.connect);
 
 	return (
 		<SidebarMenu>
@@ -45,15 +47,20 @@ export default function WorkspaceButton() {
 						sideOffset={4}
 					>
 						<DropdownMenuLabel className="text-muted-foreground text-xs">
-							Teams
+							Workspaces
 						</DropdownMenuLabel>
 						{userWorkspaces?.map((workspace: Workspace) => (
 							<DropdownMenuItem
-								key={workspace.name}
-								onClick={() => setActiveWorkspace(workspace.id)}
-								className="gap-2 p-2"
+								key={workspace.id}
+								onClick={() => connect(workspace.id)}
+								className={cn(
+									activeWorkspace.id === workspace.id
+										? "bg-primary text-primary-foreground pointer-events-none"
+										: "cursor-pointer",
+									"gap-2 p-2",
+								)}
 							>
-								<div className="flex size-6 items-center justify-center rounded-xs border">
+								<div className="flex size-6 items-center justify-center rounded-xs border bg-stone-100/70">
 									{workspace.icon}
 								</div>
 								{workspace.name}
@@ -64,7 +71,9 @@ export default function WorkspaceButton() {
 							<div className="bg-background flex size-6 items-center justify-center rounded-md border">
 								<PlusIcon className="size-4" />
 							</div>
-							<div className="text-muted-foreground font-medium">Add team</div>
+							<div className="text-muted-foreground font-medium">
+								Add workspace
+							</div>
 						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>

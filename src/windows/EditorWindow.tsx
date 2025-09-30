@@ -1,12 +1,13 @@
 import { DialogTitle } from "@radix-ui/react-dialog";
 import { useMemo } from "react";
 import { useParams } from "react-router-dom";
-import CollaborativeEditor from "@/components/Editor/CollaborativeEditor";
+import PageEditor from "@/components/Editor/PageEditor";
 import { SettingPanel } from "@/components/SettingPanel";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { useSidebar } from "@/components/ui/sidebar";
 import { useRegisterShortcuts } from "@/core/shortcut";
 import { AppNavigationShortcutExtension } from "@/features/navigates";
+import { YjsPageProvider } from "@/features/yjs-page";
 import { useGlobalModalStore } from "@/stores/modal";
 
 export interface AppContext {
@@ -41,7 +42,11 @@ function EditorWindow() {
 			{pageId ? (
 				<div className="overflow-y-scroll overflow-x-hidden mt-12">
 					<div className="px-12 m-auto w-full max-w-3xl lg:w-3xl dark:text-white">
-						<CollaborativeEditor pageId={pageId} />
+						<div className="h-screen flex flex-col">
+							<YjsPageProvider pageId={pageId}>
+								<PageEditor />
+							</YjsPageProvider>
+						</div>
 					</div>
 				</div>
 			) : (

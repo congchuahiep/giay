@@ -7,7 +7,6 @@ import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { SpinnerIcon } from "@phosphor-icons/react/dist/csr/Spinner";
 import { useCallback, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
 import {
 	usePageChildrenQuery,
 	usePageCreate,
@@ -38,57 +37,36 @@ import {
 	SidebarMenuSkeleton,
 	SidebarMenuSub,
 } from "../ui/sidebar";
+import { useYjsWorkspace } from "@/features/yjs-workspace";
 
-interface PageExplorerProps {
-	workspaceId: string;
+// interface PageExplorerProps {
+// 	workspaceId: string;
+// }
+
+export default function PageExplorer() {
+	return (
+		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
+			<SidebarGroupLabel className={cn("dark:text-stone-300d")}>
+				Pages
+			</SidebarGroupLabel>
+			<PageCreateButton />
+			<PageList />
+		</SidebarGroup>
+	);
 }
 
-export default function PageExplorer({ workspaceId }: PageExplorerProps) {
-	const { provider, activeWorkspace } = useYjsWorkspaceContext();
+function PageCreateButton() {
+	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
+	const provider = useYjsWorkspace((state) => state.provider);
 	const navigate = useNavigate();
 
-	const { mutate: createPage } = usePageCreate(workspaceId, {
+	const { mutate: createPage } = usePageCreate(activeWorkspace.id, {
 		onSuccess: (newPage) => {
 			const yDocRoot = provider.document;
 			yDocRoot.getMap<PagePreview>("root-pages").set(newPage.id, newPage);
-			navigate(`/${workspaceId}/${newPage.id}`);
+			navigate(`/${activeWorkspace.id}/${newPage.id}`);
 		},
 	});
-
-	const [pages, setPages] = useState<Record<string, PagePreview>>({});
-	const [isLoading, setIsLoading] = useState(true);
-
-	//
-	// CÁC EFFECT
-	//
-
-	// biome-ignore lint/correctness/useExhaustiveDependencies: 123
-	useEffect(() => {
-		const rootPages = provider.document.getMap("root-pages");
-		setPages(rootPages.toJSON());
-
-		// Chờ provider đồng bộ
-		const handleSynced = () => {
-			setIsLoading(false);
-		};
-
-		// Lắng nghe thay đổi trong array
-		const handlePagesChange = () => {
-			setPages(rootPages.toJSON());
-		};
-
-		rootPages.observe(handlePagesChange);
-		provider.on("synced", handleSynced);
-
-		return () => {
-			rootPages.unobserve(handlePagesChange);
-			provider.off("synced", handleSynced);
-		};
-	}, [activeWorkspace]);
-
-	//
-	// CÁC EVENT
-	//
 
 	const handleCreateNewPage = async () => {
 		try {
@@ -99,46 +77,60 @@ export default function PageExplorer({ workspaceId }: PageExplorerProps) {
 	};
 
 	return (
-		<SidebarGroup className="group-data-[collapsible=icon]:hidden">
-			<SidebarGroupLabel className={cn("dark:text-stone-300d")}>
-				Pages
-			</SidebarGroupLabel>
-			<SidebarGroupAction
-				className={cn(
-					"py-0 flex items-center hover:bg-stone-300/50 rounded-md",
-					"cursor-pointer opacity-0 group-hover:opacity-100 bg-transparent",
-				)}
-				onClick={handleCreateNewPage}
-			>
-				<PlusIcon className="w-4 h-4" />
-			</SidebarGroupAction>
-			{isLoading ? (
-				<SidebarGroup>
-					<SidebarMenu>
-						{Array.from({ length: 8 }, (_, index) => (
-							// biome-ignore lint/suspicious/noArrayIndexKey: Static element
-							<SidebarMenuItem key={index}>
-								<SidebarMenuSkeleton />
-							</SidebarMenuItem>
-						))}
-					</SidebarMenu>
-				</SidebarGroup>
-			) : pages && Object.keys(pages).length !== 0 ? (
-				<SidebarMenu>
-					{Object.entries(pages)
-						.sort((a, b) => a[1].title.localeCompare(b[1].title))
-						.map(([id, item]) => (
-							<PageItem key={id} pageId={id} pageData={item} />
-						))}
-				</SidebarMenu>
-			) : (
-				<SidebarGroupLabel>
-					<div className={cn("text-center w-full pt-4")}>
-						Oops! Looks like you don't have <br /> any pages. Create a new one?
-					</div>
-				</SidebarGroupLabel>
+		<SidebarGroupAction
+			className={cn(
+				"py-0 flex items-center hover:bg-stone-300/50 rounded-md",
+				"cursor-pointer opacity-0 group-hover:opacity-100 bg-transparent",
 			)}
-		</SidebarGroup>
+			onClick={handleCreateNewPage}
+		>
+			<PlusIcon className="w-4 h-4" />
+		</SidebarGroupAction>
+	);
+}
+
+function PageList() {
+	const provider = useYjsWorkspace((state) => state.provider);
+	const status = useYjsWorkspace((state) => state.status);
+	const [pages, setPages] = useState<Record<string, PagePreview>>({});
+
+	useEffect(() => {
+		const rootPages = provider.document.getMap("root-pages");
+		setPages(rootPages.toJSON());
+
+		// Lắng nghe thay đổi trong array
+		const handlePagesChange = () => {
+			setPages(rootPages.toJSON());
+		};
+
+		rootPages.observe(handlePagesChange);
+
+		return () => {
+			rootPages.unobserve(handlePagesChange);
+		};
+	}, [provider]);
+
+	return status === "connecting" ? (
+		Array.from({ length: 8 }, (_, index) => (
+			// biome-ignore lint/suspicious/noArrayIndexKey: Static element
+			<SidebarMenuItem key={index}>
+				<SidebarMenuSkeleton />
+			</SidebarMenuItem>
+		))
+	) : pages && Object.keys(pages).length !== 0 ? (
+		<SidebarMenu>
+			{Object.entries(pages)
+				.sort((a, b) => a[1].title.localeCompare(b[1].title))
+				.map(([id, item]) => (
+					<PageItem key={id} pageId={id} pageData={item} />
+				))}
+		</SidebarMenu>
+	) : (
+		<SidebarGroupLabel>
+			<div className={cn("text-center w-full pt-4")}>
+				Oops! Looks like you don't have <br /> any pages. Create a new one?
+			</div>
+		</SidebarGroupLabel>
 	);
 }
 
@@ -153,8 +145,8 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 	const [isCollapseOpen, setIsCollapseOpen] = useState(false);
 
 	const { pageId: currentPageId } = useParams();
-	const { activeWorkspace, provider: workspaceProvider } =
-		useYjsWorkspaceContext();
+	const activeWorkspace = useYjsWorkspace((state) => state.activeWorkspace);
+	const provider = useYjsWorkspace((state) => state.provider);
 
 	const {
 		data: pageChildrenData,
@@ -169,13 +161,12 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 	const handlePageExplanation = useCallback(async () => {
 		await fetchPageChildren();
 
-		const pageChildrenShared =
-			workspaceProvider.document.getMap<PagePreview>(pageId);
+		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
 
 		pageChildrenData?.forEach((child) => {
 			pageChildrenShared.set(child.id, child);
 		});
-	}, [fetchPageChildren, pageChildrenData, pageId, workspaceProvider]);
+	}, [fetchPageChildren, pageChildrenData, pageId, provider]);
 
 	const handlePageClick = useCallback(
 		async (e: React.MouseEvent, pageId: string) => {
@@ -201,8 +192,7 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 	}, [isCollapseOpen, handlePageExplanation]);
 
 	useEffect(() => {
-		const pageChildrenShared =
-			workspaceProvider.document.getMap<PagePreview>(pageId);
+		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
 
 		const handlePageChildrenChange = () => {
 			setPageChildren(Object.values(pageChildrenShared.toJSON()));
@@ -212,7 +202,7 @@ function PageItem({ pageId, pageData }: PageItemProps) {
 		return () => {
 			pageChildrenShared.unobserve(handlePageChildrenChange);
 		};
-	}, [workspaceProvider, pageId]);
+	}, [provider, pageId]);
 
 	return (
 		<PageItemAction pageData={pageData}>
@@ -290,9 +280,10 @@ interface PageItemActionProps {
 }
 
 function PageItemAction({ pageData, children }: PageItemActionProps) {
-	const navigate = useNavigate();
 	const { pageId: currentPageId } = useParams();
-	const { provider } = useYjsWorkspaceContext();
+
+	const navigate = useNavigate();
+	const provider = useYjsWorkspace((state) => state.provider);
 
 	const { mutate: handleDeletePage } = usePageDelete({
 		onSuccess: (deletedPageId) => {

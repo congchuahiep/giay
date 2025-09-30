@@ -1,4 +1,6 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
+import { Outlet } from "react-router-dom";
 import { AppSidebar } from "@/components/AppSidebar";
 import DebugMenu from "@/components/Titlebar/DebugMenu";
 import Titlebar from "@/components/Titlebar/Titlebar";
@@ -7,23 +9,18 @@ import {
 	SidebarProvider,
 	SidebarTrigger,
 } from "@/components/ui/sidebar";
-import { ThemeProvider } from "@/components/ui/theme-provider";
 import { ShortcutListener } from "@/core/shortcut/components/ShortcutListener";
 import { useSettingsStore } from "@/features/user-settings/stores/useSettingsStore";
-import YjsWorkspaceProvider from "./providers/YjsWorkspaceProvider";
+import { YjsWorkspaceProvider } from "@/features/yjs-workspace";
 import { useWorkspacesQuery } from "./services/workspaces";
-import type { Workspace } from "./types";
-import { Outlet } from "react-router-dom";
 import { useAuthStore } from "./stores/auth";
+import type { Workspace } from "./types";
 import CreateWorkspaceDialog from "./windows/CreateWorkspaceDialog";
-import { useQueryClient } from "@tanstack/react-query";
 
-const YJS_WORKSPACE_URL = import.meta.env.VITE_YJS_WORKSPACE_SERVER;
-
-export default function Layout() {
+export default function EditorLayout() {
 	const { init } = useSettingsStore(); // Khởi tạo settings store ngay khi app load
 	const { token } = useAuthStore();
-	const { data: workspaces, isLoading } = useWorkspacesQuery(token);
+	const { data: workspaces, isLoading, isError } = useWorkspacesQuery(token);
 	const queryClient = useQueryClient();
 
 	const [activeWorkspace, setActiveWorkspace] = useState<Workspace | null>(
@@ -44,6 +41,10 @@ export default function Layout() {
 		return <div>Loading...</div>;
 	}
 
+	if (isError) {
+		return <div>Error...</div>;
+	}
+
 	if (!workspaces || !activeWorkspace) {
 		return (
 			<CreateWorkspaceDialog
@@ -56,11 +57,7 @@ export default function Layout() {
 	}
 
 	return (
-		<YjsWorkspaceProvider
-			websocketUrl={YJS_WORKSPACE_URL}
-			workspace={activeWorkspace}
-			userWorkspaces={workspaces}
-		>
+		<YjsWorkspaceProvider>
 			<ShortcutListener />
 			<SidebarProvider>
 				<Titlebar>

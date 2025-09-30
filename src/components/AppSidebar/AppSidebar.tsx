@@ -1,10 +1,8 @@
-import { GearIcon } from "@phosphor-icons/react/dist/csr/Gear";
-import { QuestionIcon } from "@phosphor-icons/react/dist/csr/Question";
 import { Home, Search, Settings } from "lucide-react";
+import { type NavigateFunction, useNavigate } from "react-router-dom";
 import {
 	Sidebar,
 	SidebarContent,
-	SidebarFooter,
 	SidebarGroup,
 	SidebarGroupContent,
 	SidebarGroupLabel,
@@ -14,11 +12,8 @@ import {
 	SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { openSettingsWindow } from "@/features/navigates";
-import { cn } from "@/utils";
-import WorkspaceButton from "./WorkspaceButton";
 import PageExplorer from "./PageExplorer";
-import { useYjsWorkspaceContext } from "@/contexts/useYjsWorkspaceContext";
-import { useNavigate, type NavigateFunction } from "react-router-dom";
+import WorkspaceButton from "./WorkspaceButton";
 
 // Menu items.
 const useAppsidebarItems = (navigate: NavigateFunction) => [
@@ -46,8 +41,6 @@ const useAppsidebarItems = (navigate: NavigateFunction) => [
 
 const AppSidebar = () => {
 	const navigate = useNavigate();
-
-	const { activeWorkspace } = useYjsWorkspaceContext();
 	const sidebarItems = useAppsidebarItems(navigate);
 
 	return (
@@ -79,7 +72,7 @@ const AppSidebar = () => {
 					</SidebarGroupContent>
 				</SidebarGroup>
 				<SidebarGroupContent>
-					<PageExplorer workspaceId={activeWorkspace.id} />
+					<PageExplorer />
 				</SidebarGroupContent>
 			</SidebarContent>
 		</Sidebar>

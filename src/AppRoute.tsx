@@ -1,8 +1,6 @@
 import { Route, Routes } from "react-router";
-import Layout from "@/Layout";
-import EditorWindow from "@/windows/EditorWindow";
-import SettingsWindow from "@/windows/SettingsWindow";
-import LoginWindow from "./windows/LoginWindow";
+import EditorLayout from "@/EditorLayout";
+import { EditorWindow, LoginWindow, SettingsWindow } from "@/windows";
 import ProtectedRoute from "./components/ProtectedRoute";
 
 function AppRoute() {
@@ -13,26 +11,12 @@ function AppRoute() {
 				path="/"
 				element={
 					<ProtectedRoute>
-						<Layout />
+						<EditorLayout />
 					</ProtectedRoute>
 				}
 			>
-				<Route
-					index
-					element={
-						<ProtectedRoute>
-							<EditorWindow />
-						</ProtectedRoute>
-					}
-				/>
-				<Route
-					path=":workspaceId/:pageId"
-					element={
-						<ProtectedRoute>
-							<EditorWindow />
-						</ProtectedRoute>
-					}
-				/>
+				<Route index element={<EditorWindow />} />
+				<Route path=":workspaceId/:pageId" element={<EditorWindow />} />
 			</Route>
 			<Route
 				path="settings"

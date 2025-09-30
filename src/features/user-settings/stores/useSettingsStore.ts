@@ -108,6 +108,12 @@ export const useSettingsStore = create<SettingsStore>()((set, get) => ({
 		});
 	},
 
+	reload: async () => {
+		const { getSettingsDb } = get();
+		const settingsDb = await getSettingsDb();
+		await settingsDb.reload();
+	},
+
 	//==================RESET==========================
 
 	resetSettings: async () => {

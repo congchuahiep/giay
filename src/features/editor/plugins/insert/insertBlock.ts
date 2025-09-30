@@ -1,13 +1,12 @@
+import { type Editor, type Node, Path, Transforms } from "slate";
+import type { NodeInsertNodesOptions } from "slate/dist/interfaces/transforms/node";
 import type { ElementBlock } from "@/features/editor/types/block.ts";
 
-import { Editor, Node, Path, Transforms } from "slate";
-import type { NodeInsertNodesOptions } from "slate/dist/interfaces/transforms/node";
-
 export type InsertBlockOptions = NodeInsertNodesOptions<Node> & {
-  /**
-   * Chèn block phía bên trên, chỉ áp dụng cho trường hợp không đặt sẵn vị trí
-   */
-  reverse?: boolean;
+	/**
+	 * Chèn block phía bên trên, chỉ áp dụng cho trường hợp không đặt sẵn vị trí
+	 */
+	reverse?: boolean;
 };
 
 /**
@@ -21,26 +20,26 @@ export type InsertBlockOptions = NodeInsertNodesOptions<Node> & {
  * @returns Trả về `true` nếu chèn thành công, ngược lại trả về `false`.
  */
 export default function insertBlock(
-  editor: Editor,
-  additionalProps: Partial<ElementBlock> = {},
-  options: InsertBlockOptions = { reverse: false }
+	editor: Editor,
+	additionalProps: Partial<ElementBlock> = {},
+	options: InsertBlockOptions = { reverse: false },
 ): boolean {
-  // Lấy path của block hiện tại
-  const currentBlockPath = editor.getCurrentBlockPath();
-  if (!currentBlockPath) return false;
+	// Lấy path của block hiện tại
+	const currentBlockPath = editor.getCurrentBlockPath();
+	if (!currentBlockPath) return false;
 
-  // Xác định vị trí cần đặt block mới
-  let targetBlockPath = options.at
-    ? options.at
-    : options?.reverse
-    ? currentBlockPath
-    : Path.next(currentBlockPath);
+	// Xác định vị trí cần đặt block mới
+	const targetBlockPath = options.at
+		? options.at
+		: options?.reverse
+			? currentBlockPath
+			: Path.next(currentBlockPath);
 
-  // Tạo block mới dựa trên type
-  const block = editor.buildBlock(additionalProps);
+	// Tạo block mới dựa trên type
+	const block = editor.buildBlock(additionalProps);
 
-  // Chèn block vào editor
-  Transforms.insertNodes(editor, block, { at: targetBlockPath });
+	// Chèn block vào editor
+	Transforms.insertNodes(editor, block, { at: targetBlockPath });
 
-  return true;
+	return true;
 }

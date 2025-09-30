@@ -16,7 +16,7 @@ export default interface ShortcutExtension<T = any> {
 	/**
 	 * Tên của bộ shortcut muốn đăng ký
 	 */
-	name: ShortcutType;
+	name: ShortcutType | string;
 
 	/**
 	 * Thứ tự ưu tiên của bộ shortcut

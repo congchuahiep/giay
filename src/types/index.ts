@@ -3,3 +3,4 @@ export * from "./Position";
 export * from "./SafeMenuPlacement";
 export * from "./User";
 export * from "./Workspace";
+export * from "./YjsConnectStatus";

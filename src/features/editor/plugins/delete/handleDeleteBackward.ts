@@ -1,11 +1,11 @@
 import {
-  Editor,
-  Element,
-  Node,
-  Path,
-  Range,
-  Transforms,
-  type BaseSelection,
+	Editor,
+	Element,
+	Node,
+	Path,
+	Range,
+	Transforms,
+	type BaseSelection,
 } from "slate";
 
 /**
@@ -17,13 +17,13 @@ import {
  * @param editor Đối tượng Editor của Slate
  */
 export default function handleDeleteBackward(editor: Editor): boolean {
-  const { selection } = editor;
+	const { selection } = editor;
 
-  // Early return nếu không có selection
-  if (!selection) return false;
+	// Early return nếu không có selection
+	if (!selection) return false;
 
-  // Xử lý selection collapsed
-  return handleCollapsedSelection(editor, selection);
+	// Xử lý selection collapsed
+	return handleCollapsedSelection(editor, selection);
 }
 
 /**
@@ -39,18 +39,19 @@ export default function handleDeleteBackward(editor: Editor): boolean {
  * @param currentBlockType Kiểu block hiện tại, hoặc null nếu không xác định.
  */
 function handleCollapsedSelection(editor: Editor, selection: Range): boolean {
-  const currentBlockType = editor.getCurrentBlockType();
-  const isAtBlockStart = selection.focus.offset === 0;
-  const isSpecialBlock = currentBlockType !== "paragraph";
+	const currentBlockType = editor.getCurrentBlockType();
+	const isAtBlockStart = selection.focus.offset === 0;
+	const isSpecialBlock = currentBlockType !== "paragraph";
 
-  // Reset block đặc biệt thành paragraph khi con trỏ đang ở đầu block
-  if (isSpecialBlock && isAtBlockStart) {
-    Transforms.setNodes(editor, { type: "paragraph" });
-    return true;
-  }
+	// Reset block đặc biệt thành paragraph khi con trỏ đang ở đầu block
+	if (isSpecialBlock && isAtBlockStart) {
+		console.log("Resetting block to paragraph");
+		Transforms.setNodes(editor, { type: "paragraph" });
+		return true;
+	}
 
-  // Nếu con trỏ đang ở đầu Xử lý merge với block trước đó
-  return handleBackspaceMergeToPreviousBlock(editor, selection);
+	// Nếu con trỏ đang ở đầu Xử lý merge với block trước đó
+	return handleBackspaceMergeToPreviousBlock(editor, selection);
 }
 
 /**
@@ -65,41 +66,41 @@ function handleCollapsedSelection(editor: Editor, selection: Range): boolean {
  * @param selection Vị trí selection hiện tại trong editor.
  */
 function handleBackspaceMergeToPreviousBlock(
-  editor: Editor,
-  selection: BaseSelection
+	editor: Editor,
+	selection: BaseSelection,
 ): boolean {
-  if (!selection || !Range.isCollapsed(selection)) {
-    return false;
-  }
+	if (!selection || !Range.isCollapsed(selection)) {
+		return false;
+	}
 
-  // Kiểm tra nếu block hiện tại là paragraph & rỗng
-  const currentPath = editor.getCurrentBlockPath();
-  if (!currentPath) return false;
+	// Kiểm tra nếu block hiện tại là paragraph & rỗng
+	const currentPath = editor.getCurrentBlockPath();
+	if (!currentPath) return false;
 
-  // Chỉ xử lý nếu con trỏ đang ở đầu block
-  const isStart = editor.isStart(selection?.anchor, currentPath);
-  if (!isStart) return false;
+	// Chỉ xử lý nếu con trỏ đang ở đầu block
+	const isStart = editor.isStart(selection?.anchor, currentPath);
+	if (!isStart) return false;
 
-  // Tìm block phía trước
-  try {
-    const prevPath = Path.previous(currentPath);
-    const prevBlock = Node.get(editor, prevPath) as Element | undefined;
+	// Tìm block phía trước
+	try {
+		const prevPath = Path.previous(currentPath);
+		const prevBlock = Node.get(editor, prevPath) as Element | undefined;
 
-    if (
-      !prevBlock ||
-      Node.string(prevBlock).length !== 0 ||
-      prevBlock.type === "divider"
-    ) {
-      return false;
-    }
+		if (
+			!prevBlock ||
+			Node.string(prevBlock).length !== 0 ||
+			prevBlock.type === "divider"
+		) {
+			return false;
+		}
 
-    // Thực hiện logic merge block
-    editor.setNodes({ type: prevBlock.type }); // Chèn text đó vào block rỗng
-    editor.removeNodes({ at: prevPath }); // Xoá block trước đó
+		// Thực hiện logic merge block
+		editor.setNodes({ type: prevBlock.type }); // Chèn text đó vào block rỗng
+		editor.removeNodes({ at: prevPath }); // Xoá block trước đó
 
-    return true;
-  } catch {
-    console.log("Hihi, còn cái ở trên đâu mà đòi xoá z tròi?");
-    return false;
-  }
+		return true;
+	} catch {
+		console.log("Hihi, còn cái ở trên đâu mà đòi xoá z tròi?");
+		return false;
+	}
 }

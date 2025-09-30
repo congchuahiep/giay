@@ -12,7 +12,9 @@ export function usePagesInWorkspaceQuery(workspaceId: string) {
 async function fetchPagesData(workspaceId: string) {
 	await new Promise((resolve) => setTimeout(resolve, 3000)); // Giả lập thời gian chờ 1 giây
 	return await api
-		.get(endpoint.workspaces.rootPage(workspaceId))
+		.get(endpoint.workspaces.rootPage(workspaceId), {
+			headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+		})
 		.then((res) => res.data)
 		.catch((error) => {
 			console.error("Error fetching pages:", error);

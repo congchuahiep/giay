@@ -6,6 +6,7 @@ export function useWorkspacesQuery(token: string | null) {
 	return useQuery<Workspace[], Error>({
 		enabled: !!token,
 		queryKey: ["workspaces"],
+		// biome-ignore lint/style/noNonNullAssertion: Already handled by `enabled: !!token`
 		queryFn: () => fetchWorkspacesData(token!),
 	});
 }
@@ -13,7 +14,7 @@ export function useWorkspacesQuery(token: string | null) {
 async function fetchWorkspacesData(token: string) {
 	// await new Promise((resolve) => setTimeout(resolve, 10000)); // Giả lập thời gian chờ 1 giây
 	return await api
-		.get(endpoint.workspaces.user, {
+		.get(endpoint.workspaces.list, {
 			headers: { Authorization: `Bearer ${token}` },
 		})
 		.then((res) => res.data)
