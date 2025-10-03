@@ -1,3 +1,3 @@
-export { default as EditorWindow } from "./EditorWindow";
-export { default as LoginWindow } from "./LoginWindow";
-export { default as SettingsWindow } from "./SettingsWindow";
+export { default as EditorWindow } from "./editor-windows";
+export { default as LoginWindow } from "./login-window";
+export { default as SettingsWindow } from "./settings-window";

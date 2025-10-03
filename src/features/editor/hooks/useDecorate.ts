@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { Element, type NodeEntry } from "slate";
-import { decorateCodeBlock } from "../plugins/code-block";
+import { decorateCodeBlock } from "../../editor-plugins/code-block";
 
 /**
  * Sử dụng decorater:

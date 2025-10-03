@@ -3,16 +3,16 @@ import {
 	BulletListBlock,
 	CheckList,
 	CodeBlock,
+	DividerBlock,
 	Heading1Block,
 	Heading2Block,
 	Heading3Block,
 	Heading4Block,
+	PageBlock,
 	ParagraphBlock,
 	QuoteBlock,
-	DividerBlock,
-	PageBlock,
-} from "@/components/Editor/Block";
-import { withBlockInteraction } from "@/components/Editor/BlockInteraction";
+} from "../components/block";
+import { withBlockInteraction } from "../components/block-interaction";
 
 // Map các block types với components
 const blockComponents = {

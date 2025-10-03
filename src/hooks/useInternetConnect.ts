@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
  * Hook dùng để kiểm tra trạng thái kết nối mạng của người dùng.
  * @returns {boolean} - True nếu người dùng đang online, false nếu không.
  */
-const useInternetConnect = (): boolean => {
+export default function useInternetConnect(): boolean {
 	const [isOnline, setIsOnline] = useState(navigator.onLine);
 
 	useEffect(() => {
@@ -21,6 +21,4 @@ const useInternetConnect = (): boolean => {
 	}, []);
 
 	return isOnline;
-};
-
-export default useInternetConnect;
+}
