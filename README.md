@@ -2,6 +2,8 @@
 
 This project is a modern second brain system, designed to help users capture, store, and organize knowledge efficiently. It provides a flexible note-taking environment with rich block-style editing, allowing users to create and manage various types of content blocks (text, headings, lists, code, etc.). Users can structure their knowledge hierarchically, nesting pages within pages for advanced organization.
 
+<img width="1586" height="1202" alt="image" src="https://github.com/user-attachments/assets/9a0a20e7-be9f-46ab-9c4a-bcde7a72b977" />
+
 # Feature overview
 
 - `Block-style editing`: Create and manage various types of content blocks (text, headings, lists, code, etc.).
