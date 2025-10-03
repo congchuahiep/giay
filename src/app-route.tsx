@@ -1,6 +1,6 @@
 import { Route, Routes } from "react-router";
 import { ProtectedRoute } from "@/components/ui/protected-route";
-import { EditorLayout } from "@/layout";
+import { EditorLayout } from "@/layouts";
 import { EditorWindow, LoginWindow, SettingsWindow } from "@/windows";
 
 function AppRoute() {
