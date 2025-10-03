@@ -14,9 +14,7 @@ export function useWorkspacesQuery(token: string | null) {
 async function fetchWorkspacesData(token: string) {
 	// await new Promise((resolve) => setTimeout(resolve, 10000)); // Giả lập thời gian chờ 1 giây
 	return await api
-		.get(endpoint.workspaces.list, {
-			headers: { Authorization: `Bearer ${token}` },
-		})
+		.get(endpoint.workspaces.list)
 		.then((res) => res.data)
 		.catch((error) => {
 			console.error("Error fetching workspaces:", error);

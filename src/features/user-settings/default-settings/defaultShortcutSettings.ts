@@ -1,4 +1,4 @@
-import type { Hotkeys } from "@/core/shortcut";
+import type { Hotkeys } from "@/features/shortcut";
 
 export const defaultShortcutSettings: Record<string, Hotkeys> = {
 	editor: {

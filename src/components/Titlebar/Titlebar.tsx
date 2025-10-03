@@ -1,12 +1,15 @@
-import { getCurrentWindow } from "@tauri-apps/api/window";
-
-import { cn } from "@/utils";
 import { CornersOutIcon } from "@phosphor-icons/react/dist/csr/CornersOut";
 import { MinusIcon } from "@phosphor-icons/react/dist/csr/Minus";
 import { XIcon } from "@phosphor-icons/react/dist/csr/X";
 import { isTauri } from "@tauri-apps/api/core";
+import { getCurrentWindow } from "@tauri-apps/api/window";
+import { cn } from "@/utils";
 
-const Titlebar = ({ children }: { children?: React.ReactNode }) => {
+interface TitlebarProps {
+	children?: React.ReactNode;
+}
+
+export default function Titlebar({ children }: TitlebarProps) {
 	return (
 		<div
 			data-tauri-drag-region
@@ -20,7 +23,7 @@ const Titlebar = ({ children }: { children?: React.ReactNode }) => {
 			<WindowControl />
 		</div>
 	);
-};
+}
 
 function WindowControl() {
 	if (!isTauri()) return null;
@@ -58,5 +61,3 @@ function WindowControl() {
 		</div>
 	);
 }
-
-export default Titlebar;
