@@ -106,7 +106,7 @@ export default function PageBlock(props: RenderElementProps) {
 	}, [isSelected, setActiveShortcutScope]);
 
 	/**
-	 * Khi thuộc tính `isDelete` là true -> Xóa page và block
+	 * Khi thuộc tính `isDelete` của block là true -> Xóa page và block
 	 */
 	useEffect(() => {
 		if (!element.isDeleted) return;

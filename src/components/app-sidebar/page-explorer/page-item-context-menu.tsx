@@ -1,6 +1,7 @@
 import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
 import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
+import { type MouseEvent, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
 	ContextMenu,
@@ -29,15 +30,25 @@ export default function PageItemContextMenu({
 	const { pageId: currentPageId } = useParams();
 
 	const navigate = useNavigate();
-	const provider = useYjsWorkspace((state) => state.provider);
+	const workspaceProvider = useYjsWorkspace((state) => state.provider);
 
-	const { mutate: handleDeletePage } = usePageDelete(provider, {
+	const { mutate: deletePage } = usePageDelete(workspaceProvider, {
 		onSuccess: (deletedPageId) => {
-			if (deletedPageId === currentPageId) {
-				navigate("/");
-			}
+			// Nếu trang bị xoá là trang hiện tại thì chuyển về home
+			if (deletedPageId === currentPageId) navigate("/");
 		},
 	});
+
+	const handleOnDelete = useCallback(
+		(e: MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			deletePage({
+				page_id: pageData.id,
+				parent_page_id: pageData.parent_page_id,
+			});
+		},
+		[deletePage, pageData],
+	);
 
 	return (
 		<ContextMenu>
@@ -52,16 +63,7 @@ export default function PageItemContextMenu({
 					<span>Open in New Tab</span>
 				</ContextMenuItem>
 				<ContextMenuSeparator />
-				<ContextMenuItem
-					onClick={(e) => {
-						e.stopPropagation();
-						handleDeletePage({
-							page_id: pageData.id,
-							parent_page_id: pageData.parent_page_id,
-						});
-					}}
-					variant="destructive"
-				>
+				<ContextMenuItem onClick={handleOnDelete} variant="destructive">
 					<TrashIcon className="text-muted-foreground" />
 					<span>Delete</span>
 				</ContextMenuItem>

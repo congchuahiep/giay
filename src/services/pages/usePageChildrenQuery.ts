@@ -1,13 +1,13 @@
 import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { api, endpoint } from "@/configs";
-import type { PagePreview } from "@/types/Page";
+import type { PagePreview } from "@/types";
 
 export function usePageChildrenQuery(
 	pageId: string,
 	options?: Omit<UseQueryOptions<PagePreview[]>, "queryKey" | "queryFn">,
 ) {
 	return useQuery<PagePreview[]>({
-		queryKey: ["pages_children", pageId],
+		queryKey: ["page_children", pageId],
 		queryFn: () => fetchPageChildrenDataFromServer(pageId),
 		...options,
 	});

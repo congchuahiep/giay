@@ -17,7 +17,7 @@ export function usePagePreviewQuery(
 ) {
 	return useQuery<PagePreview>({
 		enabled: !!pageId,
-		queryKey: ["pages", pageId],
+		queryKey: ["page_previews", pageId],
 		// biome-ignore lint/style/noNonNullAssertion: Đã được giải quyết bằng enabled: !!pageId
 		queryFn: () => fetchPageDataFromServer(pageId!),
 		...options,

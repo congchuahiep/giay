@@ -28,14 +28,16 @@ export function usePageCreate(
 			provider.document
 				.getMap<PagePreview>(variables.parentPageId || "root-pages")
 				.set(data.id, data);
-			console.log("Mới tạo: ", data.id, provider.document);
 
 			options?.onSuccess?.(data, variables, context);
 		},
 	});
 }
 
-async function createPage(workspaceId: string, parentPageId?: string) {
+async function createPage(
+	workspaceId: string,
+	parentPageId?: string,
+): Promise<PagePreview> {
 	const pageId = uuidv4();
 
 	// Gửi yDoc dưới dạng mảng byte
@@ -54,11 +56,16 @@ async function createPage(workspaceId: string, parentPageId?: string) {
 		children: [],
 	};
 
-	console.log("Creating new page...", page);
-
 	return await api
 		.post(endpoint.pages.create, { ...page })
-		.then((response) => response.data)
+		.then((response) => ({
+			id: response.data.id,
+			title: "",
+			icon: "",
+			parent_page_id: response.data.parent_page,
+			is_deleted: false,
+			children: [],
+		}))
 		.catch((error) => {
 			console.error(error.request.responseText);
 			throw error;

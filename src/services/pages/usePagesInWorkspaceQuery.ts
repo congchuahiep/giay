@@ -4,7 +4,7 @@ import type { PagePreview } from "@/types/Page";
 
 export function usePagesInWorkspaceQuery(workspaceId: string) {
 	return useQuery<PagePreview[]>({
-		queryKey: ["pages"],
+		queryKey: ["page_previews"],
 		queryFn: () => fetchPagesData(workspaceId),
 	});
 }
