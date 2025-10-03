@@ -18,8 +18,8 @@ import {
 	ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useShortcut } from "@/features/shortcut";
 import type { PageBlock as PageBlockType } from "@/features/editor/types";
+import { useShortcut } from "@/features/shortcut";
 import { useYjsPage } from "@/features/yjs-page";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
 import {
@@ -98,7 +98,7 @@ export default function PageBlock(props: RenderElementProps) {
 	}, [element.pageId, currentPage.id, createPage]);
 
 	/**
-	 * 	Khi focus vào page block -> Chuyển shortcut scope về `editor.page-block`
+	 * Khi focus vào page block -> Chuyển shortcut scope về `editor.page-block`
 	 */
 	useEffect(() => {
 		if (isSelected) setActiveShortcutScope("editor.page-block");
@@ -106,13 +106,25 @@ export default function PageBlock(props: RenderElementProps) {
 	}, [isSelected, setActiveShortcutScope]);
 
 	/**
-	 * 	Khi page block bị xóa -> Xóa page và block
+	 * Khi thuộc tính `isDelete` là true -> Xóa page và block
 	 */
 	useEffect(() => {
 		if (!element.isDeleted) return;
 		if (!element.pageId) return;
 		deletePage({ page_id: element.pageId, parent_page_id: currentPage.id });
 	}, [element.isDeleted, element.pageId, deletePage, currentPage.id]);
+
+	/**
+	 * Xử lý việc page này đã bị xoá ở một nơi khác (như sidebar) -> xoá page
+	 * block này
+	 */
+	useEffect(() => {
+		if (!page) return;
+		if (page.is_deleted) {
+			const path = ReactEditor.findPath(editor, element);
+			Transforms.delete(editor, { at: path });
+		}
+	}, [page, element, editor]);
 
 	// Khi đang xoá sẽ không hiển thị gì cả
 	if (deleting) return null;

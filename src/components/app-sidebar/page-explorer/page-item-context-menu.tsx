@@ -1,3 +1,7 @@
+import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
+import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
+import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
+import { useNavigate, useParams } from "react-router-dom";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -8,10 +12,6 @@ import {
 import { useYjsWorkspace } from "@/features/yjs-workspace";
 import { usePageDelete } from "@/services/pages";
 import type { PagePreview } from "@/types";
-import { useNavigate, useParams } from "react-router-dom";
-import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
-import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
-import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 
 interface PageItemContextMenuProps {
 	pageData: PagePreview;
@@ -55,12 +55,24 @@ export default function PageItemContextMenu({
 				<ContextMenuItem
 					onClick={(e) => {
 						e.stopPropagation();
-						handleDeletePage({ page_id: pageData.id });
+						handleDeletePage({
+							page_id: pageData.id,
+							parent_page_id: pageData.parent_page_id,
+						});
 					}}
 					variant="destructive"
 				>
 					<TrashIcon className="text-muted-foreground" />
 					<span>Delete</span>
+				</ContextMenuItem>
+				<ContextMenuItem
+					onClick={(e) => {
+						e.stopPropagation();
+						console.log(pageData);
+					}}
+					variant="destructive"
+				>
+					<span>DEBUG</span>
 				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
