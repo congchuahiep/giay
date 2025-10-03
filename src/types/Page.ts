@@ -13,6 +13,7 @@ export type PagePreview = {
 	title: string;
 	icon: string;
 	parent_page_id: string;
+	is_deleted: boolean;
 	children: PagePreview[] | [];
 };
 
@@ -22,11 +23,6 @@ export type PageRawData = {
 	icon: string;
 	parent_page_id: string;
 	page_data: string;
+	is_deleted: boolean;
 	children: PagePreview[];
-};
-
-export type PageInWorkspace = {
-	id: string;
-	title: string;
-	icon: string;
 };

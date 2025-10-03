@@ -68,6 +68,7 @@ export default function TitleEditor() {
 	// CÁC EVENT
 	//
 
+	// TODO: updatePageIcon và updatePageTitle cần được chỉnh lại logic
 	// Hàm tuỳ chỉnh logic khi setPageIcon
 	const updatePageIcon = (icon: string) => {
 		// Xóa toàn bộ nội dung hiện tại

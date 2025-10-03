@@ -51,17 +51,6 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 	});
 	const [pageChildren, setPageChildren] = useState<PagePreview[]>([]);
 
-	const handlePageExpandation = useCallback(async () => {
-		await fetchPageChildren();
-
-		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
-
-		pageChildrenShared.clear(); // Xoá dữ liệu cũ
-		pageChildrenData?.forEach((child) => {
-			pageChildrenShared.set(child.id, child);
-		});
-	}, [fetchPageChildren, pageChildrenData, pageId, provider]);
-
 	const handlePageClick = useCallback(
 		async (e: React.MouseEvent, pageId: string) => {
 			e.stopPropagation();
@@ -80,10 +69,19 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 	// }, [currentPageId, pageId, handlePageExplanation]);
 
 	useEffect(() => {
-		if (isCollapseOpen) {
-			handlePageExpandation();
-		}
-	}, [isCollapseOpen, handlePageExpandation]);
+		(async () => {
+			if (isCollapseOpen) {
+				await fetchPageChildren();
+			}
+		})();
+	}, [isCollapseOpen, fetchPageChildren]);
+
+	useEffect(() => {
+		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
+		pageChildrenData?.forEach((child) => {
+			pageChildrenShared.set(child.id, child);
+		});
+	}, [pageChildrenData, pageId, provider]);
 
 	useEffect(() => {
 		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
