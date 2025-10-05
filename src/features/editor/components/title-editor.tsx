@@ -94,7 +94,6 @@ export default function TitleEditor() {
 		}
 
 		if (title !== null) {
-			console.log(title);
 
 			sidebarPages.set(currentPage.id, {
 				...restPageData!,
