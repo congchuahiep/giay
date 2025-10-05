@@ -226,7 +226,6 @@ export default function SlashMenu() {
 	 */
 	// biome-ignore lint/correctness/useExhaustiveDependencies: Cần phụ thuộc vào selectedIndex để xử lý sự kiện click chuột
 	useEffect(() => {
-		setAllowMouseHover(false);
 		// Reset selectedIndex nếu muốn
 		// setSlashMenuState((prev) => ({ ...prev, selectedIndex: -1 }));
 
