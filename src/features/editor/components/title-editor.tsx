@@ -35,7 +35,6 @@ export default function TitleEditor() {
 	}, [pageProvider]);
 
 	const pageIconData = useMemo(() => {
-		console.log(pageProvider.document.get("icon", Y.Text).toJSON());
 		return pageProvider.document.get("icon", Y.Text);
 	}, [pageProvider]);
 
