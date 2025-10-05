@@ -2,6 +2,7 @@ import type { Editor } from "slate";
 import { v4 as uuidv4 } from "uuid";
 import {
 	buildBlock,
+	deleteBlockById,
 	ensureBlockId,
 	getBlockByid,
 	getBlockContentById,
@@ -32,6 +33,8 @@ export default function withUtilsEditor(
 	editor.buildBlock = (additionalProps) => buildBlock(additionalProps);
 	editor.generateId = () => uuidv4();
 	editor.ensureBlockId = (block) => ensureBlockId(block);
+
+	editor.deleteBlockById = (id) => deleteBlockById(editor, id);
 
 	editor.getBlockById = (id) => getBlockByid(editor, id);
 	editor.getBlockEntryById = (id) => getBlockEntryById(editor, id);

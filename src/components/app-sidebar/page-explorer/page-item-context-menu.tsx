@@ -3,6 +3,7 @@ import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { type MouseEvent, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "sonner";
 import {
 	ContextMenu,
 	ContextMenuContent,
@@ -14,8 +15,11 @@ import { useYjsWorkspace } from "@/features/yjs-workspace";
 import { usePageDelete } from "@/services/pages";
 import type { PagePreview } from "@/types";
 
-interface PageItemContextMenuProps {
+interface ContextItemProps {
 	pageData: PagePreview;
+}
+
+interface PageItemContextMenuProps extends ContextItemProps {
 	children: React.ReactNode;
 }
 
@@ -31,6 +35,7 @@ export default function PageItemContextMenu({
 
 	const navigate = useNavigate();
 	const workspaceProvider = useYjsWorkspace((state) => state.provider);
+	const workspaceId = useYjsWorkspace((state) => state.activeWorkspace.id);
 
 	const { mutate: deletePage } = usePageDelete(workspaceProvider, {
 		onSuccess: (deletedPageId) => {
@@ -42,6 +47,7 @@ export default function PageItemContextMenu({
 	const handleOnDelete = useCallback(
 		(e: MouseEvent<HTMLDivElement>) => {
 			e.stopPropagation();
+			console.log("before: ", pageData);
 			deletePage({
 				page_id: pageData.id,
 				parent_page_id: pageData.parent_page_id,
@@ -54,10 +60,7 @@ export default function PageItemContextMenu({
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
 			<ContextMenuContent className="w-56 rounded-lg">
-				<ContextMenuItem>
-					<LinkIcon className="text-muted-foreground" />
-					<span>Copy Link</span>
-				</ContextMenuItem>
+				<CopyLinkItem pageData={pageData} workspaceId={workspaceId} />
 				<ContextMenuItem>
 					<ArrowUpRightIcon className="text-muted-foreground" />
 					<span>Open in New Tab</span>
@@ -78,5 +81,28 @@ export default function PageItemContextMenu({
 				</ContextMenuItem>
 			</ContextMenuContent>
 		</ContextMenu>
+	);
+}
+
+interface CopyLinkItemProps extends ContextItemProps {
+	workspaceId: string;
+}
+
+function CopyLinkItem({ pageData, workspaceId }: CopyLinkItemProps) {
+	const handleOnClick = () => {
+		const origin = window.location.origin;
+		navigator.clipboard.writeText(`${origin}/${workspaceId}/${pageData.id}`);
+		toast(
+			<div className="flex items-center gap-2">
+				<LinkIcon className="text-muted-foreground" size={16} /> Link copied!
+			</div>,
+		);
+	};
+
+	return (
+		<ContextMenuItem onClick={handleOnClick}>
+			<LinkIcon className="text-muted-foreground" />
+			<span>Copy Link</span>
+		</ContextMenuItem>
 	);
 }

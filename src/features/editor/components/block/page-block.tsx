@@ -1,6 +1,6 @@
 import { FileIcon } from "@phosphor-icons/react/dist/csr/File";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Transforms } from "slate";
 import {
@@ -10,6 +10,7 @@ import {
 	useSlateStatic,
 } from "slate-react";
 import { toast } from "sonner";
+import type { YMapEvent } from "yjs";
 import { Button } from "@/components/ui/button";
 import {
 	ContextMenu,
@@ -22,11 +23,8 @@ import type { PageBlock as PageBlockType } from "@/features/editor/types";
 import { useShortcut } from "@/features/shortcut";
 import { useYjsPage } from "@/features/yjs-page";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
-import {
-	usePageCreate,
-	usePageDelete,
-	usePagePreviewQuery,
-} from "@/services/pages";
+import { usePageCreate, usePageDelete } from "@/services/pages";
+import type { PagePreview } from "@/types";
 import { cn } from "@/utils";
 
 export default function PageBlock(props: RenderElementProps) {
@@ -42,8 +40,12 @@ export default function PageBlock(props: RenderElementProps) {
 	const workspaceProvider = useYjsWorkspace((state) => state.provider);
 	const element = props.element as PageBlockType;
 
+	const [pageData, setPageData] = useState<PagePreview | null | undefined>(
+		undefined,
+	);
+
 	/// Khởi tạo các Services
-	const { data: page, isLoading } = usePagePreviewQuery(element.pageId);
+	// const { data: page, isLoading } = usePagePreviewQuery(element.pageId);
 
 	const { mutate: createPage } = usePageCreate(
 		activeWorkspace.id,
@@ -60,14 +62,10 @@ export default function PageBlock(props: RenderElementProps) {
 		workspaceProvider,
 		{
 			onError: (error) => {
-				console.error("Error deleting page:", error);
 				const path = ReactEditor.findPath(editor, element);
 				editor.setNodes({ isDeleted: false }, { at: path });
 				toast.error("Failed to delete page!");
-			},
-			onSuccess: () => {
-				const path = ReactEditor.findPath(editor, element);
-				Transforms.delete(editor, { at: path });
+				console.error("Error deleting page:", error);
 			},
 		},
 	);
@@ -78,24 +76,59 @@ export default function PageBlock(props: RenderElementProps) {
 	const handleOnDelete = useCallback(() => {
 		if (!element.pageId) return;
 		const path = ReactEditor.findPath(editor, element);
-		editor.setNodes({ isDeleted: false }, { at: path });
-		deletePage({ page_id: element.pageId, parent_page_id: currentPage.id });
-	}, [element, deletePage, editor, currentPage.id]);
+		editor.setNodes({ isDeleted: true }, { at: path });
+	}, [element, editor]);
 
 	/**
 	 * Xử lý việc nhấn và để truy cập trang
 	 */
 	const handleOnClick = () => {
-		if (!page) return;
-		navigate(`/${activeWorkspace.id}/${page.id}`);
+		if (!pageData) return;
+		navigate(`/${activeWorkspace.id}/${pageData.id}`);
 	};
 
 	/**
-	 * Khởi tạo page nếu chưa có pageId
+	 * Lấy dữ liệu trang như `title`, `icon` từ yDoc
+	 *
+	 * Ta chả cần fetch dữ liệu lại từ database làm gì cả, vì sau khi mở trang
+	 * cha, dữ liệu PagePreview của trang con đã được fetch và lưu vào yDoc của
+	 * workspaceProvider rồi
+	 *
+	 * Đồng thời cũng xử lý việc xoá page-block trên editor
 	 */
 	useEffect(() => {
-		if (!element.pageId) createPage({ parentPageId: currentPage.id });
-	}, [element.pageId, currentPage.id, createPage]);
+		// Khởi tạo trang mới nếu như block page chưa tồn tại pageId
+		if (!element.pageId) {
+			createPage({ parentPageId: currentPage.id });
+			return;
+		}
+
+		const parentChildrenYDoc = workspaceProvider.document.getMap<PagePreview>(
+			currentPage.id,
+		);
+
+		// Xử lý đồng bộ dữ liệu trang theo thời gian thực.
+		const updatePageData = () => {
+			if (!element.pageId) return;
+			const newPageData = parentChildrenYDoc.get(element.pageId);
+			setPageData(newPageData);
+		};
+
+		// Cập nhật lần đầu
+		updatePageData();
+
+		// Xử lý việc tự động đồng bộ trang bằng cách kiểm
+		const handlePageChildrenChange = (event: YMapEvent<PagePreview>) => {
+			if (!element.pageId) return;
+			if (event.keysChanged.has(element.pageId)) {
+				updatePageData();
+			}
+		};
+
+		parentChildrenYDoc.observe(handlePageChildrenChange);
+
+		return () => parentChildrenYDoc.unobserve(handlePageChildrenChange);
+	}, [workspaceProvider, currentPage.id, element, createPage]);
 
 	/**
 	 * Khi focus vào page block -> Chuyển shortcut scope về `editor.page-block`
@@ -107,6 +140,8 @@ export default function PageBlock(props: RenderElementProps) {
 
 	/**
 	 * Khi thuộc tính `isDelete` của block là true -> Xóa page và block
+	 *
+	 * Cái này để dùng khi người dùng lỡ xoá trang bằng phím "backspace"
 	 */
 	useEffect(() => {
 		if (!element.isDeleted) return;
@@ -119,21 +154,21 @@ export default function PageBlock(props: RenderElementProps) {
 	 * block này
 	 */
 	useEffect(() => {
-		if (!page) return;
-		if (page.is_deleted) {
-			const path = ReactEditor.findPath(editor, element);
-			Transforms.delete(editor, { at: path });
+		if (!pageData) return;
+		if (pageData.is_deleted) {
+			editor.deleteBlockById(element.id);
 		}
-	}, [page, element, editor]);
-
-	// Khi đang xoá sẽ không hiển thị gì cả
-	if (deleting) return null;
+	}, [pageData, element, editor]);
 
 	return (
-		<PageBlockContextMenu render={!isLoading} handleOnDelete={handleOnDelete}>
+		<PageBlockContextMenu render={!!pageData} handleOnDelete={handleOnDelete}>
 			<div
 				{...props.attributes}
-				className={cn("rounded-sm p-1", isSelected && "bg-primary/30")}
+				className={cn(
+					"rounded-sm p-1",
+					isSelected && "bg-primary/30",
+					deleting && "invisible", // Khi đang xoá sẽ không hiển thị gì cả
+				)}
 				contentEditable={false}
 			>
 				<Button
@@ -145,16 +180,16 @@ export default function PageBlock(props: RenderElementProps) {
 					)}
 					onClick={handleOnClick}
 				>
-					{page && !isLoading ? (
+					{pageData ? (
 						<div className="pl-3 p-1 gap-2 flex items-center select-none">
 							<span>
-								{page.icon ? (
-									page.icon
+								{pageData.icon ? (
+									pageData.icon
 								) : (
 									<FileIcon weight="duotone" size={16} width={20} />
 								)}
 							</span>
-							<span>{page.title ? page.title : "Untitled"}</span>
+							<span>{pageData.title ? pageData.title : "Untitled"}</span>
 						</div>
 					) : (
 						<Skeleton className="w-full h-full opacity-25" />

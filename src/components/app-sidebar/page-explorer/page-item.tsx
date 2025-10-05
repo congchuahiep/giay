@@ -15,7 +15,7 @@ import {
 	SidebarMenuSub,
 } from "@/components/ui/sidebar";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
-import { usePageChildrenQuery } from "@/services/pages";
+import { useFetchPageChildrenShared } from "@/services/pages";
 import type { PagePreview } from "@/types";
 import { cn } from "@/utils";
 import PageItemContextMenu from "./page-item-context-menu";
@@ -41,14 +41,10 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 	const provider = useYjsWorkspace((state) => state.provider);
 
 	const {
-		data: pageChildrenData,
-		refetch: fetchPageChildren,
+		handleFetch: fetchPageChildren,
 		isFetching,
 		isSuccess,
-	} = usePageChildrenQuery(pageId, {
-		enabled: currentPageId === pageId,
-		initialData: [],
-	});
+	} = useFetchPageChildrenShared(pageId, provider, false);
 	const [pageChildren, setPageChildren] = useState<PagePreview[]>([]);
 
 	const handlePageClick = useCallback(
@@ -69,20 +65,23 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 	// }, [currentPageId, pageId, handlePageExplanation]);
 
 	useEffect(() => {
-		(async () => {
-			if (isCollapseOpen) {
-				await fetchPageChildren();
-			}
-		})();
-	}, [isCollapseOpen, fetchPageChildren]);
-
-	useEffect(() => {
 		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
-		pageChildrenData?.forEach((child) => {
-			pageChildrenShared.set(child.id, child);
-		});
-	}, [pageChildrenData, pageId, provider]);
 
+		// Nếu pageChildrenShared khác rỗng thì lấy dữ liệu có sẵn
+		if (pageChildrenShared.size !== 0) {
+			setPageChildren(Object.values(pageChildrenShared.toJSON()));
+			return;
+		}
+
+		// Nếu pageChildrenShared chưa có dữ liệu -> fetch
+		// Dữ liệu `pageChildrenShared` đã được xử lý sẵn trong fetchPageChildren
+		// nên ta không cần viết logic nào ở đây nữa mà chỉ cần gọi hàm để fetch
+		if (isCollapseOpen) fetchPageChildren();
+	}, [isCollapseOpen, fetchPageChildren, pageId, provider]);
+
+	/**
+	 * Tự động update sidebar khi có sự thay đổi
+	 */
 	useEffect(() => {
 		const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
 
@@ -91,23 +90,19 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 		};
 		pageChildrenShared.observe(handlePageChildrenChange);
 
-		return () => {
-			pageChildrenShared.unobserve(handlePageChildrenChange);
-		};
+		return () => pageChildrenShared.unobserve(handlePageChildrenChange);
 	}, [provider, pageId]);
 
 	return (
-		<PageItemContextMenu pageData={pageData}>
-			<SidebarMenuItem
-				onMouseEnter={() => setIsHovered(true)}
-				onMouseLeave={() => setIsHovered(false)}
-				data-page-id={pageId}
-				onClick={(e) => handlePageClick(e, pageId)}
-			>
+		<SidebarMenuItem data-page-id={pageId}>
+			<PageItemContextMenu pageData={pageData}>
 				<SidebarMenuButton
+					onMouseEnter={() => setIsHovered(true)}
+					onMouseLeave={() => setIsHovered(false)}
 					title={pageData.title}
 					isActive={pageId === currentPageId}
 					className={cn(isFetching && "animate-pulse")}
+					onClick={(e) => handlePageClick(e, pageId)}
 				>
 					<span>
 						{pageData.icon ? (
@@ -120,49 +115,52 @@ export default function PageItem({ pageId, pageData }: PageItemProps) {
 						{pageData.title ? pageData.title : "Untitled"}
 					</span>
 				</SidebarMenuButton>
-				<Collapsible
-					open={isCollapseOpen}
-					onOpenChange={() => setIsCollapseOpen(!isCollapseOpen)}
-					className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
-				>
-					<CollapsibleTrigger asChild>
-						<SidebarMenuAction
-							onClick={(e) => {
-								e.stopPropagation();
-							}}
-							className={cn(
-								isHovered ? "visible" : "invisible",
-								"cursor-pointer",
-							)}
-						>
-							{isFetching ? (
-								<SpinnerIcon
-									size={16}
-									// TODO: Làm cho cái spinner xoay tròn
-									className="ml-2 transition-all rotate-180 duration-300 repeat-infinite"
-								/>
-							) : (
-								<CaretDownIcon className="transition-transform" />
-							)}
-						</SidebarMenuAction>
-					</CollapsibleTrigger>
-					<CollapsibleContent>
-						<SidebarMenuSub>
-							{isSuccess &&
-								Array.isArray(pageChildren) &&
-								pageChildren
-									?.sort((a, b) => a.title.localeCompare(b.title))
-									.map((subItem) => (
-										<PageItem
-											key={subItem.id}
-											pageId={subItem.id}
-											pageData={subItem}
-										/>
-									))}
-						</SidebarMenuSub>
-					</CollapsibleContent>
-				</Collapsible>
-			</SidebarMenuItem>
-		</PageItemContextMenu>
+			</PageItemContextMenu>
+			<Collapsible
+				open={isCollapseOpen}
+				onOpenChange={() => setIsCollapseOpen(!isCollapseOpen)}
+				className="group/collapsible [&[data-state=open]>button>svg:first-child]:rotate-90"
+			>
+				<CollapsibleTrigger asChild>
+					<SidebarMenuAction
+						onClick={(e) => {
+							e.stopPropagation();
+						}}
+						className={cn(
+							isHovered ? "visible" : "invisible",
+							"cursor-pointer",
+						)}
+						onMouseEnter={() => setIsHovered(true)}
+						onMouseLeave={() => setIsHovered(false)}
+					>
+						{isFetching ? (
+							<SpinnerIcon
+								size={16}
+								// TODO: Làm cho cái spinner xoay tròn
+								className="ml-2 transition-all rotate-180 duration-300 repeat-infinite"
+							/>
+						) : (
+							<CaretDownIcon className="transition-transform" />
+						)}
+					</SidebarMenuAction>
+				</CollapsibleTrigger>
+				<CollapsibleContent>
+					<SidebarMenuSub>
+						{isSuccess &&
+							Array.isArray(pageChildren) &&
+							pageChildren
+								.filter((page) => !page.is_deleted)
+								?.sort((a, b) => a.title.localeCompare(b.title))
+								.map((subItem) => (
+									<PageItem
+										key={subItem.id}
+										pageId={subItem.id}
+										pageData={subItem}
+									/>
+								))}
+					</SidebarMenuSub>
+				</CollapsibleContent>
+			</Collapsible>
+		</SidebarMenuItem>
 	);
 }

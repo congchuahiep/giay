@@ -1,6 +1,6 @@
 import { type Editor, Transforms } from "slate";
+import type { SlashMenuState } from "..";
 import type { SlashMenuItem } from "../slash-menu-items";
-import type { SlashMenuState } from "../types/SlashMenuState";
 
 /**
  * Xử lý việc chọn một item từ slash command menu

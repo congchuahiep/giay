@@ -16,8 +16,12 @@ import {
 } from "@/components/ui/popover";
 import { useYjsPage } from "@/features/yjs-page";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
+import type { PagePreview } from "@/types";
 import { cn } from "@/utils";
 
+/**
+ * Editor cho phần Title của trang, bao gồm icon trang và phần tựa đề
+ */
 export default function TitleEditor() {
 	const [isEmojiMenuOpen, setIsEmojiMenuOpen] = useState(false);
 	const [pageIcon, setPageIcon] = useState<string | null>(null);
@@ -31,6 +35,7 @@ export default function TitleEditor() {
 	}, [pageProvider]);
 
 	const pageIconData = useMemo(() => {
+		console.log(pageProvider.document.get("icon", Y.Text).toJSON());
 		return pageProvider.document.get("icon", Y.Text);
 	}, [pageProvider]);
 
@@ -58,7 +63,6 @@ export default function TitleEditor() {
 
 		// Đăng ký lắng nghe thay đổi
 		pageIconData.observe(observer);
-
 		return () => {
 			pageIconData.unobserve(observer);
 		};
@@ -70,35 +74,34 @@ export default function TitleEditor() {
 
 	// TODO: updatePageIcon và updatePageTitle cần được chỉnh lại logic
 	// Hàm tuỳ chỉnh logic khi setPageIcon
-	const updatePageIcon = (icon: string) => {
-		// Xóa toàn bộ nội dung hiện tại
-		pageIconData.delete(0, pageIconData.length);
-		pageIconData.insert(0, icon);
-
-		const sidebarPages = workspaceProvider.document.getMap(
-			currentPage.parent_page_id ? currentPage.parent_page_id : "root-pages",
+	// BUG: còn lỗi ở đây!!
+	const updateTitle = (icon: string | null, title: string | null) => {
+		const sidebarPages = workspaceProvider.document.getMap<PagePreview>(
+			currentPage.parent_page_id || "root-pages",
 		);
+		const restPageData = sidebarPages.get(currentPage.id);
 
-		sidebarPages.set(currentPage.id, {
-			id: currentPage.id,
-			icon: icon,
-			title: pageTitleData.toString(),
-		});
+		if (icon) {
+			// Xóa toàn bộ nội dung hiện tại
+			pageIconData.delete(0, pageIconData.length);
+			pageIconData.insert(0, icon);
 
-		setPageIcon(icon);
-	};
+			sidebarPages.set(currentPage.id, {
+				...restPageData!,
+				icon: icon,
+			});
 
-	// Hàm tuỳ chỉnh logic khi setPageTitle, giúp cho sidebar tự cập nhật
-	const updatePageTitle = (title: string) => {
-		const sidebarPages = workspaceProvider.document.getMap(
-			currentPage.parent_page_id ? currentPage.parent_page_id : "root-pages",
-		);
+			setPageIcon(icon);
+		}
 
-		sidebarPages.set(currentPage.id, {
-			id: currentPage.id,
-			icon: pageIconData.toString(),
-			title: title,
-		});
+		if (title !== null) {
+			console.log(title);
+
+			sidebarPages.set(currentPage.id, {
+				...restPageData!,
+				title: title,
+			});
+		}
 	};
 
 	return (
@@ -124,7 +127,7 @@ export default function TitleEditor() {
 							className="h-[342px]"
 							onEmojiSelect={({ emoji }) => {
 								setIsEmojiMenuOpen(false);
-								updatePageIcon(emoji);
+								updateTitle(emoji, null);
 							}}
 						>
 							{/*<EmojiPickerSearch /> NOTE: CHƯA XỬ LÝ! CONFLICT VỚI EDITOR */}
@@ -139,7 +142,7 @@ export default function TitleEditor() {
 				initialValue={[]}
 				onChange={(value) => {
 					const text = value[0].children[0].text;
-					updatePageTitle(text);
+					updateTitle(null, text);
 				}}
 			>
 				<Editable
@@ -163,17 +166,17 @@ const withTitleSchema = (editor: Editor) => {
 	const { normalizeNode } = editor;
 
 	editor.normalizeNode = (entry, options) => {
-		const [node] = entry;
+		const [node, path] = entry;
 
 		// Đảm bảo chỉ có 1 node duy nhất
-		// if (path.length === 0) {
-		// 	if (editor.children.length > 1) {
-		// 		for (let i = 1; i < editor.children.length; i++) {
-		// 			editor.children.splice(i, 1);
-		// 		}
-		// 		return;
-		// 	}
-		// }
+		if (path.length === 0) {
+			if (editor.children.length > 1) {
+				for (let i = 1; i < editor.children.length; i++) {
+					editor.children.splice(i, 1);
+				}
+				return;
+			}
+		}
 
 		// Nếu editor rỗng, thêm initial value với ID
 		if (Editor.isEditor(node) && node.children.length === 0) {

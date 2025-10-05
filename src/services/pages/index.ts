@@ -1,3 +1,4 @@
+export * from "./useFetchPageChildrenShared";
 export * from "./usePageChildrenQuery";
 export * from "./usePageCreate";
 export * from "./usePageDelete";
