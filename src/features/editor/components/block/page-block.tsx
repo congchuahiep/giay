@@ -156,7 +156,12 @@ export default function PageBlock(props: RenderElementProps) {
 	useEffect(() => {
 		if (!pageData) return;
 		if (pageData.is_deleted) {
-			editor.deleteBlockById(element.id);
+			try {
+				editor.deleteBlockById(element.id);
+			} catch (error) {
+				console.error("Failed to delete block:", error);
+				toast.error("Failed to delete block. Please try again.");
+			}
 		}
 	}, [pageData, element, editor]);
 
