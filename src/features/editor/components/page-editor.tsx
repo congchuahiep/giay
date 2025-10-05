@@ -124,10 +124,6 @@ const PageEditor = () => {
 	useFetchPageChildrenShared(
 		currentPageId,
 		workspaceProvider,
-		// // Nếu trang hiện tại được truy cập thông qua
-		// // sidebar thì không cần fetch nữa, vì sidebar đã tự động fetch khi
-		// // người dùng truy cập trang rồi
-		// !location.state?.fromSidebar,
 	);
 
 	// Đăng ký sự kiện bàn phím
