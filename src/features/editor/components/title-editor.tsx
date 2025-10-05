@@ -72,36 +72,34 @@ export default function TitleEditor() {
 	// CÁC EVENT
 	//
 
-	// TODO: updatePageIcon và updatePageTitle cần được chỉnh lại logic
-	// Hàm tuỳ chỉnh logic khi setPageIcon
-	// BUG: còn lỗi ở đây!!
-	const updateTitle = (icon: string | null, title: string | null) => {
+	const handleUpdateTitle = (title: string) => {
 		const sidebarPages = workspaceProvider.document.getMap<PagePreview>(
 			currentPage.parent_page_id || "root-pages",
 		);
 		const restPageData = sidebarPages.get(currentPage.id);
 
-		if (icon) {
-			// Xóa toàn bộ nội dung hiện tại
-			pageIconData.delete(0, pageIconData.length);
-			pageIconData.insert(0, icon);
+		sidebarPages.set(currentPage.id, {
+			...restPageData!,
+			title: title,
+		});
+	};
 
-			sidebarPages.set(currentPage.id, {
-				...restPageData!,
-				icon: icon,
-			});
+	const handleUpdateIcon = (icon: string) => {
+		const sidebarPages = workspaceProvider.document.getMap<PagePreview>(
+			currentPage.parent_page_id || "root-pages",
+		);
+		const restPageData = sidebarPages.get(currentPage.id);
 
-			setPageIcon(icon);
-		}
+		// Xóa toàn bộ nội dung hiện tại
+		pageIconData.delete(0, pageIconData.length);
+		pageIconData.insert(0, icon);
 
-		if (title !== null) {
-			console.log(title);
+		sidebarPages.set(currentPage.id, {
+			...restPageData!,
+			icon: icon,
+		});
 
-			sidebarPages.set(currentPage.id, {
-				...restPageData!,
-				title: title,
-			});
-		}
+		setPageIcon(icon);
 	};
 
 	return (
@@ -127,7 +125,7 @@ export default function TitleEditor() {
 							className="h-[342px]"
 							onEmojiSelect={({ emoji }) => {
 								setIsEmojiMenuOpen(false);
-								updateTitle(emoji, null);
+								handleUpdateIcon(emoji);
 							}}
 						>
 							{/*<EmojiPickerSearch /> NOTE: CHƯA XỬ LÝ! CONFLICT VỚI EDITOR */}
@@ -142,7 +140,7 @@ export default function TitleEditor() {
 				initialValue={[]}
 				onChange={(value) => {
 					const text = value[0].children[0].text;
-					updateTitle(null, text);
+					handleUpdateTitle(text);
 				}}
 			>
 				<Editable

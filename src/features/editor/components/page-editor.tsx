@@ -147,7 +147,7 @@ const PageEditor = () => {
 					{status === "disconnected" && (
 						<div
 							className={cn(
-								"text-xs z-100 fixed right-8 top-16 py-1 px-2 bg-stone-600",
+								"text-xs z-50 fixed right-8 top-16 py-1 px-2 bg-stone-600",
 								"text-white rounded",
 							)}
 						>

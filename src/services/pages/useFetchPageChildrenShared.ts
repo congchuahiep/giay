@@ -60,7 +60,6 @@ export function useFetchPageChildrenShared(
 			const pageChildrenShared = provider.document.getMap<PagePreview>(pageId);
 
 			res.data?.forEach((child) => {
-				console.log(child);
 				pageChildrenShared.set(child.id, child);
 			});
 		});

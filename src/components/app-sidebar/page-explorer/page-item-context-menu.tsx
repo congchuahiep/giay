@@ -1,8 +1,14 @@
+import type { HocuspocusProvider } from "@hocuspocus/provider";
 import { ArrowUpRightIcon } from "@phosphor-icons/react/dist/csr/ArrowUpRight";
+import { BugIcon } from "@phosphor-icons/react/dist/csr/Bug";
 import { LinkIcon } from "@phosphor-icons/react/dist/csr/Link";
 import { TrashIcon } from "@phosphor-icons/react/dist/csr/Trash";
 import { type MouseEvent, useCallback } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import {
+	type NavigateFunction,
+	useNavigate,
+	useParams,
+} from "react-router-dom";
 import { toast } from "sonner";
 import {
 	ContextMenu,
@@ -37,25 +43,6 @@ export default function PageItemContextMenu({
 	const workspaceProvider = useYjsWorkspace((state) => state.provider);
 	const workspaceId = useYjsWorkspace((state) => state.activeWorkspace.id);
 
-	const { mutate: deletePage } = usePageDelete(workspaceProvider, {
-		onSuccess: (deletedPageId) => {
-			// Nếu trang bị xoá là trang hiện tại thì chuyển về home
-			if (deletedPageId === currentPageId) navigate("/");
-		},
-	});
-
-	const handleOnDelete = useCallback(
-		(e: MouseEvent<HTMLDivElement>) => {
-			e.stopPropagation();
-			console.log("before: ", pageData);
-			deletePage({
-				page_id: pageData.id,
-				parent_page_id: pageData.parent_page_id,
-			});
-		},
-		[deletePage, pageData],
-	);
-
 	return (
 		<ContextMenu>
 			<ContextMenuTrigger asChild>{children}</ContextMenuTrigger>
@@ -65,20 +52,16 @@ export default function PageItemContextMenu({
 					<ArrowUpRightIcon className="text-muted-foreground" />
 					<span>Open in New Tab</span>
 				</ContextMenuItem>
+
 				<ContextMenuSeparator />
-				<ContextMenuItem onClick={handleOnDelete} variant="destructive">
-					<TrashIcon className="text-muted-foreground" />
-					<span>Delete</span>
-				</ContextMenuItem>
-				<ContextMenuItem
-					onClick={(e) => {
-						e.stopPropagation();
-						console.log(pageData);
-					}}
-					variant="destructive"
-				>
-					<span>DEBUG</span>
-				</ContextMenuItem>
+
+				<DeletePageItem
+					pageData={pageData}
+					currentPageId={currentPageId}
+					navigate={navigate}
+					workspaceProvider={workspaceProvider}
+				/>
+				<DebugItem pageData={pageData} />
 			</ContextMenuContent>
 		</ContextMenu>
 	);
@@ -103,6 +86,61 @@ function CopyLinkItem({ pageData, workspaceId }: CopyLinkItemProps) {
 		<ContextMenuItem onClick={handleOnClick}>
 			<LinkIcon className="text-muted-foreground" />
 			<span>Copy Link</span>
+		</ContextMenuItem>
+	);
+}
+
+interface DeletePageItemProps extends ContextItemProps {
+	currentPageId?: string;
+	navigate: NavigateFunction;
+	workspaceProvider: HocuspocusProvider;
+}
+
+function DeletePageItem({
+	pageData,
+	currentPageId,
+	navigate,
+	workspaceProvider,
+}: DeletePageItemProps) {
+	const { mutate: deletePage } = usePageDelete(workspaceProvider, {
+		onSuccess: (deletedPageId) => {
+			// Nếu trang bị xoá là trang hiện tại thì chuyển về home
+			if (deletedPageId === currentPageId) navigate("/");
+		},
+	});
+
+	const handleOnDelete = useCallback(
+		(e: MouseEvent<HTMLDivElement>) => {
+			e.stopPropagation();
+			deletePage({
+				page_id: pageData.id,
+				parent_page_id: pageData.parent_page_id,
+			});
+		},
+		[deletePage, pageData],
+	);
+
+	return (
+		<ContextMenuItem onClick={handleOnDelete} variant="destructive">
+			<TrashIcon className="text-muted-foreground" />
+			<span>Delete</span>
+		</ContextMenuItem>
+	);
+}
+
+interface DebugItemProps extends ContextItemProps {}
+
+function DebugItem({ pageData }: DebugItemProps) {
+	return (
+		<ContextMenuItem
+			onClick={(e) => {
+				e.stopPropagation();
+				console.log(pageData);
+			}}
+			variant="destructive"
+		>
+			<BugIcon />
+			<span>DEBUG</span>
 		</ContextMenuItem>
 	);
 }
