@@ -6,6 +6,7 @@ export type Page = {
 	icon: string;
 	parent_page_id: string;
 	page_data: Y.Doc;
+	is_deleted: boolean;
 };
 
 export type PagePreview = {

@@ -47,6 +47,7 @@ export default function PageList() {
 	) : pages && Object.keys(pages).length !== 0 ? (
 		<SidebarMenu>
 			{Object.entries(pages)
+				.filter(([_, page]) => !page.is_deleted)
 				.sort((a, b) => a[1].title.localeCompare(b[1].title))
 				.map(([id, item]) => (
 					<PageItem key={id} pageId={id} pageData={item} />

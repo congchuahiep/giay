@@ -31,9 +31,14 @@ export function usePageDelete(
 		mutationFn: (variables) => deletePage(variables.page_id),
 		...options,
 		onSuccess: (data, variables, context) => {
-			provider.document
-				.getMap<PagePreview>(variables.parent_page_id || "root-pages")
-				.delete(variables.page_id);
+			const parentPageShared = provider.document.getMap<PagePreview>(
+				variables.parent_page_id || "root-pages",
+			);
+			const oldPageData = parentPageShared.get(variables.page_id);
+			parentPageShared.set(variables.page_id, {
+				...oldPageData!,
+				is_deleted: true,
+			});
 
 			queryClient.invalidateQueries({
 				queryKey: ["page_children", variables.parent_page_id],

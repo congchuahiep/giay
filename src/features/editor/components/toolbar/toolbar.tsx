@@ -12,7 +12,7 @@ import ToggleMarkButton from "./toggle-mark-button";
 
 const Toolbar = () => {
 	return (
-		<div className="flex gap-1">
+		<div className="flex gap-1 z-10 fixed bottom-8 bg-popover p-1 rounded-md">
 			<ToggleMarkButton format="bold" icon={<TextBIcon weight="bold" />} />
 			<ToggleMarkButton
 				format="italic"

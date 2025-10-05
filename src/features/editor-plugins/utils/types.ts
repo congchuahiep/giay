@@ -19,6 +19,14 @@ export interface UtilsEditor {
 	generateId: () => string;
 
 	/**
+	 * Xoá một block bằng ID
+	 *
+	 * @param id
+	 * @returns
+	 */
+	deleteBlockById: (id: string) => boolean;
+
+	/**
 	 * Đảm bảo block có UUID (thêm nếu chưa có)
 	 */
 	ensureBlockId: (block: any) => Element;

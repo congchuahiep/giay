@@ -2,8 +2,8 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useEffect, useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { usePageQuery } from "@/services/pages";
+import { useAuthStore } from "@/stores/auth";
 import type { YjsConnectStatus } from "@/types";
-import { useAuthStore } from "../../stores/auth";
 import { YjsPageContext } from "./context";
 import { createYjsPageStore } from "./store";
 
@@ -44,6 +44,7 @@ export const YjsPageProvider = ({ pageId, children }: YjsPageProviderProps) => {
 			setStatus("disconnected");
 			provider.removeAllListeners();
 			provider.disconnect();
+			setProvider(null);
 		};
 	}, [pageData]);
 

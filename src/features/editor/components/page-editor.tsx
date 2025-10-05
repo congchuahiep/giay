@@ -35,11 +35,13 @@ import {
 import { useRegisterShortcuts, useShortcut } from "@/features/shortcut";
 import { useYjsPage } from "@/features/yjs-page";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
+import { useFetchPageChildrenShared } from "@/services/pages";
+import { cn } from "@/utils";
 import { DragProvider } from "./block-interaction/drag-provider";
 import { CollaborateCursors } from "./collaborate-cursor";
 import TrailingEmptyParagraph from "./helper/trailing-empty-paragraph";
 import TitleEditor from "./title-editor";
-import { HoveringToolbar } from "./toolbar";
+import { HoveringToolbar, Toolbar } from "./toolbar";
 
 /**
  * Danh sách các plugin
@@ -67,22 +69,25 @@ const editorShortcutExtensions = [
 const pageShortcutExtensions = [PageBlockShortcutExtension];
 
 const PageEditor = () => {
+	const editorRef = useRef<HTMLDivElement>(null);
+
 	const navigate = useNavigate();
 
-	const editorRef = useRef<HTMLDivElement>(null);
-	const provider = useYjsPage((state) => state.provider);
-	const workspaceId = useYjsWorkspace((state) => state.activeWorkspace.id);
+	const pageProvider = useYjsPage((state) => state.provider);
 	const status = useYjsPage((state) => state.status);
+	const currentPageId = useYjsPage((state) => state.currentPage.id);
+	const workspaceProvider = useYjsWorkspace((state) => state.provider);
+	const workspaceId = useYjsWorkspace((state) => state.activeWorkspace.id);
 
 	const pageContentData = useMemo(
-		() => provider.document.get("content", Y.XmlText),
-		[provider],
+		() => pageProvider.document.get("content", Y.XmlText),
+		[pageProvider],
 	);
 
 	// Khởi tạo editor
 	const editor = useMemo(
-		() => initialEditor(plugins, pageContentData, provider),
-		[pageContentData, provider],
+		() => initialEditor(plugins, pageContentData, pageProvider),
+		[pageContentData, pageProvider],
 	);
 
 	const pageBlockShortcutContext = useMemo(() => {
@@ -107,11 +112,19 @@ const PageEditor = () => {
 
 	// Kết nối với Yjs
 	useEffect(() => {
+		// console.log(location.state?.fromSidebar);
+
 		YjsEditor.connect(editor);
 		return () => {
 			YjsEditor.disconnect(editor);
 		}; // Đóng kết nối khi kết thúc làm việc
 	}, [editor]);
+
+	// Tự động fetch tất cả các trang con có trong trang hiện tại
+	useFetchPageChildrenShared(
+		currentPageId,
+		workspaceProvider,
+	);
 
 	// Đăng ký sự kiện bàn phím
 	useRegisterShortcuts(editor, editorShortcutExtensions);
@@ -125,10 +138,15 @@ const PageEditor = () => {
 		<Slate editor={editor} initialValue={[]}>
 			<DragProvider editor={editor}>
 				<CollaborateCursors>
-					{/*<Toolbar />*/}
+					<Toolbar />
 					<TitleEditor />
 					{status === "disconnected" && (
-						<div className="text-xs z-100 fixed right-8 top-16 py-1 px-2 bg-stone-600 text-white rounded">
+						<div
+							className={cn(
+								"text-xs z-50 fixed right-8 top-16 py-1 px-2 bg-stone-600",
+								"text-white rounded",
+							)}
+						>
 							offline
 						</div>
 					)}
@@ -138,7 +156,10 @@ const PageEditor = () => {
 
 						<Editable
 							ref={editorRef}
-							className="focus:outline-none selection:bg-blue-500/15 outline-0 overflow-visible"
+							className={cn(
+								"focus:outline-none selection:bg-blue-500/15 outline-0",
+								"overflow-visible",
+							)}
 							decorate={decorate}
 							renderLeaf={memoizedRenderLeaf}
 							renderElement={memoizedRenderBlock}

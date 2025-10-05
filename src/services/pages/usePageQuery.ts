@@ -4,6 +4,14 @@ import * as Y from "yjs";
 import { api, endpoint } from "@/configs";
 import type { Page, PageRawData } from "@/types/Page";
 
+/**
+ * Hook dùng để fetch dữ liệu đầy đủ của một trang tài liệu.
+ * Trả về dữ liệu trang dưới dạng object Page, bao gồm thông tin cơ bản và nội dung đã decode.
+ *
+ * @param pageId - ID của trang cần lấy dữ liệu
+ * @param options - Tuỳ chọn cho react-query (ví dụ: enabled)
+ * @returns Kết quả truy vấn react-query chứa dữ liệu trang
+ */
 export function usePageQuery(pageId: string, options?: { enabled?: boolean }) {
 	return useQuery<Page>({
 		queryKey: ["pages", pageId],
@@ -31,6 +39,7 @@ async function fetchPageDataFromServer(pageId: string): Promise<Page> {
 				// Bổ sung children
 				parent_page_id: rawData.parent_page_id,
 				page_data: yDoc,
+				is_deleted: rawData.is_deleted,
 			};
 
 			return page;
