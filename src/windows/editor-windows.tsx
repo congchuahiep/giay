@@ -39,7 +39,7 @@ function EditorWindow() {
 			{/* EDITOR CONTAINER */}
 			{pageId ? (
 				<div className="overflow-y-scroll overflow-x-hidden mt-12">
-					<div className="px-12 m-auto w-full max-w-3xl lg:w-3xl dark:text-white">
+					<div className="px-13 m-auto w-full max-w-3xl lg:w-3xl dark:text-white">
 						<div className="h-screen flex flex-col">
 							<YjsPageProvider pageId={pageId}>
 								<PageEditor />

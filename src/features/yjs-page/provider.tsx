@@ -52,13 +52,13 @@ export const YjsPageProvider = ({ pageId, children }: YjsPageProviderProps) => {
 		return <PageLoading />;
 	}
 
-	if (isError || !provider) {
+	if (isError) {
 		return (
 			<div>Error: {error?.message || "Unknown error! provider not found"}</div>
 		);
 	}
 
-	if (!pageData) {
+	if (!pageData || !provider) {
 		return <div>Page not found</div>;
 	}
 
