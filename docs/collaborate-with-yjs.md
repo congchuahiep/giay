@@ -63,8 +63,9 @@ Each document page consists of multiple shared types, all managed within an obje
 
 > **_Example._** _A document page in Giấy has 3 main content sections: Icon, Title, Content_
 >
-> ![Image of the structure of a document page](TODO)
->
+> <p align="center">
+>   <img height="420" alt="Image of the structure of a document page" src="https://github.com/user-attachments/assets/9852bfd8-d915-4a52-8229-77670ea3604d" />
+> </p>
 > These three sections correspond to three separate shared types, all centrally managed by yDoc. In other words, yDoc is the "document page" – all data and changes of the page are contained within yDoc.
 
 - Learn more: [Y.Doc | Yjs](https://docs.yjs.dev/api/y.doc)
@@ -107,7 +108,9 @@ After understanding shared types and yDoc, you'll encounter an important questio
 
 A provider acts like a "relay station" – where all clients send their changes to yDoc, and simultaneously receive the latest updates from other users. When a client edits content, the provider transmits that change to the other clients, ensuring everyone is instantly synchronized. Thanks to the provider, everyone sees the same data state, no matter where they're working.
 
-![Provider helps clients connect with each other](todo)
+<p align="center">
+  <img height="240" alt="Provider helps clients connect with each other" src="https://github.com/user-attachments/assets/f418c6d2-475c-4cd4-9bbd-abdaa374e072" />
+</p>
 
 In other words, the provider is the bridge that keeps collaborative data flowing continuously between clients, turning even the smallest change into a real-time update for the whole group.
 
