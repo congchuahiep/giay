@@ -121,7 +121,9 @@ function SidebarProvider({
 					}
 					className={cn(
 						"group/sidebar-wrapper flex min-h-svh w-full",
-						isTauri() ? "bg-transparent" : "bg-white dark:bg-neutral-800",
+						isTauri()
+							? "bg-transparent"
+							: "bg-stone-100 dark:bg-neutral-950/90",
 						className,
 					)}
 					{...props}
@@ -626,7 +628,7 @@ function SidebarMenuSub({ className, ...props }: React.ComponentProps<"ul">) {
 			data-sidebar="menu-sub"
 			className={cn(
 				"border-sidebar-border ml-2 flex min-w-0 flex-col",
-				"gap-1 pl-1.5 [&>*:first-child]:mt-1",
+				"gap-1 border-l pl-1.5 [&>*:first-child]:mt-1",
 				"group-data-[collapsible=icon]:hidden",
 				className,
 			)}

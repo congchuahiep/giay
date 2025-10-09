@@ -27,3 +27,5 @@ This project is a modern second brain system, designed to help users capture, st
 - **lodash**: Utility libraries for data manipulation and conditional class names.
 
 The system is designed for extensibility, maintainability, and a seamless user experience for knowledge management.
+
+# Start

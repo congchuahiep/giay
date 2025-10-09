@@ -2,4 +2,5 @@ export type YjsConnectStatus =
 	| "connecting"
 	| "connected"
 	| "error"
-	| "disconnected";
+	| "disconnected"
+	| "local-ready";

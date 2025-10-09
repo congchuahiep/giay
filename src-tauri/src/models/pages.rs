@@ -11,6 +11,7 @@ pub fn get_migrations() -> Vec<Migration> {
             workspace_id TEXT NOT NULL,
             parent_page_id TEXT,
             title NVARCHAR(255),
+            icon TEXT,
             content TEXT NOT NULL,
             page_data BLOB NOT NULL,
             sync_status VARCHAR(7) NOT NULL DEFAULT 'initial' CHECK(sync_status IN ('initial', 'pending', 'synced')),

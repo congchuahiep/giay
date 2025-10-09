@@ -48,7 +48,7 @@ To track changes in a shared type, simply register an observer using the `observ
 > titleShared.unobserve(observer);
 > ```
 >
-> After registering, any place that observes will have its `observer` function called whenever the content changes _(this change can come from another user anywhere)_. Thanks to this, components sharing the same data will always be instantly synchronized _(for example: when the page title changes, the sidebar will immediately update the page name)_.
+> After registering, `observer` function will be called whenever the content changes _(this change can come from another user anywhere)_. Thanks to this, components sharing the same data will always be instantly synchronized _(for example: when the page title changes, the sidebar will immediately update the page name)_.
 
 For more complex shared types like `Y.Map`, `Y.Array`, or `Y.XmlText`, you can track deep changes using the `observeDeep` function – very useful when you want to listen to all changes in nested data _(e.g., observing a `Y.Text` inside a `Y.Map`)_.
 

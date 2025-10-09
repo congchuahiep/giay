@@ -138,8 +138,14 @@ export default function TitleEditor() {
 				editor={editor}
 				initialValue={[]}
 				onChange={(value) => {
-					const text = value[0].children[0].text;
-					handleUpdateTitle(text);
+					const isAstChange = editor.operations.some(
+						(op) => "set_selection" !== op.type,
+					);
+					// Chỉ update khi thay đổi nội dung (khác operator chọn "selection")
+					if (isAstChange) {
+						const text = value[0].children[0].text;
+						handleUpdateTitle(text);
+					}
 				}}
 			>
 				<Editable

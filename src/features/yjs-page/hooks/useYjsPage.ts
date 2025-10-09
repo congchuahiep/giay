@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { useStore } from "zustand";
-import { YjsPageContext } from "./context";
-import type { YjsPageState } from "./types";
+import { YjsPageContext } from "../context";
+import type { YjsPageState } from "../types";
 
 /**
  * Custom hook để truy cập vào Zustand store được cung cấp bởi `YjsPageProvider`.
@@ -22,7 +22,7 @@ import type { YjsPageState } from "./types";
  * const page = useYjsPage((s) => s.currentPage);
  * ```
  */
-export function useYjsPage<T>(selector: (state: YjsPageState) => T): T {
+export default function useYjsPage<T>(selector: (state: YjsPageState) => T): T {
 	const store = useContext(YjsPageContext);
 
 	if (!store) {
