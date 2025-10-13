@@ -26,5 +26,11 @@ dist-ssr
 # Environment variables
 .env
 
+# gemini-cli settings
+.gemini/
+
+# GitHub App credentials
+gha-creds-*.json
+
 # Other
 .tanstack/
