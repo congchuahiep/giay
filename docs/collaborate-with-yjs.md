@@ -2,15 +2,16 @@
 
 Yjs is a powerful library that enables real-time data synchronization between multiple users without worrying about conflicts. This section provides an overview of how Yjs works, helping you grasp the key concepts before diving into specific details. After reading, you should refer to the official Yjs documentation to gain a deeper understanding and apply it effectively to your project.
 
-**Install Yjs**
+#### Install Yjs
 
 ```bash
 npm install yjs
 ```
 
-Refs:
+#### Refs:
 
-- [Main source | Yjs Docs](https://docs.yjs.dev/)
+- [Yjs Docs](https://docs.yjs.dev/): Main source about Yjs.
+- [offline-first.md](docs/offline-first.md): Ability to work offline in Giấy (Read after you've finished reading this article)
 
 # Shared type
 

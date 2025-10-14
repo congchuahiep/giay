@@ -2,7 +2,7 @@ import { HocuspocusProvider } from "@hocuspocus/provider";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { usePagePreviewQuery, usePageQuery } from "@/services/pages";
+import { usePagePreviewQuery, usePageLocalQuery } from "@/services/pages";
 import { useAuthStore } from "@/stores/auth";
 import type { Page, YjsConnectStatus } from "@/types";
 import { YjsPageContext } from "../context";
@@ -21,7 +21,7 @@ export default function YjsPageProvider({
 }: YjsPageProviderProps) {
 	const { token } = useAuthStore();
 
-	const { data: localPageData, isFetching, error } = usePageQuery(pageId);
+	const { data: localPageData, isFetching, error } = usePageLocalQuery(pageId);
 	const { refetch: fetchPagePreview } = usePagePreviewQuery(pageId, {
 		enabled: false,
 	});

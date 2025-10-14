@@ -14,7 +14,7 @@ import { getLocalDatabase } from "../database";
  * @param options - Tuỳ chọn cho react-query (ví dụ: enabled)
  * @returns Kết quả truy vấn react-query chứa dữ liệu trang
  */
-export function usePageQuery(
+export function usePageLocalQuery(
 	pageId: string,
 	options?: Omit<UseQueryOptions<Page | null, Error>, "queryKey" | "queryFn">,
 ) {

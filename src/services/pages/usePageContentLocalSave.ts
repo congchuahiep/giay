@@ -1,8 +1,8 @@
 import { type UseMutationOptions, useMutation } from "@tanstack/react-query";
 import type { QueryResult } from "@tauri-apps/plugin-sql";
+import { fromUint8Array } from "js-base64";
 import * as Y from "yjs";
 import { getLocalDatabase } from "../database";
-import { fromUint8Array } from "js-base64";
 
 interface LocalPageContentSaveParams {
 	pageId: string;
