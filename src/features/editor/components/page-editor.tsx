@@ -33,7 +33,7 @@ import {
 	withUtilsEditor,
 } from "@/features/editor-plugins/utils";
 import { useRegisterShortcuts, useShortcut } from "@/features/shortcut";
-import { useYjsPage } from "@/features/yjs-page";
+import { useYjsPage, useYjsPageLocalSave } from "@/features/yjs-page";
 import { useYjsWorkspace } from "@/features/yjs-workspace";
 import { useFetchPageChildrenShared } from "@/services/pages";
 import { cn } from "@/utils";
@@ -68,6 +68,11 @@ const editorShortcutExtensions = [
 
 const pageShortcutExtensions = [PageBlockShortcutExtension];
 
+/**
+ *
+ * @see features/yjs-page - Dùng để nạp và lưu dữ liệu shared (dữ liệu có thể
+ * cộng tác của trình soạn thảo)
+ */
 const PageEditor = () => {
 	const editorRef = useRef<HTMLDivElement>(null);
 
@@ -121,10 +126,10 @@ const PageEditor = () => {
 	}, [editor]);
 
 	// Tự động fetch tất cả các trang con có trong trang hiện tại
-	useFetchPageChildrenShared(
-		currentPageId,
-		workspaceProvider,
-	);
+	useFetchPageChildrenShared(currentPageId, workspaceProvider);
+
+	// Tự động lưu nội dung trang xuống dữ liệu máy client (Tauri-only)
+	useYjsPageLocalSave(currentPageId, workspaceId, pageProvider);
 
 	// Đăng ký sự kiện bàn phím
 	useRegisterShortcuts(editor, editorShortcutExtensions);

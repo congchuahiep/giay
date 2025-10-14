@@ -82,6 +82,7 @@ export const YjsWorkspaceProvider = ({
 			setStatus("disconnected");
 			provider.removeAllListeners();
 			provider.disconnect();
+			setProvider(null);
 		};
 	}, [activeWorkspace]);
 

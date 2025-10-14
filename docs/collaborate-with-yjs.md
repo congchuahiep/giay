@@ -2,15 +2,16 @@
 
 Yjs is a powerful library that enables real-time data synchronization between multiple users without worrying about conflicts. This section provides an overview of how Yjs works, helping you grasp the key concepts before diving into specific details. After reading, you should refer to the official Yjs documentation to gain a deeper understanding and apply it effectively to your project.
 
-**Install Yjs**
+#### Install Yjs
 
 ```bash
 npm install yjs
 ```
 
-Refs:
+#### Refs:
 
-- [Main source | Yjs Docs](https://docs.yjs.dev/)
+- [Yjs Docs](https://docs.yjs.dev/): Main source about Yjs.
+- [offline-first.md](docs/offline-first.md): Ability to work offline in Giấy (Read after you've finished reading this article)
 
 # Shared type
 
@@ -48,7 +49,7 @@ To track changes in a shared type, simply register an observer using the `observ
 > titleShared.unobserve(observer);
 > ```
 >
-> After registering, any place that observes will have its `observer` function called whenever the content changes _(this change can come from another user anywhere)_. Thanks to this, components sharing the same data will always be instantly synchronized _(for example: when the page title changes, the sidebar will immediately update the page name)_.
+> After registering, `observer` function will be called whenever the content changes _(this change can come from another user anywhere)_. Thanks to this, components sharing the same data will always be instantly synchronized _(for example: when the page title changes, the sidebar will immediately update the page name)_.
 
 For more complex shared types like `Y.Map`, `Y.Array`, or `Y.XmlText`, you can track deep changes using the `observeDeep` function – very useful when you want to listen to all changes in nested data _(e.g., observing a `Y.Text` inside a `Y.Map`)_.
 

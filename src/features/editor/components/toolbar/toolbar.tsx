@@ -7,6 +7,8 @@ import { TextStrikethroughIcon } from "@phosphor-icons/react/dist/csr/TextStrike
 import { TextUnderlineIcon } from "@phosphor-icons/react/dist/csr/TextUnderline";
 import { useSlateStatic } from "slate-react";
 import { Button } from "@/components/ui/button";
+import { useYjsPage } from "@/features/yjs-page";
+import { cn } from "@/utils";
 import ToggleBlockButton from "./toggle-block-button";
 import ToggleMarkButton from "./toggle-mark-button";
 
@@ -30,11 +32,40 @@ const Toolbar = () => {
 			<ToggleBlockButton format="code" icon={<CodeIcon />} />
 			<ToggleBlockButton format="h1" icon={<TextHOneIcon />} />
 			<GetCurrentContentButton />
+			<ToggleYjsPageConnection />
 		</div>
 	);
 };
 
 export default Toolbar;
+
+function ToggleYjsPageConnection() {
+	const provider = useYjsPage((state) => state.provider);
+	const status = useYjsPage((state) => state.status);
+
+	const handleToggle = () => {
+		if (status === "connected") {
+			provider.disconnect();
+		} else {
+			provider.connect();
+		}
+	};
+
+	return (
+		<Button
+			className={cn(
+				"h-8 cursor-pointer",
+				status === "connected" &&
+					"bg-green-600 text-green-50 hover:bg-green-700",
+				status === "disconnected" &&
+					"bg-neutral-200 text-neutral-800 hover:bg-neutral-300",
+			)}
+			onClick={handleToggle}
+		>
+			Yjs: {status}
+		</Button>
+	);
+}
 
 const GetCurrentContentButton = () => {
 	const editor = useSlateStatic();
