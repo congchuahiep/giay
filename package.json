@@ -14,11 +14,13 @@
 		"@tailwindcss/vite": "^4.3.1",
 		"@tanstack/react-router": "^1.170.16",
 		"@tanstack/react-router-devtools": "^1.167.0",
+		"axios": "^1.18.1",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
 		"tailwindcss": "^4.3.1"
 	},
 	"devDependencies": {
+		"@biomejs/biome": "^2.5.1",
 		"@eslint/js": "^10.0.1",
 		"@tanstack/router-plugin": "^1.168.18",
 		"@tauri-apps/cli": "^2.11.3",
