@@ -9,7 +9,7 @@ import {
 	ServerError,
 	TimeoutError,
 	ValidationError,
-} from "@/errors";
+} from "@/shared/errors"
 
 /**
  * Classifies an Axios error and returns an `AppError` instance. This function

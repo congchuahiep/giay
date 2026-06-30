@@ -6,7 +6,7 @@ const EnvSchema = v.object({
 
 const createEnv = () => {
 	const raw = {
-		SERVER_API_URL: import.meta.env.SERVER_API_URL,
+		SERVER_API_URL: import.meta.env.VITE_SERVER_API_URL,
 	};
 
 	const parsed = v.safeParse(EnvSchema, raw);

@@ -1,6 +1,6 @@
 import type { AxiosInstance } from "axios";
 import { type TokenResponse, useAuthStore } from "@/features/auth";
-import { classifyApiError } from "@/utils/classify-api-error";
+import { classifyApiError } from "@/shared/utils/classify-api-error";
 import { publicEndpoints } from "./endpoints";
 
 export function setupPublicInterceptors(instance: AxiosInstance) {
