@@ -4,14 +4,14 @@ use crate::auth::error::AuthError;
 
 const SERVICE: &str = env!("CARGO_PKG_NAME");
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn save_tokens(access_token: String, refresh_token: String) -> Result<(), AuthError> {
     Entry::new(SERVICE, "access_token")?.set_password(&access_token)?;
     Entry::new(SERVICE, "refresh_token")?.set_password(&refresh_token)?;
     Ok(())
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_access_token() -> Result<Option<String>, AuthError> {
     let entry = Entry::new(SERVICE, "access_token")?;
     match entry.get_password() {
@@ -21,7 +21,7 @@ pub fn get_access_token() -> Result<Option<String>, AuthError> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn get_refresh_token() -> Result<Option<String>, AuthError> {
     let entry = Entry::new(SERVICE, "refresh_token")?;
     match entry.get_password() {
@@ -31,7 +31,7 @@ pub fn get_refresh_token() -> Result<Option<String>, AuthError> {
     }
 }
 
-#[tauri::command]
+#[tauri::command(async)]
 pub fn clear_tokens() -> Result<(), AuthError> {
     clear_one(SERVICE, "access_token")?;
     clear_one(SERVICE, "refresh_token")?;
