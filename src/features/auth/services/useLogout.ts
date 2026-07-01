@@ -4,7 +4,7 @@ import {
 	useQueryClient,
 } from "@tanstack/react-query";
 import { publicApi } from "@/api";
-import type { AppError } from "@/shared/errors"
+import type { AppError } from "@/shared/errors";
 import { useAuthStore } from "../stores/auth-store";
 import AuthKey from "./key";
 

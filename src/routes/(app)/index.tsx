@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useGetProfile, useLogout } from "@/features/auth";
 
-export const Route = createFileRoute("/_authenticated/")({
+export const Route = createFileRoute("/(app)/")({
 	component: HomePage,
 });
 
@@ -11,7 +11,7 @@ function HomePage() {
 
 	const handleLogout = async () => {
 		await logoutMutation.mutateAsync();
-		window.location.href = "/login";
+		window.location.href = "/(auth)/login";
 	};
 
 	return (
@@ -21,6 +21,7 @@ function HomePage() {
 					{isLoading ? "Đang tải..." : `Xin chào, ${user?.email ?? "bạn"}!`}
 				</h1>
 				<button
+					type="button"
 					onClick={handleLogout}
 					disabled={logoutMutation.isPending}
 					className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50"

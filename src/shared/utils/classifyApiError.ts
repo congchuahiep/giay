@@ -9,7 +9,7 @@ import {
 	ServerError,
 	TimeoutError,
 	ValidationError,
-} from "@/shared/errors"
+} from "@/shared/errors";
 
 /**
  * Classifies an Axios error and returns an `AppError` instance. This function
@@ -55,7 +55,7 @@ import {
  * }
  * ```
  */
-export function classifyApiError(error: unknown): AppError {
+export default function classifyApiError(error: unknown): AppError {
 	if (error instanceof AppError) return error;
 
 	if (!axios.isAxiosError(error)) {
@@ -111,32 +111,43 @@ export function classifyApiError(error: unknown): AppError {
  */
 function handleBadRequest(data?: Record<string, unknown>): AppError {
 	if (!data || typeof data !== "object") {
-		return new AppError("Yêu cầu không hợp lệ", 400, "BAD_REQUEST");
+		return new AppError("Invalid request", 400, "BAD_REQUEST");
 	}
 
-	const { code, detail, ...rest } = data;
+	const { code, details, ...rest } = data;
 	const apiCode = (code as string) ?? "BAD_REQUEST";
 
 	const fieldErrors: Record<string, string[]> = {};
-	for (const [key, value] of Object.entries(rest)) {
-		if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
-			fieldErrors[key] = value as string[];
+
+	if (details && typeof details === "object" && !Array.isArray(details)) {
+		for (const [key, value] of Object.entries(details as Record<string, unknown>)) {
+			if (typeof value === "string") {
+				fieldErrors[key] = [value];
+			} else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+				fieldErrors[key] = value as string[];
+			}
 		}
+	} else {
+		for (const [key, value] of Object.entries(rest)) {
+			if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+				fieldErrors[key] = value as string[];
+			}
+		}
+	}
+
+	let mainMessage: string | undefined;
+	const extractedMsg = extractErrorMessage(data, true) as string;
+	if (extractedMsg !== "Lỗi không xác định" && extractedMsg !== "") {
+		mainMessage = extractedMsg;
 	}
 
 	if (Object.keys(fieldErrors).length > 0) {
 		const fallback =
 			Object.values(fieldErrors).flat()[0] ?? "Dữ liệu không hợp lệ";
-		const message = typeof detail === "string" ? detail : fallback;
-		return new ValidationError(message, fieldErrors, apiCode);
+		return new ValidationError(mainMessage ?? fallback, fieldErrors, apiCode);
 	}
 
-	if (typeof data.detail === "string") {
-		return new AppError(data.detail, 400, apiCode);
-	}
-
-	const message = extractErrorMessage(data, true) as string;
-	return new AppError(message || "Yêu cầu không hợp lệ", 400, apiCode);
+	return new AppError(mainMessage ?? "Yêu cầu không hợp lệ", 400, apiCode);
 }
 
 function extractErrorMessage(error: unknown, stringOnly: true): string;
@@ -162,8 +173,8 @@ function extractErrorMessage(
 
 	if (typeof data === "object" && data !== null) {
 		const obj = data as Record<string, unknown>;
-		if (typeof obj.detail === "string") return stringOnly ? obj.detail : obj;
 		if (typeof obj.message === "string") return stringOnly ? obj.message : obj;
+		if (typeof obj.detail === "string") return stringOnly ? obj.detail : obj;
 	}
 
 	return stringOnly ? "Lỗi không xác định" : (data as Record<string, unknown>);

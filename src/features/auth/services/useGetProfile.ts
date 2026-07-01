@@ -1,6 +1,6 @@
 import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { authApi } from "@/api";
-import type { AppError } from "@/shared/errors"
+import type { AppError } from "@/shared/errors";
 import { useAuthStore } from "../stores/auth-store";
 import type { User, UserProfileDTO } from "../types";
 import AuthKey from "./key";
