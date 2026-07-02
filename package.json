@@ -6,6 +6,7 @@
 	"scripts": {
 		"dev": "vite",
 		"build": "tsc -b && vite build",
+		"check": "tsc -b",
 		"lint": "eslint .",
 		"preview": "vite preview",
 		"generate-routes": "tsr generate",
@@ -19,6 +20,7 @@
 		"@tanstack/react-router": "^1.170.16",
 		"@tanstack/react-router-devtools": "^1.167.0",
 		"@tauri-apps/api": "^2.11.1",
+		"@tauri-apps/plugin-os": "~2",
 		"@tauri-apps/plugin-store": "^2.4.3",
 		"axios": "^1.18.1",
 		"react": "^19.2.7",

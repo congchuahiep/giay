@@ -1,3 +1,4 @@
+import { platform } from "@tauri-apps/plugin-os";
 import axios from "axios";
 import { env } from "@/configs/env";
 
@@ -8,7 +9,12 @@ export const publicAxios = axios.create({
 	headers: { "Content-Type": "application/json" },
 });
 
+const PROXY_BASE =
+	platform() === "windows"
+		? "http://giay-api.localhost"
+		: "giay-api://localhost";
+
 export const authAxios = axios.create({
-	baseURL: env.SERVER_API_URL,
+	baseURL: PROXY_BASE,
 	headers: { "Content-Type": "application/json" },
 });

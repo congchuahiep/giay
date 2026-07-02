@@ -1,12 +1,20 @@
 import { invoke } from "@tauri-apps/api/core";
+import { classifyError } from "@/shared/utils";
+
+async function invokeCommand<T>(
+	cmd: string,
+	args?: Record<string, unknown>,
+): Promise<T> {
+	try {
+		return await invoke<T>(cmd, args);
+	} catch (err) {
+		throw classifyError(err);
+	}
+}
 
 export const AuthCommand = {
-	saveTokens: (accessToken: string, refreshToken: string) =>
-		invoke<void>("save_tokens", { accessToken, refreshToken }),
-
-	getAccessToken: () => invoke<string | null>("get_access_token"),
-
-	getRefreshToken: () => invoke<string | null>("get_refresh_token"),
-
-	clearTokens: () => invoke<void>("clear_tokens"),
+	login: (email: string, password: string) =>
+		invokeCommand<void>("login", { email, password }),
+	logout: () => invokeCommand<void>("logout"),
+	checkAuth: () => invokeCommand<boolean>("check_auth"),
 };

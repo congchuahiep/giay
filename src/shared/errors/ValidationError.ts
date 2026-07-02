@@ -5,8 +5,8 @@ export default class ValidationError extends AppError {
 
 	constructor(
 		message: string = "Dữ liệu không hợp lệ",
-		fields: Record<string, string[]> = {},
 		code: string = "VALIDATION_ERROR",
+		fields: Record<string, string[]> = {},
 	) {
 		super(message, 400, code);
 		this.name = "ValidationError";

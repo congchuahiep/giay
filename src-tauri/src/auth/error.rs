@@ -1,7 +1,6 @@
 use keyring::Error as KeyringError;
 
-#[derive(Debug, thiserror::Error, serde::Serialize)]
-#[serde(tag = "type", content = "message")]
+#[derive(Debug, thiserror::Error)]
 pub enum AuthError {
     #[error("Không thể truy cập keyring của hệ thống")]
     KeyringAccess,

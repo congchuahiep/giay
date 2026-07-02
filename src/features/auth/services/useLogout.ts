@@ -3,8 +3,8 @@ import {
 	useMutation,
 	useQueryClient,
 } from "@tanstack/react-query";
-import { publicApi } from "@/api";
 import type { AppError } from "@/shared/errors";
+import { AuthCommand } from "@/tauri";
 import { useAuthStore } from "../stores/auth-store";
 import AuthKey from "./key";
 
@@ -16,13 +16,8 @@ export default function useLogout(
 	return useMutation<void, AppError>({
 		...options,
 		mutationFn: async () => {
-			const { refreshToken } = useAuthStore.getState();
-			if (refreshToken) {
-				await publicApi.post((ep) => ep.auth.logout, {
-					refresh_token: refreshToken,
-				});
-			}
-			await useAuthStore.getState().clearTokens();
+			await AuthCommand.logout();
+			useAuthStore.getState().clearUser();
 		},
 		onSuccess: (...args) => {
 			queryClient.removeQueries({ queryKey: AuthKey.all });

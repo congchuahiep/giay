@@ -1,50 +1,74 @@
-use keyring::Entry;
+use tauri::State;
 
-use crate::auth::error::AuthError;
+use crate::{
+    auth::Auth,
+    http::{ApiClient, HttpError},
+};
 
-const SERVICE: &str = env!("CARGO_PKG_NAME");
+fn bff_err<E: Into<HttpError>>(e: E) -> serde_json::Value {
+    e.into().to_json()
+}
 
-#[tauri::command(async)]
-pub fn save_tokens(access_token: String, refresh_token: String) -> Result<(), AuthError> {
-    Entry::new(SERVICE, "access_token")?.set_password(&access_token)?;
-    Entry::new(SERVICE, "refresh_token")?.set_password(&refresh_token)?;
+#[tauri::command]
+pub async fn login(
+    api: State<'_, ApiClient>,
+    auth: State<'_, Auth>,
+    email: String,
+    password: String,
+) -> Result<(), serde_json::Value> {
+    let res = api
+        .client()
+        .post(format!("{}/auth/login", api.base_url()))
+        .json(&serde_json::json!({ "email": email, "password": password }))
+        .send()
+        .await
+        .map_err(bff_err)?;
+
+    if !res.status().is_success() {
+        let status = res.status();
+        let body: serde_json::Value = res.json().await.unwrap_or(serde_json::json!({
+            "code": "UNKNOWN_SERVER_ERROR",
+            "message": format!("Server returned {status}"),
+        }));
+        return Err(body);
+    }
+
+    let body: serde_json::Value = res.json().await.map_err(bff_err)?;
+
+    let access = body["access_token"]
+        .as_str()
+        .ok_or(HttpError::BadResponse("Missing access_token".into()))
+        .map_err(bff_err)?;
+    let refresh = body["refresh_token"]
+        .as_str()
+        .ok_or(HttpError::BadResponse("Missing refresh_token".into()))
+        .map_err(bff_err)?;
+
+    auth.set_tokens(access, refresh).map_err(bff_err)?;
+
     Ok(())
 }
 
-#[tauri::command(async)]
-pub fn get_access_token() -> Result<Option<String>, AuthError> {
-    let entry = Entry::new(SERVICE, "access_token")?;
-    match entry.get_password() {
-        Ok(token) => Ok(Some(token)),
-        Err(keyring::Error::NoEntry) => Ok(None),
-        Err(e) => Err(e.into()),
+#[tauri::command]
+pub async fn logout(
+    api: State<'_, ApiClient>,
+    auth: State<'_, Auth>,
+) -> Result<(), serde_json::Value> {
+    if let Ok(Some(refresh)) = auth.get_refresh_token() {
+        let _ = api
+            .client()
+            .post(format!("{}/auth/logout", api.base_url()))
+            .json(&serde_json::json!({ "refresh_token": refresh }))
+            .send()
+            .await;
     }
-}
 
-#[tauri::command(async)]
-pub fn get_refresh_token() -> Result<Option<String>, AuthError> {
-    let entry = Entry::new(SERVICE, "refresh_token")?;
-    match entry.get_password() {
-        Ok(token) => Ok(Some(token)),
-        Err(keyring::Error::NoEntry) => Ok(None),
-        Err(e) => Err(e.into()),
-    }
-}
+    auth.clear_tokens().map_err(bff_err)?;
 
-#[tauri::command(async)]
-pub fn clear_tokens() -> Result<(), AuthError> {
-    clear_one(SERVICE, "access_token")?;
-    clear_one(SERVICE, "refresh_token")?;
     Ok(())
 }
 
-fn clear_one(service: &str, user: &str) -> Result<(), AuthError> {
-    match Entry::new(service, user) {
-        Ok(entry) => match entry.delete_credential() {
-            Ok(()) | Err(keyring::Error::NoEntry) => Ok(()),
-            Err(e) => Err(e.into()),
-        },
-        Err(keyring::Error::NoEntry) => Ok(()),
-        Err(e) => Err(e.into()),
-    }
+#[tauri::command]
+pub async fn check_auth(auth: State<'_, Auth>) -> Result<bool, serde_json::Value> {
+    Ok(auth.get_access_token().map_err(bff_err)?.is_some())
 }
