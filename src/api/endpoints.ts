@@ -6,7 +6,7 @@ export const publicEndpoints = {
 
 export const authEndpoints = {
 	auth: {
-		me: "/auth/me",
+		me: "/user/me",
 		revokeSession: (sessionId: string) => `/auth/revoke-token/${sessionId}`,
 	},
 } as const;

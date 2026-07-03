@@ -19,6 +19,7 @@ pub async fn login(
     let res = api
         .client()
         .post(format!("{}/auth/login", api.base_url()))
+        .header("Content-Type", "application/json")
         .json(&serde_json::json!({ "email": email, "password": password }))
         .send()
         .await
@@ -64,6 +65,56 @@ pub async fn logout(
     }
 
     auth.clear_tokens().map_err(bff_err)?;
+
+    Ok(())
+}
+
+#[tauri::command(rename_all = "snake_case")]
+pub async fn register(
+    api: State<'_, ApiClient>,
+    auth: State<'_, Auth>,
+    email: String,
+    password: String,
+    first_name: String,
+    last_name: String,
+    invite_token: Option<String>,
+) -> Result<(), serde_json::Value> {
+    let res = api
+        .client()
+        .post(format!("{}/auth/register", api.base_url()))
+        .header("Content-Type", "application/json")
+        .json(&serde_json::json!({
+            "email": email,
+            "password": password,
+            "first_name": first_name,
+            "last_name": last_name,
+            "invite_token": invite_token
+        }))
+        .send()
+        .await
+        .map_err(bff_err)?;
+
+    if !res.status().is_success() {
+        let status = res.status();
+        let body: serde_json::Value = res.json().await.unwrap_or(serde_json::json!({
+            "code": "UNKNOWN_SERVER_ERROR",
+            "message": format!("Server returned {status}"),
+        }));
+        return Err(body);
+    }
+
+    let body: serde_json::Value = res.json().await.map_err(bff_err)?;
+
+    let access = body["access_token"]
+        .as_str()
+        .ok_or(HttpError::BadResponse("Missing access_token".into()))
+        .map_err(bff_err)?;
+    let refresh = body["refresh_token"]
+        .as_str()
+        .ok_or(HttpError::BadResponse("Missing refresh_token".into()))
+        .map_err(bff_err)?;
+
+    auth.set_tokens(access, refresh).map_err(bff_err)?;
 
     Ok(())
 }

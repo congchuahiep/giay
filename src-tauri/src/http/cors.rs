@@ -5,9 +5,13 @@ use tauri::http::{header, HeaderValue, Response, StatusCode};
 /// - Windows: http://tauri.localhost (hoặc https nếu useHttpsScheme)
 ///
 /// WARN: Có thể hardcode nếu không dùng useHttpsScheme.
-#[cfg(target_os = "windows")]
+#[cfg(debug_assertions)]
+pub const WEBVIEW_ORIGIN: &str = "http://localhost:5173";
+
+#[cfg(all(not(debug_assertions), target_os = "windows"))]
 pub const WEBVIEW_ORIGIN: &str = "http://tauri.localhost";
-#[cfg(not(target_os = "windows"))]
+
+#[cfg(all(not(debug_assertions), not(target_os = "windows")))]
 pub const WEBVIEW_ORIGIN: &str = "tauri://localhost";
 
 /// Build CORS preflight response (204)

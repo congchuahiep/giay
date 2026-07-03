@@ -70,6 +70,8 @@ interface NormalizedError {
 }
 
 function normalize(error: unknown): NormalizedError {
+	console.error(error);
+
 	if (axios.isAxiosError(error)) {
 		if (!error.response) {
 			if (error.code === "ECONNABORTED" || error.message.includes("timeout"))
@@ -94,15 +96,18 @@ function normalize(error: unknown): NormalizedError {
 	if (typeof error === "object" && error !== null) {
 		const body = error as Record<string, unknown>;
 		return {
-			code: (body.code as string) ?? "UNKNOWN_ERROR",
-			message: (body.message as string) ?? "Lỗi không xác định",
+			code:
+				typeof body.code === "string"
+					? body.code.toUpperCase()
+					: "UNKNOWN_ERROR",
+			message: extractMessage(body) ?? "Unknown error",
 			details: body.details as Record<string, unknown> | undefined,
 		};
 	}
 
 	return {
 		code: "UNKNOWN_ERROR",
-		message: typeof error === "string" ? error : "Lỗi không xác định",
+		message: typeof error === "string" ? error : "Unknown error",
 	};
 }
 

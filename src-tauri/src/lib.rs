@@ -27,6 +27,7 @@ pub fn run() {
         .invoke_handler(tauri::generate_handler![
             auth::command::login,
             auth::command::logout,
+            auth::command::register,
             auth::command::check_auth,
         ])
         .run(tauri::generate_context!())

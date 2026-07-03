@@ -5,6 +5,7 @@
 		"clientKind": "git",
 		"useIgnoreFile": true
 	},
+
 	"files": {
 		"ignoreUnknown": false,
 		"includes": ["**", "!**/routeTree.gen.ts"]
@@ -30,8 +31,15 @@
 		"enabled": true,
 		"actions": {
 			"source": {
-				"organizeImports": "on"
+				"organizeImports": "on",
+				"noDuplicateClasses": "on",
+				"recommended": true
 			}
+		}
+	},
+	"css": {
+		"parser": {
+			"tailwindDirectives": true
 		}
 	}
 }

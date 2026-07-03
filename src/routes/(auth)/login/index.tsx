@@ -1,9 +1,29 @@
-import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { IconBrandGoogle, IconCheck } from "@tabler/icons-react";
+import {
+	createFileRoute,
+	Link,
+	redirect,
+	useNavigate,
+} from "@tanstack/react-router";
+import { cn } from "tailwind-variants";
 import { useAuthStore, useLogin } from "@/features/auth";
+import { InputField } from "@/shared/components/form";
+import {
+	Alert,
+	Button,
+	Card,
+	Form,
+	Separator,
+	Spinner,
+} from "@/shared/components/ui";
+import { Route as RegisterRoute } from "../register";
 
-const loginSearchSchema = (search: Record<string, unknown>) => ({
-	redirect: (search.redirect as string) || "/",
+type LoginSearch = {
+	redirect?: string;
+};
+
+const loginSearchSchema = (search: Record<string, unknown>): LoginSearch => ({
+	redirect: search.redirect as string | undefined,
 });
 
 export const Route = createFileRoute("/(auth)/login/")({
@@ -17,62 +37,87 @@ export const Route = createFileRoute("/(auth)/login/")({
 });
 
 function LoginPage() {
-	const { redirect: redirectTo } = Route.useSearch();
+	const { redirect } = Route.useSearch();
+	const redirectTo = redirect || "/";
 	const navigate = useNavigate();
-	const loginMutation = useLogin();
-	const [email, setEmail] = useState("");
-	const [password, setPassword] = useState("");
 
-	const handleSubmit = async (e: React.SubmitEvent) => {
-		e.preventDefault();
-		try {
-			await loginMutation.mutateAsync({ email, password });
+	const { control, handleSubmit, status, error } = useLogin({
+		onSuccess: () => {
 			navigate({ to: redirectTo });
-		} catch {
-			// Lỗi đã được xử lý bởi error formatting interceptor
-		}
-	};
+		},
+	});
 
 	return (
-		<div className="min-h-screen flex items-center justify-center bg-gray-50">
-			<form
-				onSubmit={handleSubmit}
-				className="bg-white p-8 rounded-xl shadow-md w-full max-w-sm space-y-4"
-			>
-				<h1 className="text-2xl font-bold text-center">Đăng nhập</h1>
+		<Card className="mx-auto w-sm rounded-xl">
+			<Card.Content className="flex flex-col gap-4">
+				<div>
+					<Card.Title>Login</Card.Title>
+					<Card.Description>Access to your account</Card.Description>
+				</div>
 
-				{loginMutation.isError && (
-					<div className="bg-red-50 text-red-600 p-3 rounded text-sm">
-						{(loginMutation.error as Error).message}
-					</div>
-				)}
+				<Button variant="outline">
+					<IconBrandGoogle /> Continue with Google
+				</Button>
 
-				<input
-					type="email"
-					placeholder="Email"
-					value={email}
-					onChange={(e) => setEmail(e.target.value)}
-					required
-					className="w-full border rounded-lg px-3 py-2"
-				/>
+				<Separator>Or</Separator>
 
-				<input
-					type="password"
-					placeholder="Mật khẩu"
-					value={password}
-					onChange={(e) => setPassword(e.target.value)}
-					required
-					className="w-full border rounded-lg px-3 py-2"
-				/>
+				<Form onSubmit={handleSubmit}>
+					{status === "error" && (
+						<Alert>
+							<Alert.Description>{error?.message}</Alert.Description>
+						</Alert>
+					)}
 
-				<button
-					type="submit"
-					disabled={loginMutation.isPending}
-					className="w-full bg-blue-600 text-white rounded-lg py-2 hover:bg-blue-700 disabled:opacity-50"
-				>
-					{loginMutation.isPending ? "Đang đăng nhập..." : "Đăng nhập"}
-				</button>
-			</form>
-		</div>
+					<InputField
+						control={control}
+						name="email"
+						type="email"
+						label="Email"
+						placeholder="your@email.com"
+					/>
+
+					<InputField
+						control={control}
+						name="password"
+						type="password"
+						label="Password"
+						placeholder="*******"
+					/>
+
+					<Button
+						disabled={status === "pending"}
+						className={cn(
+							(status === "pending" || status === "success") &&
+								"pointer-events-none",
+							status === "success" && "bg-green-100 text-foreground",
+							"rounded-full",
+						)}
+						type="submit"
+					>
+						{status === "pending" ? (
+							<Spinner description="Logging in..." />
+						) : status === "success" ? (
+							<>
+								<IconCheck className="size-4" /> Logged in successfully
+							</>
+						) : (
+							"Login"
+						)}
+					</Button>
+				</Form>
+
+				<div className="text-sm text-secondary-foreground text-center">
+					<span>New here? </span>
+
+					<Link
+						to={RegisterRoute.to}
+						tabIndex={-1}
+						className="hover:underline text-foreground font-medium"
+					>
+						Register
+					</Link>
+				</div>
+			</Card.Content>
+		</Card>
 	);
 }

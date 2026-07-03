@@ -15,6 +15,16 @@ async function invokeCommand<T>(
 export const AuthCommand = {
 	login: (email: string, password: string) =>
 		invokeCommand<void>("login", { email, password }),
+
 	logout: () => invokeCommand<void>("logout"),
+
+	register: (data: {
+		email: string;
+		password: string;
+		first_name: string;
+		last_name: string;
+		invite_token: string | undefined;
+	}) => invokeCommand<void>("register", data),
+
 	checkAuth: () => invokeCommand<boolean>("check_auth"),
 };

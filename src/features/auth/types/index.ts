@@ -1,1 +1,1 @@
-export type { User, UserProfileDTO } from "./user";
+export * from "./user";
