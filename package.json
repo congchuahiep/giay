@@ -16,7 +16,6 @@
 	"dependencies": {
 		"@base-ui/react": "^1.6.0",
 		"@formisch/react": "^1.1.0",
-		"@hookform/resolvers": "^5.4.0",
 		"@tabler/icons-react": "^3.44.0",
 		"@tailwindcss/vite": "^4.3.1",
 		"@tanstack/react-query": "^5.101.2",
@@ -29,7 +28,6 @@
 		"axios": "^1.18.1",
 		"react": "^19.2.7",
 		"react-dom": "^19.2.7",
-		"react-hook-form": "^7.80.0",
 		"tailwind-merge": "^3.6.0",
 		"tailwind-variants": "^3.2.2",
 		"tailwindcss": "^4.3.1",

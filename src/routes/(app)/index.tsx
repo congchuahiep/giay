@@ -11,7 +11,7 @@ function HomePage() {
 
 	const handleLogout = async () => {
 		await logoutMutation.mutateAsync();
-		window.location.href = "/(auth)/login";
+		window.location.href = "/login";
 	};
 
 	return (

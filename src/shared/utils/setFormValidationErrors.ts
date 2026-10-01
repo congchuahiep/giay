@@ -1,8 +1,8 @@
-import type { FieldValues, Path, UseFormReturn } from "react-hook-form";
+import { type FormSchema, type FormStore, setErrors } from "@formisch/react";
 import type { ValidationError } from "@/shared/errors";
 
 /**
- * Map ValidationError.fields vào React Hook Form errors
+ * Map ValidationError.fields vào Formisch form errors
  *
  * @example
  * ```
@@ -10,18 +10,20 @@ import type { ValidationError } from "@/shared/errors";
  * { "code": "invalid", "role": ["Cannot set role to OWNER..."] }
  *
  * // Sẽ gọi:
- * form.setError("role", { type: "server", message: "Cannot set role to OWNER..." })
+ * setErrors(form, { path: ["role"], errors: ["Cannot set role to OWNER..."] })
  * ```
+ *
+ * @note Hiện tại chỉ hỗ trợ top-level fields. Nếu server trả về lỗi lồng
+ * nhau (ví dụ `user.email`), cần mở rộng helper để parse path.
  */
-export default function setFormValidationErrors<T extends FieldValues>(
-	form: UseFormReturn<T>,
+export default function setFormValidationErrors<TSchema extends FormSchema>(
+	form: FormStore<TSchema>,
 	error: ValidationError,
 ) {
 	for (const [field, messages] of Object.entries(error.fields)) {
-		// Ghép nhiều message thành 1 chuỗi (RHF chỉ hỗ trợ 1 message per setError)
-		form.setError(field as Path<T>, {
-			type: "server",
-			message: messages.join("\n"),
-		});
+		setErrors(form as never, {
+			path: [field] as [string],
+			errors: messages as [string, ...string[]],
+		} as never);
 	}
 }

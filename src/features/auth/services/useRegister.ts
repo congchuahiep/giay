@@ -7,14 +7,14 @@ import { useAuthStore } from "../stores";
 
 type UseRegisterOptions = Omit<
 	UsePostOptions<typeof registerSchema, void>,
-	"schema" | "mutationFn" | "defaultValues"
+	"schema" | "mutationFn"
 >;
 
 export default function useRegister(options?: UseRegisterOptions) {
 	return usePost({
 		...options,
 		schema: registerSchema,
-		defaultValues: {
+		initialInput: {
 			email: "",
 			password: "",
 			confirmPassword: "",

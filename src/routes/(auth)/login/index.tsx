@@ -1,3 +1,4 @@
+import { Form } from "@formisch/react";
 import { IconBrandGoogle, IconCheck } from "@tabler/icons-react";
 import {
 	createFileRoute,
@@ -12,7 +13,6 @@ import {
 	Alert,
 	Button,
 	Card,
-	Form,
 	Separator,
 	Spinner,
 } from "@/shared/components/ui";
@@ -41,27 +41,27 @@ function LoginPage() {
 	const redirectTo = redirect || "/";
 	const navigate = useNavigate();
 
-	const { control, handleSubmit, status, error } = useLogin({
+	const { form, handleSubmit, status, error } = useLogin({
 		onSuccess: () => {
-			navigate({ to: redirectTo });
+			navigate({ href: redirectTo });
 		},
 	});
 
 	return (
-		<Card className="mx-auto w-sm rounded-xl">
-			<Card.Content className="flex flex-col gap-4">
-				<div>
-					<Card.Title>Login</Card.Title>
-					<Card.Description>Access to your account</Card.Description>
-				</div>
+		<Form of={form} onSubmit={handleSubmit}>
+			<Card className="mx-auto w-sm rounded-xl">
+				<Card.Content className="flex flex-col gap-4">
+					<div>
+						<Card.Title>Login</Card.Title>
+						<Card.Description>Access to your account</Card.Description>
+					</div>
 
-				<Button variant="outline">
-					<IconBrandGoogle /> Continue with Google
-				</Button>
+					<Button variant="outline">
+						<IconBrandGoogle /> Continue with Google
+					</Button>
 
-				<Separator>Or</Separator>
+					<Separator>Or</Separator>
 
-				<Form onSubmit={handleSubmit}>
 					{status === "error" && (
 						<Alert>
 							<Alert.Description>{error?.message}</Alert.Description>
@@ -69,16 +69,16 @@ function LoginPage() {
 					)}
 
 					<InputField
-						control={control}
-						name="email"
+						of={form}
+						path={["email"]}
 						type="email"
 						label="Email"
 						placeholder="your@email.com"
 					/>
 
 					<InputField
-						control={control}
-						name="password"
+						of={form}
+						path={["password"]}
 						type="password"
 						label="Password"
 						placeholder="*******"
@@ -104,20 +104,20 @@ function LoginPage() {
 							"Login"
 						)}
 					</Button>
-				</Form>
 
-				<div className="text-sm text-secondary-foreground text-center">
-					<span>New here? </span>
+					<div className="text-sm text-secondary-foreground text-center">
+						<span>New here? </span>
 
-					<Link
-						to={RegisterRoute.to}
-						tabIndex={-1}
-						className="hover:underline text-foreground font-medium"
-					>
-						Register
-					</Link>
-				</div>
-			</Card.Content>
-		</Card>
+						<Link
+							to={RegisterRoute.to}
+							tabIndex={-1}
+							className="hover:underline text-foreground font-medium"
+						>
+							Register
+						</Link>
+					</div>
+				</Card.Content>
+			</Card>
+		</Form>
 	);
 }

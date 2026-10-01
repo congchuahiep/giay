@@ -7,14 +7,14 @@ import { useAuthStore } from "../stores";
 
 type UseLoginOptions = Omit<
 	UsePostOptions<typeof loginSchema, void>,
-	"schema" | "mutationFn" | "defaultValues"
+	"schema" | "mutationFn"
 >;
 
 export default function useLogin(options?: UseLoginOptions) {
 	return usePost({
 		...options,
 		schema: loginSchema,
-		defaultValues: { email: "", password: "" },
+		initialInput: { email: "", password: "" },
 
 		mutationFn: async ({ email, password }) => {
 			await AuthCommand.login(email, password);

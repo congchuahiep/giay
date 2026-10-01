@@ -1,16 +1,17 @@
 "use client";
-import { valibotResolver } from "@hookform/resolvers/valibot";
+import {
+	type DeepPartial,
+	type FormSchema,
+	type FormStore,
+	type SubmitEventHandler,
+	reset,
+	useForm,
+} from "@formisch/react";
 import {
 	type UseMutationOptions,
 	type UseMutationResult,
 	useMutation,
 } from "@tanstack/react-query";
-import {
-	type DefaultValues,
-	type UseFormProps,
-	type UseFormReturn,
-	useForm,
-} from "react-hook-form";
 import type * as v from "valibot";
 import { type AppError, ValidationError } from "@/shared/errors";
 import { setFormValidationErrors } from "../utils";
@@ -21,10 +22,7 @@ import { setFormValidationErrors } from "../utils";
  * @template TSchema - Schema Valibot của resource (object schema)
  */
 export interface UsePostOptions<
-	TSchema extends v.ObjectSchema<
-		v.ObjectEntries,
-		v.ErrorMessage<v.ObjectIssue> | undefined
-	>,
+	TSchema extends FormSchema,
 	TData = unknown,
 	TError = AppError,
 	TOnMutateResult = unknown,
@@ -38,22 +36,19 @@ export interface UsePostOptions<
 	schema: TSchema;
 
 	/**
-	 * Giá trị mặc định cho form
+	 * Giá trị mặc định cho form (partial được phép)
 	 */
-	defaultValues?: DefaultValues<v.InferInput<TSchema>>;
+	initialInput?: DeepPartial<v.InferInput<TSchema>>;
 
 	/**
-	 * Các tùy chọn bổ sung cho useMutation
+	 * Chế độ validate lần đầu (mặc định: 'submit')
 	 */
-	mutationOptions?: Omit<
-		UseMutationOptions<TData, TError, v.InferOutput<TSchema>>,
-		"mutationFn" | "onMutate" | "onSuccess" | "onError" | "onSettled"
-	>;
+	validate?: "initial" | "touch" | "input" | "change" | "blur" | "submit";
 
 	/**
-	 * Chế độ validate form (mặc định: 'onSubmit')
+	 * Chế độ revalidate sau lần đầu (mặc định: 'input')
 	 */
-	mode?: UseFormProps<v.InferInput<TSchema>>["mode"];
+	revalidate?: "touch" | "input" | "change" | "blur" | "submit";
 
 	/**
 	 * Có reset form sau khi mutation thành công không?
@@ -64,37 +59,78 @@ export interface UsePostOptions<
 	 * @default true
 	 */
 	resetOnSuccess?: boolean;
+
+	/**
+	 * Các tùy chọn bổ sung cho useMutation
+	 */
+	mutationOptions?: Omit<
+		UseMutationOptions<TData, TError, v.InferOutput<TSchema>, TOnMutateResult>,
+		"mutationFn" | "onMutate" | "onSuccess" | "onError" | "onSettled"
+	>;
 }
 
 /**
  * Kết quả trả về từ hook usePost
  */
 export interface UsePostReturn<
-	TSchema extends v.ObjectSchema<
-		v.ObjectEntries,
-		v.ErrorMessage<v.ObjectIssue> | undefined
-	>,
+	TSchema extends FormSchema,
 	TData = unknown,
 	TError = AppError,
-> extends Omit<
-			UseFormReturn<v.InferInput<TSchema>, unknown, v.InferOutput<TSchema>>,
-			"handleSubmit" | "reset"
-		>,
-		Pick<
-			UseMutationResult<TData, TError, v.InferOutput<TSchema>>,
-			| "mutate"
-			| "mutateAsync"
-			| "isPending"
-			| "isError"
-			| "isSuccess"
-			| "error"
-			| "data"
-			| "status"
-		> {
+> {
+	/**
+	 * Form store từ Formisch
+	 */
+	form: FormStore<TSchema>;
+
+	/**
+	 * Trigger mutation
+	 */
+	mutate: UseMutationResult<TData, TError, v.InferOutput<TSchema>>["mutate"];
+
+	/**
+	 * Trigger mutation và trả về Promise
+	 */
+	mutateAsync: UseMutationResult<
+		TData,
+		TError,
+		v.InferOutput<TSchema>
+	>["mutateAsync"];
+
+	/**
+	 * Mutation đang chạy
+	 */
+	isPending: boolean;
+
+	/**
+	 * Mutation gặp lỗi
+	 */
+	isError: boolean;
+
+	/**
+	 * Mutation thành công
+	 */
+	isSuccess: boolean;
+
+	/**
+	 * Lỗi mutation nếu có
+	 */
+	error: TError | null;
+
+	/**
+	 * Dữ liệu trả về từ mutation nếu thành công
+	 */
+	data: TData | undefined;
+
+	/**
+	 * Trạng thái mutation
+	 */
+	status: UseMutationResult<TData, TError, v.InferOutput<TSchema>>["status"];
+
 	/**
 	 * Handler để submit form - validate và trigger mutation
+	 * Dùng trực tiếp cho prop `onSubmit` của Formisch `<Form>`
 	 */
-	handleSubmit: (e?: React.BaseSyntheticEvent) => Promise<void>;
+	handleSubmit: SubmitEventHandler<TSchema>;
 
 	/**
 	 * Reset form và mutation
@@ -113,10 +149,10 @@ export interface UsePostReturn<
 }
 
 /**
- * Custom hook kết hợp React Hook Form, TanStack Query và Valibot
+ * Custom hook kết hợp Formisch, TanStack Query và Valibot
  * dùng để thực hiện tạo mới dữ liệu (POST request) với form validation.
  *
- * Hook này quản lý đồng thời state của form (thông qua React Hook Form)
+ * Hook này quản lý đồng thời state của form (thông qua Formisch)
  * và mutation (thông qua TanStack Query), giúp việc xử lý submit form
  * trở nên đơn giản và nhất quán hơn.
  *
@@ -133,9 +169,9 @@ export interface UsePostReturn<
  * });
  *
  * function CreateWorkspaceForm() {
- *   const { register, handleSubmit, formState: { errors }, isPending } = usePost({
+ *   const { form, handleSubmit, isPending } = usePost({
  *     schema: CreateWorkspaceSchema,
- *     defaultValues: { name: '', description: '' },
+ *     initialInput: { name: '', description: '' },
  *     mutationFn: (data) => api.post('/workspaces', data),
  *     onSuccess: (data) => {
  *       toast.success('Tạo thành công!');
@@ -144,16 +180,20 @@ export interface UsePostReturn<
  *   });
  *
  *   return (
- *     <form onSubmit={handleSubmit}>
- *       <input {...register('name')} />
- *       {errors.name && <span>{errors.name.message}</span>}
- *
- *       <textarea {...register('description')} />
+ *     <Form of={form} onSubmit={handleSubmit}>
+ *       <Field of={form} path={['name']}>
+ *         {(field) => (
+ *           <div>
+ *             <input {...field.props} value={field.input} />
+ *             {field.errors && <div>{field.errors[0]}</div>}
+ *           </div>
+ *         )}
+ *       </Field>
  *
  *       <button type="submit" disabled={isPending}>
  *         {isPending ? 'Đang tạo...' : 'Tạo mới'}
  *       </button>
- *     </form>
+ *     </Form>
  *   );
  * }
  * ```
@@ -162,10 +202,7 @@ export default function usePost<
 	/**
 	 * Định nghĩa schema cho form và mutation
 	 */
-	TSchema extends v.ObjectSchema<
-		v.ObjectEntries,
-		v.ErrorMessage<v.ObjectIssue> | undefined
-	>,
+	TSchema extends FormSchema,
 	/**
 	 * Kiểu dữ liệu trả về từ mutation
 	 */
@@ -177,21 +214,23 @@ export default function usePost<
 ): UsePostReturn<TSchema, TData, TError> {
 	const {
 		schema,
-		defaultValues,
+		initialInput,
+		validate,
+		revalidate,
+		resetOnSuccess = true,
 		mutationFn,
 		mutationOptions = {},
-		mode = "onSubmit",
-		resetOnSuccess = true,
 		onMutate,
 		onSuccess,
 		onError,
 		onSettled,
 	} = options;
 
-	const form = useForm<v.InferInput<TSchema>, unknown, v.InferOutput<TSchema>>({
-		resolver: valibotResolver(schema),
-		defaultValues,
-		mode,
+	const form = useForm({
+		schema,
+		initialInput,
+		validate,
+		revalidate,
 	});
 
 	const mutation = useMutation<
@@ -201,9 +240,10 @@ export default function usePost<
 		TOnMutateResult
 	>({
 		mutationFn,
+		...mutationOptions,
 		onMutate,
 		onSuccess: (...args) => {
-			if (resetOnSuccess) form.reset();
+			if (resetOnSuccess) reset(form);
 			onSuccess?.(...args);
 		},
 		onError: (error, ...args) => {
@@ -213,21 +253,24 @@ export default function usePost<
 			onError?.(error, ...args);
 		},
 		onSettled,
-		...mutationOptions,
 	});
 
-	const handleSubmit = form.handleSubmit((data) => {
-		mutation.mutate(data);
-	});
+	const handleSubmit: SubmitEventHandler<TSchema> = async (output) => {
+		try {
+			await mutation.mutateAsync(output);
+		} catch {
+			// Lỗi đã được mutation.onError xử lý (map ValidationError vào form,
+			// hoặc để lại trong mutation.error cho UI hiển thị)
+		}
+	};
 
 	const handleReset = () => {
-		form.reset();
+		reset(form);
 		mutation.reset();
 	};
 
 	return {
-		...form,
-		resetForm: form.reset,
+		form,
 
 		mutate: mutation.mutate,
 		mutateAsync: mutation.mutateAsync,
@@ -237,9 +280,10 @@ export default function usePost<
 		error: mutation.error,
 		data: mutation.data,
 		status: mutation.status,
-		resetMutation: mutation.reset,
+		resetMutation: () => mutation.reset(),
 
 		handleSubmit,
 		reset: handleReset,
+		resetForm: () => reset(form),
 	};
 }

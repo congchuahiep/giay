@@ -46,7 +46,7 @@ import {
  *
  * ```json
  * {
- *   "code": "VALIDATION_ERROR",
+ *   "code": "VALIDATION",
  *   "message": "Validation failed",
  *   "details": {
  *     "field1": "Invalid value",
@@ -120,7 +120,7 @@ function classify(err: NormalizedError): AppError {
 			return new NetworkError(message);
 		case "TIMEOUT_ERROR":
 			return new TimeoutError(message);
-		case "VALIDATION_ERROR":
+		case "VALIDATION":
 			return new ValidationError(message, code, extractFieldErrors(details));
 		case "UNAUTHORIZED":
 		case "TOKEN_EXPIRED":

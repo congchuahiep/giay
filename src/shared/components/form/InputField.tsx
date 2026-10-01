@@ -1,93 +1,165 @@
 import {
-	type Control,
-	Controller,
-	type FieldPath,
-	type FieldValues,
-} from "react-hook-form";
+	Field as FormField,
+	type FormSchema,
+	type FormStore,
+	type PartialValues,
+	type PathValue,
+	type RequiredPath,
+	type ValidPath,
+} from "@formisch/react";
+import type * as v from "valibot";
 import { Field, Input } from "../ui";
 
 interface InputFieldProps<
-	TFieldValues extends FieldValues = FieldValues,
-	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-	TTransformedValues extends FieldValues = TFieldValues,
-> extends React.ComponentProps<typeof Input> {
+	TSchema extends FormSchema = FormSchema,
+	TFieldPath extends RequiredPath = RequiredPath,
+> extends Omit<
+		React.ComponentProps<typeof Input>,
+		"name" | "value" | "onChange" | "ref"
+	> {
 	/**
-	 * Control từ useForm
+	 * Form store từ useForm
 	 */
-	control: Control<TFieldValues, unknown, TTransformedValues>;
+	of: FormStore<TSchema>;
+
 	/**
-	 * Tên field trong form
+	 * Path đến field trong schema
 	 */
-	name: TName;
+	path: ValidPath<v.InferInput<TSchema>, TFieldPath>;
+
 	/**
-	 *  Label hiển thị
+	 * Label hiển thị
 	 */
 	label?: string;
+
 	/**
 	 * Description
 	 */
 	description?: string;
+
 	/**
 	 * Placeholder khi chưa chọn
 	 */
 	placeholder?: string;
+
 	/**
 	 * Vô hiệu hóa
 	 */
 	disabled?: boolean;
+
 	/**
 	 * Class name cho Field
 	 */
 	className?: string;
+
+	/**
+	 * Class name cho Input
+	 */
+	inputClassName?: string;
+
+	/**
+	 * Hiển thị dấu * khi field bắt buộc
+	 */
+	required?: boolean;
+
+	/**
+	 * Hàm biến đổi giá trị string từ input sang giá trị schema.
+	 * Ví dụ: chuyển string sang number hoặc null cho field number.
+	 */
+	transform?: (value: string) => PathValue<v.InferInput<TSchema>, TFieldPath>;
+
+	/**
+	 * Bỏ qua Field wrapper, chỉ render Input thuần
+	 */
+	noField?: boolean;
 }
 
 export default function InputField<
-	TFieldValues extends FieldValues = FieldValues,
-	TName extends FieldPath<TFieldValues> = FieldPath<TFieldValues>,
-	TTransformedValues extends FieldValues = TFieldValues,
+	TSchema extends FormSchema = FormSchema,
+	TFieldPath extends RequiredPath = RequiredPath,
 >({
-	control,
-	name,
+	of,
+	path,
 	label,
 	description,
 	placeholder = "Nhập giá trị",
 	disabled,
 	className,
+	inputClassName,
+	required,
+	transform,
+	noField,
 	onBlur,
 	...props
-}: InputFieldProps<TFieldValues, TName, TTransformedValues>) {
+}: InputFieldProps<TSchema, TFieldPath>) {
 	return (
-		<Controller
-			name={name}
-			control={control}
-			render={({
-				field: { ref, name, value, onBlur: onBlurField, onChange },
-				fieldState: { invalid, isTouched, isDirty, error },
-			}) => (
-				<Field
-					name={name}
-					invalid={invalid}
-					isTouched={isTouched}
-					isDirty={isDirty}
-					className={className}
-				>
-					{label && <Field.Label>{label}</Field.Label>}
+		<FormField of={of} path={path}>
+			{(field) => {
+				const input = (
 					<Input
+						{...field.props}
 						{...props}
-						ref={ref}
-						value={value}
+						id={field.props.name}
+						value={
+							(field.input ?? "") as
+								| string
+								| number
+								| readonly string[]
+								| undefined
+						}
 						onBlur={(e) => {
-							onBlurField();
+							field.props.onBlur?.();
 							onBlur?.(e);
 						}}
-						onChange={onChange}
+						onChange={(e) => {
+							const next = transform
+								? transform(e.target.value)
+								: (e.target.value as PathValue<
+										v.InferInput<TSchema>,
+										TFieldPath
+									>);
+							field.onChange(
+								next as PartialValues<
+									PathValue<v.InferInput<TSchema>, TFieldPath>
+								>,
+							);
+						}}
 						placeholder={placeholder}
 						disabled={disabled}
+						aria-invalid={field.errors ? true : undefined}
+						className={inputClassName}
 					/>
-					{description && <Field.Description>{description}</Field.Description>}
-					<Field.Error match={!!error} error={error?.message} />
-				</Field>
-			)}
-		/>
+				);
+
+				if (noField) {
+					return input;
+				}
+
+				return (
+					<Field
+						name={field.props.name}
+						invalid={!!field.errors}
+						isTouched={field.isTouched}
+						isDirty={field.isDirty}
+						className={className}
+					>
+						{label && (
+							<Field.Label>
+								{label}{" "}
+								{required && <span className="text-destructive">*</span>}
+							</Field.Label>
+						)}
+						{input}
+						{description && (
+							<Field.Description>{description}</Field.Description>
+						)}
+						<Field.Error
+							match={!!field.errors}
+							error={field.errors?.join("\n")}
+						/>
+					</Field>
+				);
+			}}
+		</FormField>
 	);
 }
