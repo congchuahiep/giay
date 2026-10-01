@@ -1,4 +1,6 @@
 use tauri::Manager;
+#[cfg(target_os = "windows")]
+use window_vibrancy::apply_mica;
 
 mod auth;
 mod http;
@@ -21,6 +23,13 @@ pub fn run() {
 
             app.manage(http::ApiClient::new(server_url.to_string()));
             app.manage(auth::Auth::new());
+
+            let window = app.get_webview_window("main").unwrap();
+
+            #[cfg(target_os = "windows")]
+            apply_mica(&window, None)
+                .expect("Unsupported platform! 'apply_mica' is only supported on Windows");
+
             Ok(())
         })
         .register_asynchronous_uri_scheme_protocol("giay-api", http::handle_auth_api)

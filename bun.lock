@@ -6,6 +6,7 @@
       "name": "giay",
       "dependencies": {
         "@base-ui/react": "^1.6.0",
+        "@formisch/react": "^1.1.0",
         "@hookform/resolvers": "^5.4.0",
         "@tabler/icons-react": "^3.44.0",
         "@tailwindcss/vite": "^4.3.1",
@@ -135,6 +136,8 @@
     "@floating-ui/react-dom": ["@floating-ui/react-dom@2.1.8", "", { "dependencies": { "@floating-ui/dom": "^1.7.6" }, "peerDependencies": { "react": ">=16.8.0", "react-dom": ">=16.8.0" } }, "sha512-cC52bHwM/n/CxS87FH0yWdngEZrjdtLW/qVruo68qg+prK7ZQ4YGdut2GyDVpoGeAYe/h899rVeOVm6Oi40k2A=="],
 
     "@floating-ui/utils": ["@floating-ui/utils@0.2.11", "", {}, "sha512-RiB/yIh78pcIxl6lLMG0CgBXAZ2Y0eVHqMPYugu+9U0AeT6YBeiJpf7lbdJNIugFP5SIjwNRgo4DhR1Qxi26Gg=="],
+
+    "@formisch/react": ["@formisch/react@1.1.0", "", { "peerDependencies": { "react": ">=16.8.0 <20", "react-dom": ">=16.8.0 <20", "typescript": ">=5 <8", "valibot": ">=1.4.1 <2" }, "optionalPeers": ["typescript"] }, "sha512-/LSuYN1m28pownbofeQQIOHw8zPR/jpyR15e5nn+hkRwlHnm5jf9YG8C5iNZru998/KmxTYFLVG3F1XZPvTL8A=="],
 
     "@hookform/resolvers": ["@hookform/resolvers@5.4.0", "", { "dependencies": { "@standard-schema/utils": "^0.3.0" }, "peerDependencies": { "react-hook-form": "^7.55.0" } }, "sha512-EIsqr/t/qbinPIhGjMdtvutIN1Kk4uwbROE9/UQ93CAVGR7GkA7Y92+fX80OzXi/OB67jVFYwKGO1WzkxmkFZw=="],
 

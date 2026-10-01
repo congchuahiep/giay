@@ -2,6 +2,7 @@ import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
 import { QueryProvider, TanstackDevtoolProvider } from "@/shared/providers";
+import { ThemeProvider } from "./features/theme";
 import { routeTree } from "./routeTree.gen";
 
 const router = createRouter({
@@ -22,9 +23,11 @@ if (rootElement && !rootElement.innerHTML) {
 	root.render(
 		<StrictMode>
 			<QueryProvider>
-				<TanstackDevtoolProvider router={router}>
-					<RouterProvider router={router} />
-				</TanstackDevtoolProvider>
+				<ThemeProvider>
+					<TanstackDevtoolProvider router={router}>
+						<RouterProvider router={router} />
+					</TanstackDevtoolProvider>
+				</ThemeProvider>
 			</QueryProvider>
 		</StrictMode>,
 	);

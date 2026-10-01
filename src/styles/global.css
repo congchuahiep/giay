@@ -4,7 +4,7 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-	--color-background: var(--background);
+	--color-background: transparent;
 	--color-foreground: var(--foreground);
 	--font-sans: var(--font-google-sans);
 	--color-sidebar-ring: var(--sidebar-ring);
