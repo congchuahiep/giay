@@ -86,7 +86,7 @@ pub async fn try_refresh(api: &ApiClient, auth: &Auth) -> Result<Option<String>,
     let resp = api
         .client()
         .post(format!("{}/auth/refresh-token", api.base_url()))
-        .json(&serde_json::json!({ "refresh_token": refresh }))
+        .json(&serde_json::json!({ "refreshToken": refresh }))
         .send()
         .await?;
 
@@ -96,10 +96,10 @@ pub async fn try_refresh(api: &ApiClient, auth: &Auth) -> Result<Option<String>,
     }
 
     let body: serde_json::Value = resp.json().await?;
-    let new_access = body["access_token"]
+    let new_access = body["accessToken"]
         .as_str()
-        .ok_or(HttpError::BadResponse("Missing access_token".into()))?;
-    let new_refresh = body["refresh_token"].as_str().unwrap_or(&refresh);
+        .ok_or(HttpError::BadResponse("Missing accessToken".into()))?;
+    let new_refresh = body["refreshToken"].as_str().unwrap_or(&refresh);
 
     auth.set_tokens(new_access, new_refresh)?;
 

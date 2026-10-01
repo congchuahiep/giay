@@ -36,13 +36,13 @@ pub async fn login(
 
     let body: serde_json::Value = res.json().await.map_err(bff_err)?;
 
-    let access = body["access_token"]
+    let access = body["accessToken"]
         .as_str()
-        .ok_or(HttpError::BadResponse("Missing access_token".into()))
+        .ok_or(HttpError::BadResponse("Missing accessToken".into()))
         .map_err(bff_err)?;
-    let refresh = body["refresh_token"]
+    let refresh = body["refreshToken"]
         .as_str()
-        .ok_or(HttpError::BadResponse("Missing refresh_token".into()))
+        .ok_or(HttpError::BadResponse("Missing refreshToken".into()))
         .map_err(bff_err)?;
 
     auth.set_tokens(access, refresh).map_err(bff_err)?;
@@ -59,7 +59,7 @@ pub async fn logout(
         let _ = api
             .client()
             .post(format!("{}/auth/logout", api.base_url()))
-            .json(&serde_json::json!({ "refresh_token": refresh }))
+            .json(&serde_json::json!({ "refreshToken": refresh }))
             .send()
             .await;
     }
@@ -86,9 +86,9 @@ pub async fn register(
         .json(&serde_json::json!({
             "email": email,
             "password": password,
-            "first_name": first_name,
-            "last_name": last_name,
-            "invite_token": invite_token
+            "firstName": first_name,
+            "lastName": last_name,
+            "inviteToken": invite_token
         }))
         .send()
         .await
@@ -105,13 +105,13 @@ pub async fn register(
 
     let body: serde_json::Value = res.json().await.map_err(bff_err)?;
 
-    let access = body["access_token"]
+    let access = body["accessToken"]
         .as_str()
-        .ok_or(HttpError::BadResponse("Missing access_token".into()))
+        .ok_or(HttpError::BadResponse("Missing accessToken".into()))
         .map_err(bff_err)?;
-    let refresh = body["refresh_token"]
+    let refresh = body["refreshToken"]
         .as_str()
-        .ok_or(HttpError::BadResponse("Missing refresh_token".into()))
+        .ok_or(HttpError::BadResponse("Missing refreshToken".into()))
         .map_err(bff_err)?;
 
     auth.set_tokens(access, refresh).map_err(bff_err)?;

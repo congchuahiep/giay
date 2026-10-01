@@ -2,11 +2,7 @@ import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
 import { authApi } from "@/api";
 import type { AppError } from "@/shared/errors";
 import { useAuthStore } from "../stores/auth-store";
-import {
-	type UserProfile,
-	type UserProfileDTO,
-	userProfileFromDto,
-} from "../types";
+import type { UserProfile } from "../types";
 import AuthKey from "./key";
 
 export default function useGetProfile(
@@ -19,8 +15,8 @@ export default function useGetProfile(
 		queryKey: AuthKey.profile,
 		enabled: isAuthenticated,
 		queryFn: async () => {
-			const response = await authApi.get<UserProfileDTO>((ep) => ep.auth.me);
-			return userProfileFromDto(response.data);
+			const response = await authApi.get<UserProfile>((ep) => ep.auth.me);
+			return response.data;
 		},
 	});
 }
