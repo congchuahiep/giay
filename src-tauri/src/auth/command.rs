@@ -18,7 +18,7 @@ pub async fn login(
 ) -> Result<(), serde_json::Value> {
     let res = api
         .client()
-        .post(format!("{}/auth/login", api.base_url()))
+        .post(format!("{}/api/auth/login", api.base_url()))
         .header("Content-Type", "application/json")
         .json(&serde_json::json!({ "email": email, "password": password }))
         .send()
@@ -58,7 +58,7 @@ pub async fn logout(
     if let Ok(Some(refresh)) = auth.get_refresh_token() {
         let _ = api
             .client()
-            .post(format!("{}/auth/logout", api.base_url()))
+            .post(format!("{}/api/auth/logout", api.base_url()))
             .json(&serde_json::json!({ "refreshToken": refresh }))
             .send()
             .await;
@@ -81,7 +81,7 @@ pub async fn register(
 ) -> Result<(), serde_json::Value> {
     let res = api
         .client()
-        .post(format!("{}/auth/register", api.base_url()))
+        .post(format!("{}/api/auth/register", api.base_url()))
         .header("Content-Type", "application/json")
         .json(&serde_json::json!({
             "email": email,

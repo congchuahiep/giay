@@ -1,5 +1,5 @@
 import { type UseQueryOptions, useQuery } from "@tanstack/react-query";
-import { authApi } from "@/api";
+import { authApi, unwrap } from "@/api";
 import type { AppError } from "@/shared/errors";
 import { useAuthStore } from "../stores/auth-store";
 import type { UserProfile } from "../types";
@@ -15,8 +15,7 @@ export default function useGetProfile(
 		queryKey: AuthKey.profile,
 		enabled: isAuthenticated,
 		queryFn: async () => {
-			const response = await authApi.get<UserProfile>((ep) => ep.auth.me);
-			return response.data;
+			return unwrap(await authApi.GET("/api/user/me"));
 		},
 	});
 }

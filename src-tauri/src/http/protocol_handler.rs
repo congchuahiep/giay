@@ -85,7 +85,7 @@ pub async fn try_refresh(api: &ApiClient, auth: &Auth) -> Result<Option<String>,
 
     let resp = api
         .client()
-        .post(format!("{}/auth/refresh-token", api.base_url()))
+        .post(format!("{}/api/auth/refresh-token", api.base_url()))
         .json(&serde_json::json!({ "refreshToken": refresh }))
         .send()
         .await?;

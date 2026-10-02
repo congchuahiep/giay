@@ -1,69 +1,66 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: Kệ */
 
 /**
- * Cấu hình ánh xạ cho từng field giữa DTO (snake_case) và Domain (camelCase).
+ * Override cho 1 field của DTO:
  *
- * - Giá trị là `string`: ánh xạ key, giữ nguyên giá trị (không transform)
- * - Giá trị là `[string, fn]`: ánh xạ key + transform giá trị
+ * - `string`: **rename** — lấy field nguồn khác tên (`title: "name"`)
+ * - `[dtoKey, transform]`: **transform giá trị** (`createdAt: ["createdAt", (v) => new Date(v)]`),
+ *   có thể kèm rename (`createdAt: ["created_at", (v) => new Date(v)]`)
  *
- * @template TDto   - Kiểu dữ liệu từ API (snake_case)
- * @template TDomain - Kiểu dữ liệu domain (camelCase)
+ * Field **không** được đề cập → copy nguyên trạng cùng tên (không cần ghi lại).
  */
-export type MappingConfig<TDto, TDomain> = {
-	[K in keyof TDomain & string]:
-		| Extract<keyof TDto, string>
-		| [Extract<keyof TDto, string>, (value: any) => TDomain[K]];
-};
+export type DtoOverride<TDto> =
+	| Extract<keyof TDto, string>
+	| readonly [Extract<keyof TDto, string>, (value: any) => unknown];
 
 /**
- * Tạo hàm chuyển đổi từ DTO (snake_case) sang Domain (camelCase).
+ * Tạo mapper từ DTO (codegen, camelCase) sang Domain — chỉ khai báo những field
+ * CẦN xử lý khác thường (rename/transform). Field còn lại copy tự động.
  *
- * Hàm trả về hỗ trợ cả dữ liệu đầy đủ và partial:
- * - `UserProfileDTO` → `UserProfile`
- * - `Partial<UserProfileDTO>` → `Partial<UserProfile>`
+ * Muốn domain chỉ giữ một subset field, dùng `Pick` ở tầng type (không tốn runtime):
  *
- * @example
  * ```ts
- * export const userProfileFromDto = createFromDto<UserProfileDTO, UserProfile>({
- *   id: 'id',
- *   email: 'email',
- *   firstName: 'first_name',
- *   lastName: 'last_name',
- *   isActive: 'is_active',
- *   dateJoined: ['date_joined', (v: string) => new Date(v)],
+ * type InvitationDTO = components["schemas"]["InvitationResponse"];
+ * type Invitation = Pick<InvitationDTO, "id" | "email"> & {
+ *   createdAt: Date | null;
+ * };
+ *
+ * export const invitationFromDto = createFromDto<InvitationDTO, Invitation>({
+ *   // field unchanged → không ghi
+ *   createdAt: ["createdAt", (v) => new Date(v)],
  * });
- *
- * // Full data
- * const user = userProfileFromDto(response.data);
- * user.firstName // string ✅
- *
- * // Partial data
- * const partial = userProfileFromDto({ id: 1, first_name: "Hiep" });
- * partial.firstName // string | undefined
  * ```
  *
- * @template TDto    - Kiểu dữ liệu từ API (snake_case)
- * @template TDomain - Kiểu dữ liệu domain (camelCase)
- * @param mapping    - Object ánh xạ: key = domain field, value = dto key hoặc [dto key, transform fn]
- * @returns Hàm chuyển đổi `(dto: Partial<TDto>) => Partial<TDomain>`
+ * Partial vẫn được giữ: `Partial<TDto>` → `Partial<TDomain>`.
  */
 export function createFromDto<
 	TDto extends Record<string, unknown>,
 	TDomain extends Record<string, unknown>,
->(mapping: MappingConfig<TDto, TDomain>) {
+>(
+	overrides: Partial<{
+		[K in keyof TDomain & string]: DtoOverride<TDto>;
+	}>,
+) {
 	function fromDto(dto: TDto): TDomain;
 	function fromDto(dto: Partial<TDto>): Partial<TDomain>;
 	function fromDto(dto: TDto | Partial<TDto>): TDomain | Partial<TDomain> {
-		const result: Record<string, unknown> = {};
-		for (const [domainKey, mapValue] of Object.entries(mapping)) {
-			const [dtoKey, transform] = Array.isArray(mapValue)
-				? mapValue
-				: [mapValue, undefined];
-			const value = dto[dtoKey as keyof TDto];
+		// Copy mọi field cùng tên — điểm khác biệt duy nhất với DTO là các override.
+		const result: Record<string, unknown> = { ...dto };
+
+		for (const [domainKey, override] of Object.entries(overrides)) {
+			const [dtoKey, transform] = Array.isArray(override)
+				? override
+				: [override, undefined];
+			const value = (dto as Record<string, unknown>)[dtoKey];
+
 			if (value !== undefined) {
 				result[domainKey] = transform ? transform(value) : value;
+				if (domainKey !== dtoKey) delete result[dtoKey]; // rename: bỏ key nguồn
+			} else {
+				delete result[domainKey]; // giữ partial semantics khi field không có
 			}
 		}
+
 		return result as TDomain | Partial<TDomain>;
 	}
 	return fromDto;
