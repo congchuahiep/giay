@@ -1,6 +1,7 @@
 import type { QueryClient } from "@tanstack/react-query";
-import { createRootRouteWithContext, Outlet } from "@tanstack/react-router";
+import { createRootRouteWithContext } from "@tanstack/react-router";
 import { useAuthStore } from "@/features/auth";
+import { AuthGate } from "@/features/auth/components/AuthGate";
 
 export interface RouterContext {
 	queryClient: QueryClient;
@@ -12,9 +13,5 @@ export const Route = createRootRouteWithContext<RouterContext>()({
 			await useAuthStore.getState().init();
 		}
 	},
-	component: RootLayout,
+	component: AuthGate,
 });
-
-function RootLayout() {
-	return <Outlet />;
-}

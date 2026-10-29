@@ -63,16 +63,35 @@ pub async fn forward_with_retry(
     };
 
     if res.status() == StatusCode::UNAUTHORIZED {
-        match try_refresh(api, auth).await {
-            Ok(Some(new_token)) => {
-                let retry = api.forward(method, path, body, &new_token).await;
-                return match retry {
-                    Ok(r) => pass_through(r).await,
-                    Err(e) => e.to_response(),
-                };
-            }
-            _ => return HttpError::NotAuthenticated.to_response(),
+        // Nhiều request gửi song song có thể cùng nhận 401. Backend xoay vòng
+        // refresh token ở lần refresh đầu tiên, nên các lần refresh song song còn
+        // lại sẽ fail và xóa nhầm token mới. Cần single-flight: chỉ một task refresh,
+        // các task khác chờ lock rồi dùng lại token mới.
+        let _guard = auth.refresh_guard().lock().await;
+
+        // Có thể request khác đã refresh thành công trong lúc ta chờ lock
+        let fresh = auth.get_access_token().ok().flatten();
+        let token = match fresh {
+            Some(t) if t != token => t,
+            _ => match try_refresh(api, auth).await {
+                Ok(Some(t)) => t,
+                _ => return HttpError::NotAuthenticated.to_response(),
+            },
+        };
+
+        let retry = match api.forward(method, path, body, &token).await {
+            Ok(r) => r,
+            Err(e) => return e.to_response(),
+        };
+
+        // Retry vẫn 401 → session thực sự đã chết (vd: refresh token hết hạn).
+        // Xoá token để frontend biết session mất và chuyển về màn hình đăng nhập.
+        if retry.status() == StatusCode::UNAUTHORIZED {
+            let _ = auth.clear_tokens();
+            return HttpError::NotAuthenticated.to_response();
         }
+
+        return pass_through(retry).await;
     }
 
     pass_through(res).await

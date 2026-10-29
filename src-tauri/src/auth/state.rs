@@ -1,6 +1,7 @@
 use std::sync::RwLock;
 
 use keyring::Entry;
+use tokio::sync::Mutex;
 
 use crate::auth::error::AuthError;
 
@@ -8,6 +9,10 @@ use crate::auth::error::AuthError;
 pub struct Auth {
     cache: RwLock<Option<String>>,
     service: &'static str,
+    /// Khóa single-flight cho flow refresh token: chỉ một task được refresh cùng lúc
+    /// để tránh nhiều request 401 song song cùng gọi refresh-token và làm backend
+    /// xoay vòng refresh token gây lỗi cho các request còn lại.
+    refresh_lock: Mutex<()>,
 }
 
 impl Auth {
@@ -15,7 +20,13 @@ impl Auth {
         Self {
             cache: RwLock::new(None),
             service: env!("CARGO_PKG_NAME"),
+            refresh_lock: Mutex::new(()),
         }
+    }
+
+    /// Guard single-flight dùng trong flow refresh token
+    pub fn refresh_guard(&self) -> &Mutex<()> {
+        &self.refresh_lock
     }
 
     /// Read access token: cache first, fallback keyring

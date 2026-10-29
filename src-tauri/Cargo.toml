@@ -21,6 +21,7 @@ tauri = { version = "2.11.3", features = [] }
 tauri-plugin-log = "2"
 tauri-plugin-os = "2"
 thiserror = "2"
+tokio = { version = "1", features = ["sync"] }
 window-vibrancy = "0.8.1"
 
 [build-dependencies]

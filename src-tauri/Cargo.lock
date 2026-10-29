@@ -1524,6 +1524,7 @@ dependencies = [
  "tauri-plugin-log",
  "tauri-plugin-os",
  "thiserror 2.0.18",
+ "tokio",
  "window-vibrancy 0.8.1",
 ]
 

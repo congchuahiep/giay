@@ -69,7 +69,7 @@ pub async fn logout(
     Ok(())
 }
 
-#[tauri::command(rename_all = "snake_case")]
+#[tauri::command]
 pub async fn register(
     api: State<'_, ApiClient>,
     auth: State<'_, Auth>,

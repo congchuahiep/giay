@@ -21,19 +21,24 @@ export default function SchemaProvider({
 	useEffect(() => {
 		const root = window.document.documentElement;
 
-		root.classList.remove("light", "dark");
+		const applyTheme = (resolvedTheme: "light" | "dark") => {
+			root.classList.remove("light", "dark");
+			root.classList.add(resolvedTheme);
+		};
 
 		if (theme === "system") {
-			const systemTheme = window.matchMedia("(prefers-color-scheme: dark)")
-				.matches
-				? "dark"
-				: "light";
+			const media = window.matchMedia("(prefers-color-scheme: dark)");
 
-			root.classList.add(systemTheme);
-			return;
+			const applySystemTheme = () =>
+				applyTheme(media.matches ? "dark" : "light");
+
+			applySystemTheme();
+			media.addEventListener("change", applySystemTheme);
+
+			return () => media.removeEventListener("change", applySystemTheme);
 		}
 
-		root.classList.add(theme);
+		applyTheme(theme);
 	}, [theme]);
 
 	const value = {

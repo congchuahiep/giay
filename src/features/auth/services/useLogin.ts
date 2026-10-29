@@ -1,12 +1,12 @@
 "use client";
 
-import { type UsePostOptions, usePost } from "@/shared/hooks";
+import { usePost } from "@/shared/hooks";
 import { AuthCommand } from "@/tauri";
 import { loginSchema } from "../schemas";
 import { useAuthStore } from "../stores";
 
 type UseLoginOptions = Omit<
-	UsePostOptions<typeof loginSchema, void>,
+	usePost.Options<typeof loginSchema, void>,
 	"schema" | "mutationFn"
 >;
 

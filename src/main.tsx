@@ -1,3 +1,4 @@
+import { Tooltip } from "@base-ui/react/tooltip";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { StrictMode } from "react";
 import ReactDOM from "react-dom/client";
@@ -24,9 +25,11 @@ if (rootElement && !rootElement.innerHTML) {
 		<StrictMode>
 			<QueryProvider>
 				<ThemeProvider>
-					<TanstackDevtoolProvider router={router}>
-						<RouterProvider router={router} />
-					</TanstackDevtoolProvider>
+					<Tooltip.Provider delay={200}>
+						<TanstackDevtoolProvider router={router}>
+							<RouterProvider router={router} />
+						</TanstackDevtoolProvider>
+					</Tooltip.Provider>
 				</ThemeProvider>
 			</QueryProvider>
 		</StrictMode>,

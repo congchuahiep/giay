@@ -1,6 +1,7 @@
 import { platform } from "@tauri-apps/plugin-os";
 import createClient from "openapi-fetch";
 import { env } from "@/configs/env";
+import { useAuthStore } from "@/features/auth/stores";
 import { classifyError } from "@/shared/utils";
 import type { paths } from "./generated/schema";
 
@@ -11,7 +12,28 @@ const PROXY_BASE =
 		? "http://giay-api.localhost"
 		: "giay-api://localhost";
 
-export const authApi = createClient<paths>({ baseUrl: PROXY_BASE });
+/**
+ * Mọi request qua `authApi` đều đi qua proxy Rust (tự gắn Bearer token và refresh
+ * khi 401). Nếu proxy vẫn trả 401 nghĩa là session đã chết (refresh thất bại hoặc
+ * token hết hạn) → báo store xoá user, `AuthGate` trong root layout sẽ redirect về
+ * trang đăng nhập.
+ */
+async function authFetch(
+	input: RequestInfo | URL,
+	init?: RequestInit,
+): Promise<Response> {
+	const response = await fetch(input, init);
+	if (response.status === 401) {
+		const { isAuthenticated, clearUser } = useAuthStore.getState();
+		if (isAuthenticated) clearUser();
+	}
+	return response;
+}
+
+export const authApi = createClient<paths>({
+	baseUrl: PROXY_BASE,
+	fetch: authFetch,
+});
 
 type FetchResult<T> = { data?: T; error?: unknown };
 

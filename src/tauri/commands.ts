@@ -21,9 +21,9 @@ export const AuthCommand = {
 	register: (data: {
 		email: string;
 		password: string;
-		first_name: string;
-		last_name: string;
-		invite_token: string | undefined;
+		lastName: string;
+		firstName: string;
+		inviteToken?: string;
 	}) => invokeCommand<void>("register", data),
 
 	checkAuth: () => invokeCommand<boolean>("check_auth"),

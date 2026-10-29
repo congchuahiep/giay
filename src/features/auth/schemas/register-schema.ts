@@ -34,13 +34,6 @@ export const registerSchema = v.pipe(
 		),
 		["confirmPassword"],
 	),
-	v.transform((input) => ({
-		email: input.email,
-		password: input.password,
-		first_name: input.firstName,
-		last_name: input.lastName,
-		invite_token: input.inviteToken,
-	})),
 );
 
 export type RegisterFormData = v.InferInput<typeof registerSchema>;
